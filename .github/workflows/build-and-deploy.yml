@@ -17,7 +17,7 @@ jobs:
       with:
         base: main
         filters: |
-          journal_service: services/journal_service/**
+          journal: services/journal_service/**
   build:
     needs: changes
     runs-on: ubuntu-latest
