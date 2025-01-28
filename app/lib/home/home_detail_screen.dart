@@ -1,7 +1,9 @@
 import 'package:cbt_journal/models/goal.dart';
+import 'package:cbt_journal/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
-class HomeDetailScreen extends StatefulWidget {
+class HomeDetailScreen extends WatchingStatefulWidget {
   const HomeDetailScreen({super.key});
 
   @override
@@ -11,15 +13,17 @@ class HomeDetailScreen extends StatefulWidget {
 class _HomeDetailScreenState extends State<HomeDetailScreen> {
   @override
   Widget build(BuildContext context) {
+    final username = watchPropertyValue((CurrentUserModel m) => m.displayName);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Welcome back!'),
+              Text('Welcome back, $username!'),
             ],
           ),
           const SizedBox(height: 12.0),

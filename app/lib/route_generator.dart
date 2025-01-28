@@ -1,10 +1,13 @@
 import 'package:cbt_journal/home_screen.dart';
-import 'package:cbt_journal/home/journal_entry_screen.dart';
+import 'package:cbt_journal/home/edit_journal_entry_screen.dart';
+import 'package:cbt_journal/home/view_journal_entry_screen.dart';
 import 'package:cbt_journal/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
+    final args = settings.arguments;
+
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
@@ -14,8 +17,15 @@ class RouteGenerator {
         );
       case '/journal-entry':
         return MaterialPageRoute(
-          builder: (_) => const JournalEntryScreen(),
+          builder: (_) => const EditJournalEntryScreen(),
         );
+      case '/view-journal-entry':
+        if (args is String) {
+          return MaterialPageRoute(
+            builder: (_) => ViewJournalEntryScreen(journalId: args),
+          );
+        }
+        return _errorRoute();
       default:
         return _errorRoute();
     }
