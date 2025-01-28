@@ -1,4 +1,5 @@
 import 'package:cbt_journal/home_screen.dart';
+import 'package:cbt_journal/home/journal_entry_screen.dart';
 import 'package:cbt_journal/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,10 @@ class RouteGenerator {
       case '/settings':
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),
+        );
+      case '/journal-entry':
+        return MaterialPageRoute(
+          builder: (_) => const JournalEntryScreen(),
         );
       default:
         return _errorRoute();
