@@ -30,7 +30,9 @@ class ViewJournalEntryScreen extends StatelessWidget {
                   Text(guidedJournal.guideQuestions[e],
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8.0),
-                  Text(journal.content[e]),
+                  (guidedJournal.journalType[e] == JournalType.mood)
+                      ? getMoodIcon(journal.content[e])
+                      : Text(journal.content[e]),
                 ],
               ),
             );
@@ -38,5 +40,22 @@ class ViewJournalEntryScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Icon getMoodIcon(String mood) {
+  switch (mood) {
+    case '1':
+      return const Icon(Icons.sentiment_very_dissatisfied);
+    case '2':
+      return const Icon(Icons.sentiment_dissatisfied);
+    case '3':
+      return const Icon(Icons.sentiment_neutral);
+    case '4':
+      return const Icon(Icons.sentiment_satisfied_alt);
+    case '5':
+      return const Icon(Icons.sentiment_very_satisfied);
+    default:
+      return const Icon(Icons.sentiment_neutral);
   }
 }

@@ -1,5 +1,4 @@
-import 'package:cbt_journal/models/goal.dart';
-import 'package:cbt_journal/models/user.dart';
+import 'package:cbt_journal/models/model.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -14,6 +13,8 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final username = watchPropertyValue((CurrentUser m) => m.displayName);
+    final dailyJournal =
+        di<CurrentGuidedJournals>().getGuidedJournalByTitle('Daily Check-in');
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -38,7 +39,8 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                     const SizedBox(height: 50),
                     FilledButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/journal-entry');
+                          Navigator.pushNamed(context, '/journal-entry',
+                              arguments: dailyJournal);
                         },
                         child: const Text('Start')),
                   ],

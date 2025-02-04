@@ -91,7 +91,7 @@ class _InputWidget extends WatchingWidget {
   @override
   Widget build(BuildContext context) {
     if (journalType == JournalType.mood) {
-      return const _MoodJournal();
+      return _MoodJournal(guideQuestion, contentController);
     } else {
       return _TextJournal(guideQuestion, contentController);
     }
@@ -99,11 +99,53 @@ class _InputWidget extends WatchingWidget {
 }
 
 class _MoodJournal extends WatchingWidget {
-  const _MoodJournal();
+  const _MoodJournal(this.guideQuestion, this.contentController);
+  final String guideQuestion;
+  final TextEditingController contentController;
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Column(
+      children: [
+        Text(guideQuestion),
+        const SizedBox(height: 24.0),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.sentiment_very_dissatisfied),
+              onPressed: () {
+                contentController.text = '1';
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.sentiment_dissatisfied),
+              onPressed: () {
+                contentController.text = '2';
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.sentiment_neutral),
+              onPressed: () {
+                contentController.text = '3';
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.sentiment_satisfied_alt),
+              onPressed: () {
+                contentController.text = '4';
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.sentiment_very_satisfied),
+              onPressed: () {
+                contentController.text = '5';
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 24.0),
+      ],
+    );
   }
 }
 

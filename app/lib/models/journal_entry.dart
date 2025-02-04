@@ -75,6 +75,10 @@ class CurrentGuidedJournals extends ChangeNotifier {
     return guidedJournals.firstWhere((e) => e.id == id);
   }
 
+  GuidedJournal getGuidedJournalByTitle(String title) {
+    return guidedJournals.firstWhere((e) => e.title == title);
+  }
+
   addMultiple(List<GuidedJournal> items) {
     guidedJournals = [...guidedJournals, ...items];
   }
