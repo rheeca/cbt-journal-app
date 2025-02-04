@@ -13,7 +13,7 @@ class HomeDetailScreen extends WatchingStatefulWidget {
 class _HomeDetailScreenState extends State<HomeDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final username = watchPropertyValue((CurrentUserModel m) => m.displayName);
+    final username = watchPropertyValue((CurrentUser m) => m.displayName);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),

@@ -24,7 +24,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = watchPropertyValue((CurrentUserModel m) => m.userId);
+    final userId = watchPropertyValue((CurrentUser m) => m.userId);
 
     return Scaffold(
       appBar: AppBar(),

@@ -36,3 +36,27 @@ class UserJournalEntries extends ChangeNotifier {
     return _entries.firstWhere((entry) => entry.id == id);
   }
 }
+
+class GuidedJournal {
+  String id;
+  String title;
+  List<String> guideQuestions;
+  String description;
+  JournalType journalType;
+
+  GuidedJournal({
+    required this.id,
+    required this.title,
+    required this.guideQuestions,
+    required this.description,
+    required this.journalType,
+  });
+  GuidedJournal.createNew(
+      {required this.title,
+      required this.guideQuestions,
+      this.description = '',
+      required this.journalType})
+      : id = const Uuid().v4();
+}
+
+enum JournalType { mood, text }

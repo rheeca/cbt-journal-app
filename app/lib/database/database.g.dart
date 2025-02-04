@@ -36,9 +36,15 @@ class $GuidedJournalsTable extends GuidedJournals
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _journalTypeMeta =
+      const VerificationMeta('journalType');
+  @override
+  late final GeneratedColumn<String> journalType = GeneratedColumn<String>(
+      'journal_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, title, guideQuestions, description];
+      [id, title, guideQuestions, description, journalType];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -70,6 +76,14 @@ class $GuidedJournalsTable extends GuidedJournals
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
+    if (data.containsKey('journal_type')) {
+      context.handle(
+          _journalTypeMeta,
+          journalType.isAcceptableOrUnknown(
+              data['journal_type']!, _journalTypeMeta));
+    } else if (isInserting) {
+      context.missing(_journalTypeMeta);
+    }
     return context;
   }
 
@@ -88,6 +102,8 @@ class $GuidedJournalsTable extends GuidedJournals
               DriftSqlType.string, data['${effectivePrefix}guide_questions'])),
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      journalType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}journal_type'])!,
     );
   }
 
@@ -108,11 +124,13 @@ class GuidedJournalEntity extends DataClass
   final String title;
   final List<String>? guideQuestions;
   final String description;
+  final String journalType;
   const GuidedJournalEntity(
       {required this.id,
       required this.title,
       this.guideQuestions,
-      required this.description});
+      required this.description,
+      required this.journalType});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -123,6 +141,7 @@ class GuidedJournalEntity extends DataClass
           $GuidedJournalsTable.$converterguideQuestionsn.toSql(guideQuestions));
     }
     map['description'] = Variable<String>(description);
+    map['journal_type'] = Variable<String>(journalType);
     return map;
   }
 
@@ -134,6 +153,7 @@ class GuidedJournalEntity extends DataClass
           ? const Value.absent()
           : Value(guideQuestions),
       description: Value(description),
+      journalType: Value(journalType),
     );
   }
 
@@ -146,6 +166,7 @@ class GuidedJournalEntity extends DataClass
       guideQuestions:
           serializer.fromJson<List<String>?>(json['guideQuestions']),
       description: serializer.fromJson<String>(json['description']),
+      journalType: serializer.fromJson<String>(json['journalType']),
     );
   }
   @override
@@ -156,6 +177,7 @@ class GuidedJournalEntity extends DataClass
       'title': serializer.toJson<String>(title),
       'guideQuestions': serializer.toJson<List<String>?>(guideQuestions),
       'description': serializer.toJson<String>(description),
+      'journalType': serializer.toJson<String>(journalType),
     };
   }
 
@@ -163,13 +185,15 @@ class GuidedJournalEntity extends DataClass
           {String? id,
           String? title,
           Value<List<String>?> guideQuestions = const Value.absent(),
-          String? description}) =>
+          String? description,
+          String? journalType}) =>
       GuidedJournalEntity(
         id: id ?? this.id,
         title: title ?? this.title,
         guideQuestions:
             guideQuestions.present ? guideQuestions.value : this.guideQuestions,
         description: description ?? this.description,
+        journalType: journalType ?? this.journalType,
       );
   GuidedJournalEntity copyWithCompanion(GuidedJournalsCompanion data) {
     return GuidedJournalEntity(
@@ -180,6 +204,8 @@ class GuidedJournalEntity extends DataClass
           : this.guideQuestions,
       description:
           data.description.present ? data.description.value : this.description,
+      journalType:
+          data.journalType.present ? data.journalType.value : this.journalType,
     );
   }
 
@@ -189,13 +215,15 @@ class GuidedJournalEntity extends DataClass
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('guideQuestions: $guideQuestions, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('journalType: $journalType')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, guideQuestions, description);
+  int get hashCode =>
+      Object.hash(id, title, guideQuestions, description, journalType);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -203,7 +231,8 @@ class GuidedJournalEntity extends DataClass
           other.id == this.id &&
           other.title == this.title &&
           other.guideQuestions == this.guideQuestions &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.journalType == this.journalType);
 }
 
 class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
@@ -211,12 +240,14 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
   final Value<String> title;
   final Value<List<String>?> guideQuestions;
   final Value<String> description;
+  final Value<String> journalType;
   final Value<int> rowid;
   const GuidedJournalsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.guideQuestions = const Value.absent(),
     this.description = const Value.absent(),
+    this.journalType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GuidedJournalsCompanion.insert({
@@ -224,15 +255,18 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
     required String title,
     this.guideQuestions = const Value.absent(),
     required String description,
+    required String journalType,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         title = Value(title),
-        description = Value(description);
+        description = Value(description),
+        journalType = Value(journalType);
   static Insertable<GuidedJournalEntity> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? guideQuestions,
     Expression<String>? description,
+    Expression<String>? journalType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -240,6 +274,7 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
       if (title != null) 'title': title,
       if (guideQuestions != null) 'guide_questions': guideQuestions,
       if (description != null) 'description': description,
+      if (journalType != null) 'journal_type': journalType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -249,12 +284,14 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
       Value<String>? title,
       Value<List<String>?>? guideQuestions,
       Value<String>? description,
+      Value<String>? journalType,
       Value<int>? rowid}) {
     return GuidedJournalsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       guideQuestions: guideQuestions ?? this.guideQuestions,
       description: description ?? this.description,
+      journalType: journalType ?? this.journalType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -276,6 +313,9 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (journalType.present) {
+      map['journal_type'] = Variable<String>(journalType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -289,6 +329,7 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
           ..write('title: $title, ')
           ..write('guideQuestions: $guideQuestions, ')
           ..write('description: $description, ')
+          ..write('journalType: $journalType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -965,6 +1006,7 @@ typedef $$GuidedJournalsTableCreateCompanionBuilder = GuidedJournalsCompanion
   required String title,
   Value<List<String>?> guideQuestions,
   required String description,
+  required String journalType,
   Value<int> rowid,
 });
 typedef $$GuidedJournalsTableUpdateCompanionBuilder = GuidedJournalsCompanion
@@ -973,6 +1015,7 @@ typedef $$GuidedJournalsTableUpdateCompanionBuilder = GuidedJournalsCompanion
   Value<String> title,
   Value<List<String>?> guideQuestions,
   Value<String> description,
+  Value<String> journalType,
   Value<int> rowid,
 });
 
@@ -1020,6 +1063,9 @@ class $$GuidedJournalsTableFilterComposer
   ColumnFilters<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get journalType => $composableBuilder(
+      column: $table.journalType, builder: (column) => ColumnFilters(column));
+
   Expression<bool> journalEntriesRefs(
       Expression<bool> Function($$JournalEntriesTableFilterComposer f) f) {
     final $$JournalEntriesTableFilterComposer composer = $composerBuilder(
@@ -1063,6 +1109,9 @@ class $$GuidedJournalsTableOrderingComposer
 
   ColumnOrderings<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get journalType => $composableBuilder(
+      column: $table.journalType, builder: (column) => ColumnOrderings(column));
 }
 
 class $$GuidedJournalsTableAnnotationComposer
@@ -1086,6 +1135,9 @@ class $$GuidedJournalsTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get journalType => $composableBuilder(
+      column: $table.journalType, builder: (column) => column);
 
   Expression<T> journalEntriesRefs<T extends Object>(
       Expression<T> Function($$JournalEntriesTableAnnotationComposer a) f) {
@@ -1137,6 +1189,7 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
             Value<String> title = const Value.absent(),
             Value<List<String>?> guideQuestions = const Value.absent(),
             Value<String> description = const Value.absent(),
+            Value<String> journalType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GuidedJournalsCompanion(
@@ -1144,6 +1197,7 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
             title: title,
             guideQuestions: guideQuestions,
             description: description,
+            journalType: journalType,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -1151,6 +1205,7 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
             required String title,
             Value<List<String>?> guideQuestions = const Value.absent(),
             required String description,
+            required String journalType,
             Value<int> rowid = const Value.absent(),
           }) =>
               GuidedJournalsCompanion.insert(
@@ -1158,6 +1213,7 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
             title: title,
             guideQuestions: guideQuestions,
             description: description,
+            journalType: journalType,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

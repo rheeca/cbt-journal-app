@@ -8,6 +8,7 @@ class GuidedJournals extends Table {
   TextColumn get guideQuestions =>
       text().nullable().map(const StringListConverter())();
   TextColumn get description => text()();
+  TextColumn get journalType => text()();
 
   @override
   Set<Column> get primaryKey => {id};
