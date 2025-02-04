@@ -8,7 +8,7 @@ class ViewJournalEntryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final journal = GetIt.I<JournalEntries>().getEntryById(journalId);
+    final journal = di<UserJournalEntries>().getEntryById(journalId);
 
     return Scaffold(
       appBar: AppBar(),

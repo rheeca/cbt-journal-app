@@ -17,7 +17,7 @@ class JournalEntry {
       : id = const Uuid().v4();
 }
 
-class JournalEntries extends ChangeNotifier {
+class UserJournalEntries extends ChangeNotifier {
   List<JournalEntry> _entries = [];
 
   List<JournalEntry> get entries => _entries;

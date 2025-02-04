@@ -12,7 +12,8 @@ class JournalScreen extends WatchingStatefulWidget {
 class _JournalScreenState extends State<JournalScreen> {
   @override
   Widget build(BuildContext context) {
-    final journalEntries = watchPropertyValue((JournalEntries m) => m.entries);
+    final journalEntries =
+        watchPropertyValue((UserJournalEntries m) => m.entries);
 
     return Center(
       child: Padding(

@@ -47,7 +47,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
         onPressed: () {
           final DateTime now = DateTime.now();
           final title = DateFormat('yyyy-MM-dd h:mm a').format(now);
-          GetIt.I<JournalEntries>().addEntry(JournalEntry.createNew(
+          di<UserJournalEntries>().addEntry(JournalEntry.createNew(
             userId: userId,
             title: title,
             content: contentController.text,
