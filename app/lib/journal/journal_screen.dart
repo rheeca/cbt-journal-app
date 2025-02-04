@@ -27,7 +27,10 @@ class _JournalScreenState extends State<JournalScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
-                            children: [Text(e.title)],
+                            children: [
+                              Text(e.title ?? 'Untitled'),
+                              // TODO: add date created
+                            ],
                           ),
                         ),
                         onTap: () {

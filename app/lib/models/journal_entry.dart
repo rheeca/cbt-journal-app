@@ -4,17 +4,26 @@ import 'package:uuid/uuid.dart';
 class JournalEntry {
   String id;
   String userId;
-  String title;
-  String content;
+  DateTime createdAt;
+  String guidedJournal;
+  String? title;
+  List<String> content;
 
-  JournalEntry(
-      {required this.id,
-      required this.userId,
-      required this.title,
-      required this.content});
+  JournalEntry({
+    required this.id,
+    required this.userId,
+    required this.createdAt,
+    required this.guidedJournal,
+    this.title,
+    required this.content,
+  });
   JournalEntry.createNew(
-      {required this.userId, this.title = 'Untitled', this.content = ''})
-      : id = const Uuid().v4();
+      {required this.userId,
+      required this.guidedJournal,
+      this.title,
+      required this.content})
+      : id = const Uuid().v4(),
+        createdAt = DateTime.now();
 }
 
 class UserJournalEntries extends ChangeNotifier {
@@ -57,6 +66,14 @@ class GuidedJournal {
       this.description = '',
       required this.journalType})
       : id = const Uuid().v4();
+}
+
+class CurrentGuidedJournals extends ChangeNotifier {
+  List<GuidedJournal> guidedJournals = [];
+
+  addMultiple(List<GuidedJournal> items) {
+    guidedJournals = [...guidedJournals, ...items];
+  }
 }
 
 enum JournalType { mood, text }

@@ -1,6 +1,7 @@
 import 'package:cbt_journal/home_screen.dart';
 import 'package:cbt_journal/home/edit_journal_entry_screen.dart';
 import 'package:cbt_journal/home/view_journal_entry_screen.dart';
+import 'package:cbt_journal/models/model.dart' show GuidedJournal;
 import 'package:cbt_journal/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,12 @@ class RouteGenerator {
           builder: (_) => const SettingsScreen(),
         );
       case '/journal-entry':
-        return MaterialPageRoute(
-          builder: (_) => const EditJournalEntryScreen(),
-        );
+        if (args is GuidedJournal) {
+          return MaterialPageRoute(
+            builder: (_) => EditJournalEntryScreen(guidedJournal: args),
+          );
+        }
+        return _errorRoute();
       case '/view-journal-entry':
         if (args is String) {
           return MaterialPageRoute(

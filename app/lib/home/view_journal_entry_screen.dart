@@ -21,7 +21,7 @@ class ViewJournalEntryScreen extends StatelessWidget {
                 // TODO: change according to guide question
                 'How are you feeling?'),
             const SizedBox(height: 12.0),
-            Text(journal.content),
+            Text(journal.content[0]),
           ],
         ),
       ),

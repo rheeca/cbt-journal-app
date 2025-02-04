@@ -20,6 +20,10 @@ class AppDatabase extends _$AppDatabase {
         .getSingleOrNull();
   }
 
+  Future<List<GuidedJournalEntity>> getAllGuidedJournals() {
+    return (select(guidedJournals)).get();
+  }
+
   Future<int> insertGuidedJournal(md.GuidedJournal gj) {
     return into(guidedJournals).insertOnConflictUpdate(GuidedJournalsCompanion(
       id: Value(gj.id),
@@ -39,6 +43,22 @@ class AppDatabase extends _$AppDatabase {
       id: Value(user.userId),
       email: Value(user.email),
       displayName: Value(user.displayName),
+    ));
+  }
+
+  Future<List<JournalEntryEntity>> getJournalEntriesByUser(String userId) {
+    return (select(journalEntries)..where((t) => t.userId.equals(userId)))
+        .get();
+  }
+
+  Future<int> insertJournalEntry(md.JournalEntry item) {
+    return into(journalEntries).insertOnConflictUpdate(JournalEntriesCompanion(
+      id: Value(item.id),
+      userId: Value(item.userId),
+      createdAt: Value(item.createdAt),
+      guidedJournal: Value(item.guidedJournal),
+      title: Value(item.title),
+      content: Value(item.content),
     ));
   }
 }
