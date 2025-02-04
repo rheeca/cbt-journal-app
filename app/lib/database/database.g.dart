@@ -24,12 +24,12 @@ class $GuidedJournalsTable extends GuidedJournals
   static const VerificationMeta _guideQuestionsMeta =
       const VerificationMeta('guideQuestions');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
       guideQuestions = GeneratedColumn<String>(
-              'guide_questions', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<List<String>?>(
-              $GuidedJournalsTable.$converterguideQuestionsn);
+              'guide_questions', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $GuidedJournalsTable.$converterguideQuestions);
   static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
@@ -39,9 +39,11 @@ class $GuidedJournalsTable extends GuidedJournals
   static const VerificationMeta _journalTypeMeta =
       const VerificationMeta('journalType');
   @override
-  late final GeneratedColumn<String> journalType = GeneratedColumn<String>(
-      'journal_type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      journalType = GeneratedColumn<String>('journal_type', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $GuidedJournalsTable.$converterjournalType);
   @override
   List<GeneratedColumn> get $columns =>
       [id, title, guideQuestions, description, journalType];
@@ -76,14 +78,7 @@ class $GuidedJournalsTable extends GuidedJournals
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('journal_type')) {
-      context.handle(
-          _journalTypeMeta,
-          journalType.isAcceptableOrUnknown(
-              data['journal_type']!, _journalTypeMeta));
-    } else if (isInserting) {
-      context.missing(_journalTypeMeta);
-    }
+    context.handle(_journalTypeMeta, const VerificationResult.success());
     return context;
   }
 
@@ -97,13 +92,14 @@ class $GuidedJournalsTable extends GuidedJournals
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      guideQuestions: $GuidedJournalsTable.$converterguideQuestionsn.fromSql(
+      guideQuestions: $GuidedJournalsTable.$converterguideQuestions.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}guide_questions'])),
+              DriftSqlType.string, data['${effectivePrefix}guide_questions'])!),
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      journalType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}journal_type'])!,
+      journalType: $GuidedJournalsTable.$converterjournalType.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}journal_type'])!),
     );
   }
 
@@ -114,21 +110,21 @@ class $GuidedJournalsTable extends GuidedJournals
 
   static TypeConverter<List<String>, String> $converterguideQuestions =
       const StringListConverter();
-  static TypeConverter<List<String>?, String?> $converterguideQuestionsn =
-      NullAwareTypeConverter.wrap($converterguideQuestions);
+  static TypeConverter<List<String>, String> $converterjournalType =
+      const StringListConverter();
 }
 
 class GuidedJournalEntity extends DataClass
     implements Insertable<GuidedJournalEntity> {
   final String id;
   final String title;
-  final List<String>? guideQuestions;
+  final List<String> guideQuestions;
   final String description;
-  final String journalType;
+  final List<String> journalType;
   const GuidedJournalEntity(
       {required this.id,
       required this.title,
-      this.guideQuestions,
+      required this.guideQuestions,
       required this.description,
       required this.journalType});
   @override
@@ -136,12 +132,15 @@ class GuidedJournalEntity extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['title'] = Variable<String>(title);
-    if (!nullToAbsent || guideQuestions != null) {
+    {
       map['guide_questions'] = Variable<String>(
-          $GuidedJournalsTable.$converterguideQuestionsn.toSql(guideQuestions));
+          $GuidedJournalsTable.$converterguideQuestions.toSql(guideQuestions));
     }
     map['description'] = Variable<String>(description);
-    map['journal_type'] = Variable<String>(journalType);
+    {
+      map['journal_type'] = Variable<String>(
+          $GuidedJournalsTable.$converterjournalType.toSql(journalType));
+    }
     return map;
   }
 
@@ -149,9 +148,7 @@ class GuidedJournalEntity extends DataClass
     return GuidedJournalsCompanion(
       id: Value(id),
       title: Value(title),
-      guideQuestions: guideQuestions == null && nullToAbsent
-          ? const Value.absent()
-          : Value(guideQuestions),
+      guideQuestions: Value(guideQuestions),
       description: Value(description),
       journalType: Value(journalType),
     );
@@ -163,10 +160,9 @@ class GuidedJournalEntity extends DataClass
     return GuidedJournalEntity(
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
-      guideQuestions:
-          serializer.fromJson<List<String>?>(json['guideQuestions']),
+      guideQuestions: serializer.fromJson<List<String>>(json['guideQuestions']),
       description: serializer.fromJson<String>(json['description']),
-      journalType: serializer.fromJson<String>(json['journalType']),
+      journalType: serializer.fromJson<List<String>>(json['journalType']),
     );
   }
   @override
@@ -175,23 +171,22 @@ class GuidedJournalEntity extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
-      'guideQuestions': serializer.toJson<List<String>?>(guideQuestions),
+      'guideQuestions': serializer.toJson<List<String>>(guideQuestions),
       'description': serializer.toJson<String>(description),
-      'journalType': serializer.toJson<String>(journalType),
+      'journalType': serializer.toJson<List<String>>(journalType),
     };
   }
 
   GuidedJournalEntity copyWith(
           {String? id,
           String? title,
-          Value<List<String>?> guideQuestions = const Value.absent(),
+          List<String>? guideQuestions,
           String? description,
-          String? journalType}) =>
+          List<String>? journalType}) =>
       GuidedJournalEntity(
         id: id ?? this.id,
         title: title ?? this.title,
-        guideQuestions:
-            guideQuestions.present ? guideQuestions.value : this.guideQuestions,
+        guideQuestions: guideQuestions ?? this.guideQuestions,
         description: description ?? this.description,
         journalType: journalType ?? this.journalType,
       );
@@ -238,9 +233,9 @@ class GuidedJournalEntity extends DataClass
 class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
   final Value<String> id;
   final Value<String> title;
-  final Value<List<String>?> guideQuestions;
+  final Value<List<String>> guideQuestions;
   final Value<String> description;
-  final Value<String> journalType;
+  final Value<List<String>> journalType;
   final Value<int> rowid;
   const GuidedJournalsCompanion({
     this.id = const Value.absent(),
@@ -253,12 +248,13 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
   GuidedJournalsCompanion.insert({
     required String id,
     required String title,
-    this.guideQuestions = const Value.absent(),
+    required List<String> guideQuestions,
     required String description,
-    required String journalType,
+    required List<String> journalType,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         title = Value(title),
+        guideQuestions = Value(guideQuestions),
         description = Value(description),
         journalType = Value(journalType);
   static Insertable<GuidedJournalEntity> custom({
@@ -282,9 +278,9 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
   GuidedJournalsCompanion copyWith(
       {Value<String>? id,
       Value<String>? title,
-      Value<List<String>?>? guideQuestions,
+      Value<List<String>>? guideQuestions,
       Value<String>? description,
-      Value<String>? journalType,
+      Value<List<String>>? journalType,
       Value<int>? rowid}) {
     return GuidedJournalsCompanion(
       id: id ?? this.id,
@@ -307,14 +303,15 @@ class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
     }
     if (guideQuestions.present) {
       map['guide_questions'] = Variable<String>($GuidedJournalsTable
-          .$converterguideQuestionsn
+          .$converterguideQuestions
           .toSql(guideQuestions.value));
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
     if (journalType.present) {
-      map['journal_type'] = Variable<String>(journalType.value);
+      map['journal_type'] = Variable<String>(
+          $GuidedJournalsTable.$converterjournalType.toSql(journalType.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -357,7 +354,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, true,
+      'created_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       clientDefault: () => DateTime.now());
@@ -416,7 +413,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       email: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}email'])!,
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       displayName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
     );
@@ -431,21 +428,19 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
 class UserEntity extends DataClass implements Insertable<UserEntity> {
   final String id;
   final String email;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   final String displayName;
   const UserEntity(
       {required this.id,
       required this.email,
-      this.createdAt,
+      required this.createdAt,
       required this.displayName});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['email'] = Variable<String>(email);
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
-    }
+    map['created_at'] = Variable<DateTime>(createdAt);
     map['display_name'] = Variable<String>(displayName);
     return map;
   }
@@ -454,9 +449,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return UsersCompanion(
       id: Value(id),
       email: Value(email),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
+      createdAt: Value(createdAt),
       displayName: Value(displayName),
     );
   }
@@ -467,7 +460,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return UserEntity(
       id: serializer.fromJson<String>(json['id']),
       email: serializer.fromJson<String>(json['email']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       displayName: serializer.fromJson<String>(json['displayName']),
     );
   }
@@ -477,7 +470,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'email': serializer.toJson<String>(email),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'displayName': serializer.toJson<String>(displayName),
     };
   }
@@ -485,12 +478,12 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity copyWith(
           {String? id,
           String? email,
-          Value<DateTime?> createdAt = const Value.absent(),
+          DateTime? createdAt,
           String? displayName}) =>
       UserEntity(
         id: id ?? this.id,
         email: email ?? this.email,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        createdAt: createdAt ?? this.createdAt,
         displayName: displayName ?? this.displayName,
       );
   UserEntity copyWithCompanion(UsersCompanion data) {
@@ -529,7 +522,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String> id;
   final Value<String> email;
-  final Value<DateTime?> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> displayName;
   final Value<int> rowid;
   const UsersCompanion({
@@ -567,7 +560,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion copyWith(
       {Value<String>? id,
       Value<String>? email,
-      Value<DateTime?>? createdAt,
+      Value<DateTime>? createdAt,
       Value<String>? displayName,
       Value<int>? rowid}) {
     return UsersCompanion(
@@ -636,7 +629,7 @@ class $JournalEntriesTable extends JournalEntries
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, true,
+      'created_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       clientDefault: () => DateTime.now());
@@ -720,7 +713,7 @@ class $JournalEntriesTable extends JournalEntries
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       guidedJournal: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}guided_journal'])!,
       title: attachedDatabase.typeMapping
@@ -746,14 +739,14 @@ class JournalEntryEntity extends DataClass
     implements Insertable<JournalEntryEntity> {
   final String id;
   final String userId;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   final String guidedJournal;
   final String? title;
   final List<String>? content;
   const JournalEntryEntity(
       {required this.id,
       required this.userId,
-      this.createdAt,
+      required this.createdAt,
       required this.guidedJournal,
       this.title,
       this.content});
@@ -762,9 +755,7 @@ class JournalEntryEntity extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['user_id'] = Variable<String>(userId);
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
-    }
+    map['created_at'] = Variable<DateTime>(createdAt);
     map['guided_journal'] = Variable<String>(guidedJournal);
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
@@ -780,9 +771,7 @@ class JournalEntryEntity extends DataClass
     return JournalEntriesCompanion(
       id: Value(id),
       userId: Value(userId),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
+      createdAt: Value(createdAt),
       guidedJournal: Value(guidedJournal),
       title:
           title == null && nullToAbsent ? const Value.absent() : Value(title),
@@ -798,7 +787,7 @@ class JournalEntryEntity extends DataClass
     return JournalEntryEntity(
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       guidedJournal: serializer.fromJson<String>(json['guidedJournal']),
       title: serializer.fromJson<String?>(json['title']),
       content: serializer.fromJson<List<String>?>(json['content']),
@@ -810,7 +799,7 @@ class JournalEntryEntity extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'guidedJournal': serializer.toJson<String>(guidedJournal),
       'title': serializer.toJson<String?>(title),
       'content': serializer.toJson<List<String>?>(content),
@@ -820,14 +809,14 @@ class JournalEntryEntity extends DataClass
   JournalEntryEntity copyWith(
           {String? id,
           String? userId,
-          Value<DateTime?> createdAt = const Value.absent(),
+          DateTime? createdAt,
           String? guidedJournal,
           Value<String?> title = const Value.absent(),
           Value<List<String>?> content = const Value.absent()}) =>
       JournalEntryEntity(
         id: id ?? this.id,
         userId: userId ?? this.userId,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        createdAt: createdAt ?? this.createdAt,
         guidedJournal: guidedJournal ?? this.guidedJournal,
         title: title.present ? title.value : this.title,
         content: content.present ? content.value : this.content,
@@ -876,7 +865,7 @@ class JournalEntryEntity extends DataClass
 class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   final Value<String> id;
   final Value<String> userId;
-  final Value<DateTime?> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> guidedJournal;
   final Value<String?> title;
   final Value<List<String>?> content;
@@ -924,7 +913,7 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   JournalEntriesCompanion copyWith(
       {Value<String>? id,
       Value<String>? userId,
-      Value<DateTime?>? createdAt,
+      Value<DateTime>? createdAt,
       Value<String>? guidedJournal,
       Value<String?>? title,
       Value<List<String>?>? content,
@@ -1004,18 +993,18 @@ typedef $$GuidedJournalsTableCreateCompanionBuilder = GuidedJournalsCompanion
     Function({
   required String id,
   required String title,
-  Value<List<String>?> guideQuestions,
+  required List<String> guideQuestions,
   required String description,
-  required String journalType,
+  required List<String> journalType,
   Value<int> rowid,
 });
 typedef $$GuidedJournalsTableUpdateCompanionBuilder = GuidedJournalsCompanion
     Function({
   Value<String> id,
   Value<String> title,
-  Value<List<String>?> guideQuestions,
+  Value<List<String>> guideQuestions,
   Value<String> description,
-  Value<String> journalType,
+  Value<List<String>> journalType,
   Value<int> rowid,
 });
 
@@ -1055,7 +1044,7 @@ class $$GuidedJournalsTableFilterComposer
   ColumnFilters<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get guideQuestions => $composableBuilder(
           column: $table.guideQuestions,
           builder: (column) => ColumnWithTypeConverterFilters(column));
@@ -1063,8 +1052,10 @@ class $$GuidedJournalsTableFilterComposer
   ColumnFilters<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get journalType => $composableBuilder(
-      column: $table.journalType, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get journalType => $composableBuilder(
+          column: $table.journalType,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   Expression<bool> journalEntriesRefs(
       Expression<bool> Function($$JournalEntriesTableFilterComposer f) f) {
@@ -1129,15 +1120,16 @@ class $$GuidedJournalsTableAnnotationComposer
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get guideQuestions =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get guideQuestions =>
       $composableBuilder(
           column: $table.guideQuestions, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => column);
 
-  GeneratedColumn<String> get journalType => $composableBuilder(
-      column: $table.journalType, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<List<String>, String> get journalType =>
+      $composableBuilder(
+          column: $table.journalType, builder: (column) => column);
 
   Expression<T> journalEntriesRefs<T extends Object>(
       Expression<T> Function($$JournalEntriesTableAnnotationComposer a) f) {
@@ -1187,9 +1179,9 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> title = const Value.absent(),
-            Value<List<String>?> guideQuestions = const Value.absent(),
+            Value<List<String>> guideQuestions = const Value.absent(),
             Value<String> description = const Value.absent(),
-            Value<String> journalType = const Value.absent(),
+            Value<List<String>> journalType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GuidedJournalsCompanion(
@@ -1203,9 +1195,9 @@ class $$GuidedJournalsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String title,
-            Value<List<String>?> guideQuestions = const Value.absent(),
+            required List<String> guideQuestions,
             required String description,
-            required String journalType,
+            required List<String> journalType,
             Value<int> rowid = const Value.absent(),
           }) =>
               GuidedJournalsCompanion.insert(
@@ -1265,14 +1257,14 @@ typedef $$GuidedJournalsTableProcessedTableManager = ProcessedTableManager<
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required String id,
   required String email,
-  Value<DateTime?> createdAt,
+  Value<DateTime> createdAt,
   required String displayName,
   Value<int> rowid,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> id,
   Value<String> email,
-  Value<DateTime?> createdAt,
+  Value<DateTime> createdAt,
   Value<String> displayName,
   Value<int> rowid,
 });
@@ -1429,7 +1421,7 @@ class $$UsersTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> email = const Value.absent(),
-            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             Value<String> displayName = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1443,7 +1435,7 @@ class $$UsersTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String email,
-            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             required String displayName,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1502,7 +1494,7 @@ typedef $$JournalEntriesTableCreateCompanionBuilder = JournalEntriesCompanion
     Function({
   required String id,
   required String userId,
-  Value<DateTime?> createdAt,
+  Value<DateTime> createdAt,
   required String guidedJournal,
   Value<String?> title,
   Value<List<String>?> content,
@@ -1512,7 +1504,7 @@ typedef $$JournalEntriesTableUpdateCompanionBuilder = JournalEntriesCompanion
     Function({
   Value<String> id,
   Value<String> userId,
-  Value<DateTime?> createdAt,
+  Value<DateTime> createdAt,
   Value<String> guidedJournal,
   Value<String?> title,
   Value<List<String>?> content,
@@ -1764,7 +1756,7 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> userId = const Value.absent(),
-            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             Value<String> guidedJournal = const Value.absent(),
             Value<String?> title = const Value.absent(),
             Value<List<String>?> content = const Value.absent(),
@@ -1782,7 +1774,7 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String userId,
-            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             required String guidedJournal,
             Value<String?> title = const Value.absent(),
             Value<List<String>?> content = const Value.absent(),

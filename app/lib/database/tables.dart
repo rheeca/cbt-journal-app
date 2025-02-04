@@ -5,10 +5,9 @@ import 'package:drift/drift.dart';
 class GuidedJournals extends Table {
   TextColumn get id => text()();
   TextColumn get title => text().unique()();
-  TextColumn get guideQuestions =>
-      text().nullable().map(const StringListConverter())();
+  TextColumn get guideQuestions => text().map(const StringListConverter())();
   TextColumn get description => text()();
-  TextColumn get journalType => text()();
+  TextColumn get journalType => text().map(const StringListConverter())();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -19,7 +18,7 @@ class JournalEntries extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text().references(Users, #id)();
   DateTimeColumn get createdAt =>
-      dateTime().nullable().clientDefault(() => DateTime.now())();
+      dateTime().clientDefault(() => DateTime.now())();
   TextColumn get guidedJournal => text().references(GuidedJournals, #id)();
   TextColumn get title => text().withLength(min: 1, max: 200).nullable()();
   TextColumn get content =>
@@ -34,7 +33,7 @@ class Users extends Table {
   TextColumn get id => text()();
   TextColumn get email => text().unique()();
   DateTimeColumn get createdAt =>
-      dateTime().nullable().clientDefault(() => DateTime.now())();
+      dateTime().clientDefault(() => DateTime.now())();
   TextColumn get displayName => text()();
 
   @override

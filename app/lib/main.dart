@@ -3,9 +3,11 @@ import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/route_generator.dart';
 import 'package:cbt_journal/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:watch_it/watch_it.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
   di.registerSingleton<AppDatabase>(AppDatabase());
@@ -15,7 +17,7 @@ void main() async {
 
   // TODO: user login
   final db = di<AppDatabase>();
-  final user = await db.getUser("e2195ad0-d07d-48fd-a7d7-7ee330a7edc1");
+  final user = await db.getUser(dotenv.env['USER_ID'] ?? '');
   if (user != null) {
     di<CurrentUser>().setUser(UserModel(
         userId: user.id, email: user.email, displayName: user.displayName));
@@ -26,9 +28,10 @@ void main() async {
       .map((e) => GuidedJournal(
           id: e.id,
           title: e.title,
-          guideQuestions: e.guideQuestions ?? [],
+          guideQuestions: e.guideQuestions,
           description: e.description,
-          journalType: JournalType.values.byName(e.journalType)))
+          journalType:
+              e.journalType.map((e) => JournalType.values.byName(e)).toList()))
       .toList());
 
   List<JournalEntryEntity> entries = await db.getJournalEntriesByUser(user!.id);

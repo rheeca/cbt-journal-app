@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 class JournalEntry {
   String id;
   String userId;
-  DateTime? createdAt;
+  DateTime createdAt;
   String guidedJournal;
   String? title;
   List<String> content;
@@ -51,7 +51,7 @@ class GuidedJournal {
   String title;
   List<String> guideQuestions;
   String description;
-  JournalType journalType;
+  List<JournalType> journalType;
 
   GuidedJournal({
     required this.id,

@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
       title: Value(gj.title),
       guideQuestions: Value(gj.guideQuestions),
       description: Value(gj.description),
-      journalType: Value(gj.journalType.name),
+      journalType: Value(gj.journalType.map((e) => e.name).toList()),
     ));
   }
 
