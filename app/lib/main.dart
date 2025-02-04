@@ -1,6 +1,7 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/route_generator.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -30,6 +31,18 @@ void main() async {
           journalType: JournalType.values.byName(e.journalType)))
       .toList());
 
+  List<JournalEntryEntity> entries = await db.getJournalEntriesByUser(user!.id);
+  di<UserJournalEntries>().entries = entries
+      .map((e) => JournalEntry(
+            id: e.id,
+            userId: e.userId,
+            createdAt: e.createdAt,
+            guidedJournal: e.guidedJournal,
+            title: e.title,
+            content: e.content ?? [],
+          ))
+      .toList();
+
   runApp(const CBTApp());
 }
 
@@ -39,12 +52,7 @@ class CBTApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueGrey,
-        ),
-      ),
+      theme: theme,
       initialRoute: '/',
       onGenerateRoute: RouteGenerator.generateRoute,
       debugShowCheckedModeBanner: false,

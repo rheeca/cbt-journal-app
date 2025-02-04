@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 class JournalEntry {
   String id;
   String userId;
-  DateTime createdAt;
+  DateTime? createdAt;
   String guidedJournal;
   String? title;
   List<String> content;
@@ -70,6 +70,10 @@ class GuidedJournal {
 
 class CurrentGuidedJournals extends ChangeNotifier {
   List<GuidedJournal> guidedJournals = [];
+
+  GuidedJournal getGuidedJournalById(String id) {
+    return guidedJournals.firstWhere((e) => e.id == id);
+  }
 
   addMultiple(List<GuidedJournal> items) {
     guidedJournals = [...guidedJournals, ...items];

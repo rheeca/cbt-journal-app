@@ -9,6 +9,11 @@ class ViewJournalEntryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final journal = di<UserJournalEntries>().getEntryById(journalId);
+    final GuidedJournal guidedJournal =
+        di<CurrentGuidedJournals>().getGuidedJournalById(journal.guidedJournal);
+    List<int> indexList = [
+      for (int i = 0; i < guidedJournal.guideQuestions.length; i++) i
+    ];
 
     return Scaffold(
       appBar: AppBar(),
@@ -16,13 +21,20 @@ class ViewJournalEntryScreen extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-                // TODO: change according to guide question
-                'How are you feeling?'),
-            const SizedBox(height: 12.0),
-            Text(journal.content[0]),
-          ],
+          children: indexList.map((e) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(guidedJournal.guideQuestions[e],
+                      style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 8.0),
+                  Text(journal.content[e]),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
