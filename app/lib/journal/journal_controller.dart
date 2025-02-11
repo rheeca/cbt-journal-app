@@ -70,3 +70,19 @@ class JournalController extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+enum Sentiment {
+  verySad(value: '1', icon: Icon(Icons.sentiment_very_dissatisfied)),
+  sad(value: '2', icon: Icon(Icons.sentiment_dissatisfied)),
+  neutral(value: '3', icon: Icon(Icons.sentiment_neutral)),
+  happy(value: '4', icon: Icon(Icons.sentiment_satisfied_alt)),
+  veryHappy(value: '5', icon: Icon(Icons.sentiment_very_satisfied));
+
+  const Sentiment({required this.icon, required this.value});
+  final Icon icon;
+  final String value;
+
+  static Sentiment? getSentimentByValue(String value) {
+    return Sentiment.values.firstWhere((e) => e.value == value);
+  }
+}

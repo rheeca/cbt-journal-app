@@ -123,50 +123,45 @@ class _InputWidget extends WatchingWidget {
   }
 }
 
-class _MoodJournal extends WatchingWidget {
+class _MoodJournal extends StatefulWidget {
   const _MoodJournal(this.guideQuestion, this.contentController);
   final String guideQuestion;
   final TextEditingController contentController;
 
   @override
+  State<_MoodJournal> createState() => _MoodJournalState();
+}
+
+class _MoodJournalState extends State<_MoodJournal> {
+  String? selectedMood;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(guideQuestion),
-        const SizedBox(height: 24.0),
+        Text(widget.guideQuestion),
+        const SizedBox(height: 60.0),
         Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.sentiment_very_dissatisfied),
-              onPressed: () {
-                contentController.text = '1';
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.sentiment_dissatisfied),
-              onPressed: () {
-                contentController.text = '2';
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.sentiment_neutral),
-              onPressed: () {
-                contentController.text = '3';
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.sentiment_satisfied_alt),
-              onPressed: () {
-                contentController.text = '4';
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.sentiment_very_satisfied),
-              onPressed: () {
-                contentController.text = '5';
-              },
-            ),
-          ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: Sentiment.values.map((e) {
+            double opacity = 0.3;
+            if (selectedMood == e.value) {
+              opacity = 1.0;
+            }
+            return Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: () {
+                  widget.contentController.text = e.value;
+                  setState(() {
+                    selectedMood = e.value;
+                  });
+                },
+                icon: e.icon,
+                iconSize: 40.0,
+              ),
+            );
+          }).toList(),
         ),
         const SizedBox(height: 24.0),
       ],
