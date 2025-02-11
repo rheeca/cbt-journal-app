@@ -40,6 +40,28 @@ class Users extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName("GoalEntity")
+class Goals extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text().references(Users, #id)();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get goalSettingJournal => text().references(JournalEntries, #id)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName("GoalEntryEntity")
+class GoalEntries extends Table {
+  TextColumn get journalEntryId => text().references(JournalEntries, #id)();
+  TextColumn get goalId => text().references(Goals, #id)();
+
+  @override
+  Set<Column> get primaryKey => {journalEntryId};
+}
+
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 

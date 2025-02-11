@@ -24,7 +24,7 @@ class _JournalScreenState extends State<JournalScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
+        child: ListView(
           children: journalEntries
               .map((e) => Card(
                     child: InkWell(

@@ -1,7 +1,7 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
-import 'package:cbt_journal/models/user.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -38,7 +38,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
 
     journalEntry = di<JournalController>().selectedJournalEntry;
     journalEntry ??= JournalEntry.createNew(
-        userId: di<CurrentUser>().userId,
+        userId: di<UserController>().currentUser!.userId,
         guidedJournal: widget.guidedJournal.id,
         title: widget.guidedJournal.title,
         content: []);

@@ -8,13 +8,63 @@ part 'database.g.dart';
 
 var logger = Logger();
 
-@DriftDatabase(tables: [GuidedJournals, JournalEntries, Users])
+@DriftDatabase(
+    tables: [GoalEntries, Goals, GuidedJournals, JournalEntries, Users])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'cbt_journal_database'));
 
   @override
   int get schemaVersion => 1;
+}
 
+extension GoalQuery on AppDatabase {
+  Future<List<md.Goal>> getGoalsByUser(String userId) async {
+    List<md.Goal> userGoals = [];
+
+    final goalsFromDb =
+        await (select(goals)..where((t) => t.userId.equals(userId))).get();
+    for (GoalEntity g in goalsFromDb) {
+      final goalEntriesFromDb = await getGoalEntriesByGoal(g.id);
+      userGoals.add(md.Goal(
+        id: g.id,
+        userId: g.userId,
+        createdAt: g.createdAt,
+        title: g.title,
+        goalSettingJournal: g.goalSettingJournal,
+        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
+      ));
+    }
+    return userGoals;
+  }
+
+  Future<int> insertGoal(md.Goal item) {
+    for (final e in item.journalEntries) {
+      into(goalEntries).insertOnConflictUpdate(GoalEntriesCompanion(
+        journalEntryId: Value(e),
+        goalId: Value(item.id),
+      ));
+    }
+
+    return into(goals).insertOnConflictUpdate(GoalsCompanion(
+      id: Value(item.id),
+      userId: Value(item.userId),
+      createdAt: Value(item.createdAt),
+      title: Value(item.title),
+      goalSettingJournal: Value(item.goalSettingJournal),
+    ));
+  }
+
+  Future<void> deleteGoal(String id) {
+    (delete(goalEntries)..where((t) => t.goalId.isValue(id))).go();
+    return (delete(goals)..where((t) => t.id.isValue(id))).go();
+  }
+
+  Future<List<GoalEntryEntity>> getGoalEntriesByGoal(String goalId) {
+    return (select(goalEntries)..where((t) => t.goalId.equals(goalId))).get();
+  }
+}
+
+extension GuidedJournalQuery on AppDatabase {
   Future<GuidedJournalEntity?> getGuidedJournal(String id) {
     return (select(guidedJournals)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
@@ -33,7 +83,9 @@ class AppDatabase extends _$AppDatabase {
       journalType: Value(gj.journalType.map((e) => e.name).toList()),
     ));
   }
+}
 
+extension UserQuery on AppDatabase {
   Future<UserEntity?> getUser(String userId) {
     return (select(users)..where((t) => t.id.equals(userId))).getSingleOrNull();
   }
@@ -45,7 +97,9 @@ class AppDatabase extends _$AppDatabase {
       displayName: Value(user.displayName),
     ));
   }
+}
 
+extension JournalEntryQuery on AppDatabase {
   Future<List<JournalEntryEntity>> getJournalEntriesByUser(String userId) {
     return (select(journalEntries)
           ..where((t) => t.userId.equals(userId))
@@ -68,6 +122,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> deleteJournalEntry(String id) {
+    // TODO: If the guided journal is 'Set a Goal', also delete from GoalEntries
     return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
   }
 }

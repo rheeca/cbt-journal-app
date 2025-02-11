@@ -1,5 +1,6 @@
+import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
-import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -18,11 +19,15 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
       return const SizedBox();
     }
 
-    final username = watchPropertyValue((CurrentUser m) => m.displayName);
+    final username =
+        watchPropertyValue((UserController m) => m.currentUser?.displayName) ??
+            '';
     final guidedJournals =
         watchPropertyValue((JournalController c) => c.guidedJournals);
     final dailyJournal =
         guidedJournals.firstWhere((e) => e.title == 'Daily Check-in');
+
+    final goals = watchPropertyValue((GoalsController c) => c.goals);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -65,7 +70,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
             ],
           ),
           Column(
-            children: _goals
+            children: goals
                 .map(
                   (e) => Card(
                       child: Container(
@@ -91,8 +96,3 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
     );
   }
 }
-
-// TODO: put in database
-List<Goal> _goals = [
-  Goal(id: '123', title: 'Public Speaking', description: '')
-];

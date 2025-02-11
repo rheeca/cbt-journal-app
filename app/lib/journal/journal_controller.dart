@@ -1,7 +1,11 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:watch_it/watch_it.dart';
+
+var logger = Logger();
 
 class JournalController extends ChangeNotifier {
   JournalController();
@@ -26,16 +30,24 @@ class JournalController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await loadJournalEntries();
-    await loadGuidedJournals();
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      await loadJournalEntries();
+      await loadGuidedJournals();
+    } catch (e) {
+      logger.e('Failed to get journal entries. Error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadJournalEntries() async {
     final AppDatabase db = di<AppDatabase>();
-    final userId = di<CurrentUser>().userId;
+    final userId = di<UserController>().currentUser?.userId;
+    if (userId == null) {
+      throw 'user is null';
+    }
+
     final journalEntries = await db.getJournalEntriesByUser(userId);
 
     _journalEntries.clear();
