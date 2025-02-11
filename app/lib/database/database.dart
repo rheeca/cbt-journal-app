@@ -47,7 +47,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<JournalEntryEntity>> getJournalEntriesByUser(String userId) {
-    return (select(journalEntries)..where((t) => t.userId.equals(userId)))
+    return (select(journalEntries)
+          ..where((t) => t.userId.equals(userId))
+          ..orderBy([
+            (u) =>
+                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
+          ]))
         .get();
   }
 
@@ -60,5 +65,9 @@ class AppDatabase extends _$AppDatabase {
       title: Value(item.title),
       content: Value(item.content),
     ));
+  }
+
+  Future<void> deleteJournalEntry(String id) {
+    return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
   }
 }

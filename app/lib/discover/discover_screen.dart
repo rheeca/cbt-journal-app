@@ -1,3 +1,4 @@
+import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -31,6 +32,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       const Expanded(child: SizedBox()),
                       FilledButton(
                           onPressed: () {
+                            di<JournalController>().selectedJournalEntry = null;
                             Navigator.pushNamed(context, '/journal-entry',
                                 arguments: e);
                           },

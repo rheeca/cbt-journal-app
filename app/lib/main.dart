@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/route_generator.dart';
 import 'package:cbt_journal/theme.dart';
@@ -13,7 +14,7 @@ void main() async {
   di.registerSingleton<AppDatabase>(AppDatabase());
   di.registerSingleton<CurrentGuidedJournals>(CurrentGuidedJournals());
   di.registerSingleton<CurrentUser>(CurrentUser());
-  di.registerSingleton<UserJournalEntries>(UserJournalEntries());
+  di.registerSingleton<JournalController>(JournalController());
 
   // TODO: user login
   final db = di<AppDatabase>();
@@ -34,17 +35,7 @@ void main() async {
               e.journalType.map((e) => JournalType.values.byName(e)).toList()))
       .toList());
 
-  List<JournalEntryEntity> entries = await db.getJournalEntriesByUser(user!.id);
-  di<UserJournalEntries>().entries = entries
-      .map((e) => JournalEntry(
-            id: e.id,
-            userId: e.userId,
-            createdAt: e.createdAt,
-            guidedJournal: e.guidedJournal,
-            title: e.title,
-            content: e.content ?? [],
-          ))
-      .toList();
+  di<JournalController>().updateJournalEntries();
 
   runApp(const CBTApp());
 }

@@ -26,26 +26,6 @@ class JournalEntry {
         createdAt = DateTime.now();
 }
 
-class UserJournalEntries extends ChangeNotifier {
-  List<JournalEntry> _entries = [];
-
-  List<JournalEntry> get entries => _entries;
-
-  set entries(List<JournalEntry> value) {
-    _entries = value;
-    notifyListeners();
-  }
-
-  addEntry(JournalEntry value) {
-    _entries.insert(0, value);
-    notifyListeners();
-  }
-
-  JournalEntry getEntryById(String id) {
-    return _entries.firstWhere((entry) => entry.id == id);
-  }
-}
-
 class GuidedJournal {
   String id;
   String title;

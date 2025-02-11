@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:cbt_journal/models/user.dart';
 import 'package:cbt_journal/util/util.dart';
@@ -34,11 +35,15 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
     super.initState();
     guideQuestions = widget.guidedJournal.guideQuestions;
     journalTypes = widget.guidedJournal.journalType;
-    journalEntry = JournalEntry.createNew(
+
+    journalEntry = di<JournalController>().selectedJournalEntry;
+    journalEntry ??= JournalEntry.createNew(
         userId: di<CurrentUser>().userId,
         guidedJournal: widget.guidedJournal.id,
         title: widget.guidedJournal.title,
         content: []);
+    contentController.text =
+        getAtIndexOrNull(journalEntry!.content, currentQuestion) ?? '';
   }
 
   @override
@@ -60,7 +65,8 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
             updateOrAppend(
                 journalEntry!.content, currentQuestion, contentController.text);
             await di<AppDatabase>().insertJournalEntry(journalEntry!);
-            di<UserJournalEntries>().addEntry(journalEntry!);
+            di<JournalController>().updateJournalEntries();
+
             if (context.mounted) Navigator.pop(context);
           } else {
             setState(() {

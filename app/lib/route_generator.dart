@@ -24,12 +24,8 @@ class RouteGenerator {
         }
         return _errorRoute();
       case '/view-journal-entry':
-        if (args is String) {
-          return MaterialPageRoute(
-            builder: (_) => ViewJournalEntryScreen(journalId: args),
-          );
-        }
-        return _errorRoute();
+        return MaterialPageRoute(
+            builder: (_) => const ViewJournalEntryScreen());
       default:
         return _errorRoute();
     }
