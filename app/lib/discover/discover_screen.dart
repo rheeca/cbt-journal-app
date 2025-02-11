@@ -1,5 +1,4 @@
 import 'package:cbt_journal/journal/journal_controller.dart';
-import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -14,7 +13,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     final guidedJournals =
-        watchPropertyValue((CurrentGuidedJournals m) => m.guidedJournals);
+        watchPropertyValue((JournalController c) => c.guidedJournals);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(

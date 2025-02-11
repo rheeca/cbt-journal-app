@@ -13,9 +13,16 @@ class HomeDetailScreen extends WatchingStatefulWidget {
 class _HomeDetailScreenState extends State<HomeDetailScreen> {
   @override
   Widget build(BuildContext context) {
+    final isLoading = watchPropertyValue((JournalController c) => c.isLoading);
+    if (isLoading) {
+      return const SizedBox();
+    }
+
     final username = watchPropertyValue((CurrentUser m) => m.displayName);
+    final guidedJournals =
+        watchPropertyValue((JournalController c) => c.guidedJournals);
     final dailyJournal =
-        di<CurrentGuidedJournals>().getGuidedJournalByTitle('Daily Check-in');
+        guidedJournals.firstWhere((e) => e.title == 'Daily Check-in');
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),

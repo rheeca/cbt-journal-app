@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class JournalEntry {
@@ -46,22 +45,6 @@ class GuidedJournal {
       this.description = '',
       required this.journalType})
       : id = const Uuid().v4();
-}
-
-class CurrentGuidedJournals extends ChangeNotifier {
-  List<GuidedJournal> guidedJournals = [];
-
-  GuidedJournal getGuidedJournalById(String id) {
-    return guidedJournals.firstWhere((e) => e.id == id);
-  }
-
-  GuidedJournal getGuidedJournalByTitle(String title) {
-    return guidedJournals.firstWhere((e) => e.title == title);
-  }
-
-  addMultiple(List<GuidedJournal> items) {
-    guidedJournals = [...guidedJournals, ...items];
-  }
 }
 
 enum JournalType { mood, text }

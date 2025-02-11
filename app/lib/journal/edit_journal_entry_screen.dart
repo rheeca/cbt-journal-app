@@ -65,7 +65,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
             updateOrAppend(
                 journalEntry!.content, currentQuestion, contentController.text);
             await di<AppDatabase>().insertJournalEntry(journalEntry!);
-            di<JournalController>().updateJournalEntries();
+            di<JournalController>().loadJournalEntries();
 
             if (context.mounted) Navigator.pop(context);
           } else {

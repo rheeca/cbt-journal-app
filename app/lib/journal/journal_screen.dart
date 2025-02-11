@@ -13,6 +13,11 @@ class JournalScreen extends WatchingStatefulWidget {
 class _JournalScreenState extends State<JournalScreen> {
   @override
   Widget build(BuildContext context) {
+    final isLoading = watchPropertyValue((JournalController c) => c.isLoading);
+    if (isLoading) {
+      return const SizedBox();
+    }
+
     final journalEntries =
         watchPropertyValue((JournalController c) => c.journalEntries);
 

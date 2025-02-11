@@ -12,7 +12,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   di.registerSingleton<AppDatabase>(AppDatabase());
-  di.registerSingleton<CurrentGuidedJournals>(CurrentGuidedJournals());
   di.registerSingleton<CurrentUser>(CurrentUser());
   di.registerSingleton<JournalController>(JournalController());
 
@@ -24,18 +23,7 @@ void main() async {
         userId: user.id, email: user.email, displayName: user.displayName));
   }
 
-  List<GuidedJournalEntity> items = await db.getAllGuidedJournals();
-  di<CurrentGuidedJournals>().addMultiple(items
-      .map((e) => GuidedJournal(
-          id: e.id,
-          title: e.title,
-          guideQuestions: e.guideQuestions,
-          description: e.description,
-          journalType:
-              e.journalType.map((e) => JournalType.values.byName(e)).toList()))
-      .toList());
-
-  di<JournalController>().updateJournalEntries();
+  di<JournalController>().load();
 
   runApp(const CBTApp());
 }

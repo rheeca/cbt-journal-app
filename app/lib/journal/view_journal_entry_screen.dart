@@ -24,8 +24,10 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
       );
     }
 
+    final guidedJournals =
+        watchPropertyValue((JournalController c) => c.guidedJournals);
     final GuidedJournal guidedJournal =
-        di<CurrentGuidedJournals>().getGuidedJournalById(journal.guidedJournal);
+        guidedJournals.firstWhere((e) => e.id == journal.guidedJournal);
     List<int> indexList = [
       for (int i = 0; i < guidedJournal.guideQuestions.length; i++) i
     ];
@@ -47,7 +49,7 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
                 child: const Text('Delete'),
                 onPressed: () {
                   di<AppDatabase>().deleteJournalEntry(journal.id);
-                  di<JournalController>().updateJournalEntries();
+                  di<JournalController>().loadJournalEntries();
                   Navigator.pop(context);
                 },
               ),
