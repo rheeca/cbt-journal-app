@@ -49,7 +49,26 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            final previousQuestion = currentQuestion - 1;
+            if (previousQuestion < 0) {
+              Navigator.pop(context);
+            } else {
+              setState(() {
+                updateOrAppend(journalEntry!.content, currentQuestion,
+                    contentController.text);
+                contentController.text =
+                    getAtIndexOrNull(journalEntry!.content, previousQuestion) ??
+                        '';
+                currentQuestion = previousQuestion;
+              });
+            }
+          },
+        ),
+      ),
       body: Container(
           margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
           child: _InputWidget(
