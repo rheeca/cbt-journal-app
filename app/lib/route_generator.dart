@@ -1,6 +1,6 @@
 import 'package:cbt_journal/home_screen.dart';
-import 'package:cbt_journal/home/edit_journal_entry_screen.dart';
-import 'package:cbt_journal/home/view_journal_entry_screen.dart';
+import 'package:cbt_journal/journal/edit_journal_entry_screen.dart';
+import 'package:cbt_journal/journal/view_journal_entry_screen.dart';
 import 'package:cbt_journal/models/model.dart' show GuidedJournal;
 import 'package:cbt_journal/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
