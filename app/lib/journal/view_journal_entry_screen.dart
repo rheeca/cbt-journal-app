@@ -40,7 +40,7 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
               MenuItemButton(
                 child: const Text('Edit'),
                 onPressed: () async {
-                  await Navigator.pushNamed(context, '/journal-entry',
+                  await Navigator.pushNamed(context, '/journal-entry/edit',
                       arguments: guidedJournal);
                   setState(() {});
                 },

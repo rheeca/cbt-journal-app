@@ -52,8 +52,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                     const SizedBox(height: 50),
                     FilledButton(
                         onPressed: () {
-                          di<JournalController>().selectedJournalEntry = null;
-                          Navigator.pushNamed(context, '/journal-entry',
+                          Navigator.pushNamed(context, '/journal-entry/create',
                               arguments: dailyJournal);
                         },
                         child: const Text('Start')),

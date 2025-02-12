@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
 class EditJournalEntryScreen extends WatchingStatefulWidget {
-  const EditJournalEntryScreen({super.key, required this.guidedJournal});
+  const EditJournalEntryScreen(
+      {super.key, required this.mode, required this.guidedJournal});
+  final EditJournalMode mode;
   final GuidedJournal guidedJournal;
 
   @override
@@ -36,18 +38,27 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
     guideQuestions = widget.guidedJournal.guideQuestions;
     journalTypes = widget.guidedJournal.journalType;
 
-    journalEntry = di<JournalController>().selectedJournalEntry;
-    journalEntry ??= JournalEntry.createNew(
-        userId: di<UserController>().currentUser!.userId,
-        guidedJournal: widget.guidedJournal.id,
-        title: widget.guidedJournal.title,
-        content: []);
-    contentController.text =
-        getAtIndexOrNull(journalEntry!.content, currentQuestion) ?? '';
+    if (widget.mode == EditJournalMode.edit) {
+      journalEntry = di<JournalController>().selectedJournalEntry;
+      contentController.text =
+          getAtIndexOrNull(journalEntry!.content, currentQuestion) ?? '';
+    } else {
+      journalEntry = JournalEntry.createNew(
+          userId: di<UserController>().currentUser!.userId,
+          guidedJournal: widget.guidedJournal.id,
+          title: widget.guidedJournal.title,
+          content: []);
+      di<JournalController>().selectedJournalEntry = journalEntry;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    Icon nextButton = const Icon(Icons.arrow_forward);
+    if (currentQuestion + 1 >= guideQuestions.length) {
+      nextButton = const Icon(Icons.check);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -86,7 +97,15 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
             await di<AppDatabase>().insertJournalEntry(journalEntry!);
             di<JournalController>().loadJournalEntries();
 
-            if (context.mounted) Navigator.pop(context);
+            if (widget.guidedJournal.title == 'Set a Goal' &&
+                widget.mode == EditJournalMode.create) {
+              // TODO: Ask if user wants to create a goal
+              if (context.mounted) {
+                Navigator.popAndPushNamed(context, '/goal/create');
+              }
+            } else {
+              if (context.mounted) Navigator.pop(context);
+            }
           } else {
             setState(() {
               updateOrAppend(journalEntry!.content, currentQuestion,
@@ -98,7 +117,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
           }
         },
         elevation: 1.0,
-        child: const Icon(Icons.arrow_forward),
+        child: nextButton,
       ),
     );
   }
@@ -190,3 +209,5 @@ class _TextJournal extends WatchingWidget {
     );
   }
 }
+
+enum EditJournalMode { create, edit }

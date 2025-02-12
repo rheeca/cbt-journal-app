@@ -1,3 +1,4 @@
+import 'package:cbt_journal/goals/create_goal.dart';
 import 'package:cbt_journal/home_screen.dart';
 import 'package:cbt_journal/journal/edit_journal_entry_screen.dart';
 import 'package:cbt_journal/journal/view_journal_entry_screen.dart';
@@ -16,10 +17,23 @@ class RouteGenerator {
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),
         );
-      case '/journal-entry':
+      case '/goal/create':
+        return MaterialPageRoute(
+          builder: (_) => const CreateGoalScreen(),
+        );
+      case '/journal-entry/create':
         if (args is GuidedJournal) {
           return MaterialPageRoute(
-            builder: (_) => EditJournalEntryScreen(guidedJournal: args),
+            builder: (_) => EditJournalEntryScreen(
+                mode: EditJournalMode.create, guidedJournal: args),
+          );
+        }
+        return _errorRoute();
+      case '/journal-entry/edit':
+        if (args is GuidedJournal) {
+          return MaterialPageRoute(
+            builder: (_) => EditJournalEntryScreen(
+                mode: EditJournalMode.edit, guidedJournal: args),
           );
         }
         return _errorRoute();

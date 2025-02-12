@@ -31,8 +31,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       const Expanded(child: SizedBox()),
                       FilledButton(
                           onPressed: () {
-                            di<JournalController>().selectedJournalEntry = null;
-                            Navigator.pushNamed(context, '/journal-entry',
+                            Navigator.pushNamed(
+                                context, '/journal-entry/create',
                                 arguments: e);
                           },
                           child: const Text('Start'))
