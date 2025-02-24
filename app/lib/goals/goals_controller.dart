@@ -13,6 +13,13 @@ class GoalsController extends ChangeNotifier {
   final List<Goal> _goals = [];
   List<Goal> get goals => _goals;
 
+  Goal? _selectedGoal;
+  Goal? get selectedGoal => _selectedGoal;
+  set selectedGoal(Goal? goal) {
+    _selectedGoal = goal;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();

@@ -6,6 +6,10 @@ final theme = ThemeData(
     seedColor: Colors.blueGrey,
   ),
   textTheme: const TextTheme(
+    titleLarge: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w400,
+    ),
     titleMedium: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w700,

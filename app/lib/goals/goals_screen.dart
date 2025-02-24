@@ -1,6 +1,7 @@
 import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class GoalsScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
@@ -28,7 +29,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               },
               child: const Text('Create a Goal')),
           const SizedBox(height: 24.0),
-          const _GoalsListView(),
+          const Expanded(child: _GoalsListView()),
         ],
       ),
     );
@@ -40,25 +41,39 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isLoadingGoals =
+        watchPropertyValue((GoalsController c) => c.isLoading);
     final goals = watchPropertyValue((GoalsController c) => c.goals);
 
-    if (goals.isEmpty) {
-      return const SizedBox();
-    } else {
-      return ConstrainedBox(
-        // TODO: ListView should fill up remaining space
-        // in screen instead of having a specific height
-        constraints: const BoxConstraints(maxHeight: 300.0),
-        child: ListView(
-          children: goals
-              .map(
-                (e) => Card(
-                  child: Text(e.title),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: isLoadingGoals
+          ? LoadingAnimationWidget.waveDots(
+              color: Colors.blueGrey,
+              size: 50,
+            )
+          : ListView(
+              children: goals
+                  .map(
+                    (e) => Card(
+                      child: InkWell(
+                        onTap: () {
+                          di<GoalsController>().selectedGoal = e;
+                          Navigator.pushNamed(context, '/goal/view');
+                        },
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+                          child: Text(
+                            e.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+    );
   }
 }

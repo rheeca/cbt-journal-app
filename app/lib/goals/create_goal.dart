@@ -29,31 +29,36 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: Center(
-        child: Column(
-          children: [
-            TextField(
-              controller: titleController,
-            ),
-            FilledButton(
-              onPressed: () async {
-                final userId = di<UserController>().currentUser!.userId;
-                final goalSettingJournalId =
-                    di<JournalController>().selectedJournalEntry!.id;
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                    border: InputBorder.none, hintText: 'Title'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final userId = di<UserController>().currentUser!.userId;
+                  final goalSettingJournalId =
+                      di<JournalController>().selectedJournalEntry!.id;
 
-                final goal = Goal.createNew(
-                    userId: userId,
-                    title: titleController.text,
-                    goalSettingJournal: goalSettingJournalId,
-                    journalEntries: []);
-                await di<AppDatabase>().insertGoal(goal);
-                await di<GoalsController>().load();
+                  final goal = Goal.createNew(
+                      userId: userId,
+                      title: titleController.text,
+                      goalSettingJournal: goalSettingJournalId,
+                      journalEntries: []);
+                  await di<AppDatabase>().insertGoal(goal);
+                  await di<GoalsController>().load();
 
-                // TODO: Loading indicator until goal is saved
-                if (context.mounted) Navigator.pop(context);
-              },
-              child: const Text('Create Goal'),
-            )
-          ],
+                  // TODO: Loading indicator until goal is saved
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text('Create Goal'),
+              )
+            ],
+          ),
         ),
       ),
     );

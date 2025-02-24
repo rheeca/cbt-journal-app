@@ -103,6 +103,11 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
               if (context.mounted) {
                 Navigator.popAndPushNamed(context, '/goal/create');
               }
+            } else if (widget.mode == EditJournalMode.create) {
+              if (context.mounted) {
+                Navigator.popAndPushNamed(
+                    context, '/journal-entry/create/confirm');
+              }
             } else {
               if (context.mounted) Navigator.pop(context);
             }

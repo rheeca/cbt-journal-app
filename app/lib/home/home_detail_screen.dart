@@ -2,6 +2,7 @@ import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/user/user_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class HomeDetailScreen extends WatchingStatefulWidget {
@@ -13,10 +14,25 @@ class HomeDetailScreen extends WatchingStatefulWidget {
 
 class _HomeDetailScreenState extends State<HomeDetailScreen> {
   @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    di<GoalsController>().load();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isLoading = watchPropertyValue((JournalController c) => c.isLoading);
     if (isLoading) {
-      return const SizedBox();
+      return Center(
+        child: LoadingAnimationWidget.waveDots(
+          color: Colors.blueGrey.shade200,
+          size: 30,
+        ),
+      );
     }
 
     final username =
@@ -26,6 +42,9 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
         watchPropertyValue((JournalController c) => c.guidedJournals);
     final dailyJournal =
         guidedJournals.firstWhere((e) => e.title == 'Daily Check-in');
+
+    final isLoadingGoals =
+        watchPropertyValue((GoalsController c) => c.isLoading);
 
     final goals = watchPropertyValue((GoalsController c) => c.goals);
 
@@ -68,28 +87,36 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
               Text('Today\'s Goals'),
             ],
           ),
-          Column(
-            children: goals
-                .map(
-                  (e) => Card(
-                      child: Container(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 12.0),
-                      child: Row(
-                        children: [
-                          Text(e.title),
-                          const Expanded(child: SizedBox()),
-                          FilledButton(
-                              onPressed: () {}, child: const Text('Check-in'))
-                        ],
-                      ),
-                    ),
-                  )),
+          isLoadingGoals
+              ? LoadingAnimationWidget.waveDots(
+                  color: Colors.blueGrey,
+                  size: 50,
                 )
-                .toList(),
-          )
+              : Expanded(
+                  child: ListView(
+                    children: goals
+                        .map(
+                          (e) => Card(
+                              child: Container(
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 12.0),
+                              child: Row(
+                                children: [
+                                  Text(e.title),
+                                  const Expanded(child: SizedBox()),
+                                  FilledButton(
+                                      onPressed: () {},
+                                      child: const Text('Check-in'))
+                                ],
+                              ),
+                            ),
+                          )),
+                        )
+                        .toList(),
+                  ),
+                )
         ],
       ),
     );
