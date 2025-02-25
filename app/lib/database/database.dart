@@ -30,8 +30,13 @@ extension GoalQuery on AppDatabase {
         userId: g.userId,
         createdAt: g.createdAt,
         title: g.title,
-        goalSettingJournal: g.goalSettingJournal,
+        guideQuestions:
+            g.guideQuestions.map((e) => md.GuideQuestion.fromMap(e)).toList(),
+        notificationSchedule: g.notificationSchedule
+            .map((e) => md.DayOfWeek.values.byName(e))
+            .toList(),
         journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
+        isArchived: g.isArchived,
       ));
     }
     return userGoals;
@@ -50,7 +55,10 @@ extension GoalQuery on AppDatabase {
       userId: Value(item.userId),
       createdAt: Value(item.createdAt),
       title: Value(item.title),
-      goalSettingJournal: Value(item.goalSettingJournal),
+      guideQuestions: Value(item.guideQuestions.map((e) => e.toMap()).toList()),
+      notificationSchedule:
+          Value(item.notificationSchedule.map((e) => e.name).toList()),
+      isArchived: Value(item.isArchived),
     ));
   }
 

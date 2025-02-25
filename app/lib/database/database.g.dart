@@ -1006,18 +1006,44 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 200),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
-  static const VerificationMeta _goalSettingJournalMeta =
-      const VerificationMeta('goalSettingJournal');
+  static const VerificationMeta _guideQuestionsMeta =
+      const VerificationMeta('guideQuestions');
   @override
-  late final GeneratedColumn<String> goalSettingJournal =
-      GeneratedColumn<String>('goal_setting_journal', aliasedName, false,
-          type: DriftSqlType.string,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintIsAlways(
-              'REFERENCES journal_entries (id)'));
+  late final GeneratedColumnWithTypeConverter<List<Map<String, String>>, String>
+      guideQuestions = GeneratedColumn<String>(
+              'guide_questions', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<Map<String, String>>>(
+              $GoalsTable.$converterguideQuestions);
+  static const VerificationMeta _notificationScheduleMeta =
+      const VerificationMeta('notificationSchedule');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, userId, createdAt, title, goalSettingJournal];
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      notificationSchedule = GeneratedColumn<String>(
+              'notification_schedule', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $GoalsTable.$converternotificationSchedule);
+  static const VerificationMeta _isArchivedMeta =
+      const VerificationMeta('isArchived');
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+      'is_archived', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_archived" IN (0, 1))'),
+      clientDefault: () => false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        userId,
+        createdAt,
+        title,
+        guideQuestions,
+        notificationSchedule,
+        isArchived
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1049,13 +1075,14 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
-    if (data.containsKey('goal_setting_journal')) {
+    context.handle(_guideQuestionsMeta, const VerificationResult.success());
+    context.handle(
+        _notificationScheduleMeta, const VerificationResult.success());
+    if (data.containsKey('is_archived')) {
       context.handle(
-          _goalSettingJournalMeta,
-          goalSettingJournal.isAcceptableOrUnknown(
-              data['goal_setting_journal']!, _goalSettingJournalMeta));
-    } else if (isInserting) {
-      context.missing(_goalSettingJournalMeta);
+          _isArchivedMeta,
+          isArchived.isAcceptableOrUnknown(
+              data['is_archived']!, _isArchivedMeta));
     }
     return context;
   }
@@ -1074,8 +1101,14 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      goalSettingJournal: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}goal_setting_journal'])!,
+      guideQuestions: $GoalsTable.$converterguideQuestions.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}guide_questions'])!),
+      notificationSchedule: $GoalsTable.$converternotificationSchedule.fromSql(
+          attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}notification_schedule'])!),
+      isArchived: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
     );
   }
 
@@ -1083,6 +1116,11 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
   $GoalsTable createAlias(String alias) {
     return $GoalsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<Map<String, String>>, String>
+      $converterguideQuestions = const QuestionListConverter();
+  static TypeConverter<List<String>, String> $converternotificationSchedule =
+      const StringListConverter();
 }
 
 class GoalEntity extends DataClass implements Insertable<GoalEntity> {
@@ -1090,13 +1128,17 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
   final String userId;
   final DateTime createdAt;
   final String title;
-  final String goalSettingJournal;
+  final List<Map<String, String>> guideQuestions;
+  final List<String> notificationSchedule;
+  final bool isArchived;
   const GoalEntity(
       {required this.id,
       required this.userId,
       required this.createdAt,
       required this.title,
-      required this.goalSettingJournal});
+      required this.guideQuestions,
+      required this.notificationSchedule,
+      required this.isArchived});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1104,7 +1146,16 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
     map['user_id'] = Variable<String>(userId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['title'] = Variable<String>(title);
-    map['goal_setting_journal'] = Variable<String>(goalSettingJournal);
+    {
+      map['guide_questions'] = Variable<String>(
+          $GoalsTable.$converterguideQuestions.toSql(guideQuestions));
+    }
+    {
+      map['notification_schedule'] = Variable<String>($GoalsTable
+          .$converternotificationSchedule
+          .toSql(notificationSchedule));
+    }
+    map['is_archived'] = Variable<bool>(isArchived);
     return map;
   }
 
@@ -1114,7 +1165,9 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: Value(userId),
       createdAt: Value(createdAt),
       title: Value(title),
-      goalSettingJournal: Value(goalSettingJournal),
+      guideQuestions: Value(guideQuestions),
+      notificationSchedule: Value(notificationSchedule),
+      isArchived: Value(isArchived),
     );
   }
 
@@ -1126,8 +1179,11 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: serializer.fromJson<String>(json['userId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       title: serializer.fromJson<String>(json['title']),
-      goalSettingJournal:
-          serializer.fromJson<String>(json['goalSettingJournal']),
+      guideQuestions: serializer
+          .fromJson<List<Map<String, String>>>(json['guideQuestions']),
+      notificationSchedule:
+          serializer.fromJson<List<String>>(json['notificationSchedule']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
     );
   }
   @override
@@ -1138,7 +1194,11 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       'userId': serializer.toJson<String>(userId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'title': serializer.toJson<String>(title),
-      'goalSettingJournal': serializer.toJson<String>(goalSettingJournal),
+      'guideQuestions':
+          serializer.toJson<List<Map<String, String>>>(guideQuestions),
+      'notificationSchedule':
+          serializer.toJson<List<String>>(notificationSchedule),
+      'isArchived': serializer.toJson<bool>(isArchived),
     };
   }
 
@@ -1147,13 +1207,17 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           String? userId,
           DateTime? createdAt,
           String? title,
-          String? goalSettingJournal}) =>
+          List<Map<String, String>>? guideQuestions,
+          List<String>? notificationSchedule,
+          bool? isArchived}) =>
       GoalEntity(
         id: id ?? this.id,
         userId: userId ?? this.userId,
         createdAt: createdAt ?? this.createdAt,
         title: title ?? this.title,
-        goalSettingJournal: goalSettingJournal ?? this.goalSettingJournal,
+        guideQuestions: guideQuestions ?? this.guideQuestions,
+        notificationSchedule: notificationSchedule ?? this.notificationSchedule,
+        isArchived: isArchived ?? this.isArchived,
       );
   GoalEntity copyWithCompanion(GoalsCompanion data) {
     return GoalEntity(
@@ -1161,9 +1225,14 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: data.userId.present ? data.userId.value : this.userId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       title: data.title.present ? data.title.value : this.title,
-      goalSettingJournal: data.goalSettingJournal.present
-          ? data.goalSettingJournal.value
-          : this.goalSettingJournal,
+      guideQuestions: data.guideQuestions.present
+          ? data.guideQuestions.value
+          : this.guideQuestions,
+      notificationSchedule: data.notificationSchedule.present
+          ? data.notificationSchedule.value
+          : this.notificationSchedule,
+      isArchived:
+          data.isArchived.present ? data.isArchived.value : this.isArchived,
     );
   }
 
@@ -1174,14 +1243,16 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('title: $title, ')
-          ..write('goalSettingJournal: $goalSettingJournal')
+          ..write('guideQuestions: $guideQuestions, ')
+          ..write('notificationSchedule: $notificationSchedule, ')
+          ..write('isArchived: $isArchived')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, userId, createdAt, title, goalSettingJournal);
+  int get hashCode => Object.hash(id, userId, createdAt, title, guideQuestions,
+      notificationSchedule, isArchived);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1190,7 +1261,9 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           other.userId == this.userId &&
           other.createdAt == this.createdAt &&
           other.title == this.title &&
-          other.goalSettingJournal == this.goalSettingJournal);
+          other.guideQuestions == this.guideQuestions &&
+          other.notificationSchedule == this.notificationSchedule &&
+          other.isArchived == this.isArchived);
 }
 
 class GoalsCompanion extends UpdateCompanion<GoalEntity> {
@@ -1198,14 +1271,18 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   final Value<String> userId;
   final Value<DateTime> createdAt;
   final Value<String> title;
-  final Value<String> goalSettingJournal;
+  final Value<List<Map<String, String>>> guideQuestions;
+  final Value<List<String>> notificationSchedule;
+  final Value<bool> isArchived;
   final Value<int> rowid;
   const GoalsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.title = const Value.absent(),
-    this.goalSettingJournal = const Value.absent(),
+    this.guideQuestions = const Value.absent(),
+    this.notificationSchedule = const Value.absent(),
+    this.isArchived = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GoalsCompanion.insert({
@@ -1213,18 +1290,23 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     required String userId,
     this.createdAt = const Value.absent(),
     required String title,
-    required String goalSettingJournal,
+    required List<Map<String, String>> guideQuestions,
+    required List<String> notificationSchedule,
+    this.isArchived = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         userId = Value(userId),
         title = Value(title),
-        goalSettingJournal = Value(goalSettingJournal);
+        guideQuestions = Value(guideQuestions),
+        notificationSchedule = Value(notificationSchedule);
   static Insertable<GoalEntity> custom({
     Expression<String>? id,
     Expression<String>? userId,
     Expression<DateTime>? createdAt,
     Expression<String>? title,
-    Expression<String>? goalSettingJournal,
+    Expression<String>? guideQuestions,
+    Expression<String>? notificationSchedule,
+    Expression<bool>? isArchived,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1232,8 +1314,10 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       if (userId != null) 'user_id': userId,
       if (createdAt != null) 'created_at': createdAt,
       if (title != null) 'title': title,
-      if (goalSettingJournal != null)
-        'goal_setting_journal': goalSettingJournal,
+      if (guideQuestions != null) 'guide_questions': guideQuestions,
+      if (notificationSchedule != null)
+        'notification_schedule': notificationSchedule,
+      if (isArchived != null) 'is_archived': isArchived,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1243,14 +1327,18 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       Value<String>? userId,
       Value<DateTime>? createdAt,
       Value<String>? title,
-      Value<String>? goalSettingJournal,
+      Value<List<Map<String, String>>>? guideQuestions,
+      Value<List<String>>? notificationSchedule,
+      Value<bool>? isArchived,
       Value<int>? rowid}) {
     return GoalsCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       title: title ?? this.title,
-      goalSettingJournal: goalSettingJournal ?? this.goalSettingJournal,
+      guideQuestions: guideQuestions ?? this.guideQuestions,
+      notificationSchedule: notificationSchedule ?? this.notificationSchedule,
+      isArchived: isArchived ?? this.isArchived,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1270,8 +1358,17 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
-    if (goalSettingJournal.present) {
-      map['goal_setting_journal'] = Variable<String>(goalSettingJournal.value);
+    if (guideQuestions.present) {
+      map['guide_questions'] = Variable<String>(
+          $GoalsTable.$converterguideQuestions.toSql(guideQuestions.value));
+    }
+    if (notificationSchedule.present) {
+      map['notification_schedule'] = Variable<String>($GoalsTable
+          .$converternotificationSchedule
+          .toSql(notificationSchedule.value));
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<bool>(isArchived.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1286,7 +1383,9 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
           ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('title: $title, ')
-          ..write('goalSettingJournal: $goalSettingJournal, ')
+          ..write('guideQuestions: $guideQuestions, ')
+          ..write('notificationSchedule: $notificationSchedule, ')
+          ..write('isArchived: $isArchived, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2137,21 +2236,6 @@ final class $$JournalEntriesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static MultiTypedResultKey<$GoalsTable, List<GoalEntity>> _goalsRefsTable(
-          _$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(db.goals,
-          aliasName: $_aliasNameGenerator(
-              db.journalEntries.id, db.goals.goalSettingJournal));
-
-  $$GoalsTableProcessedTableManager get goalsRefs {
-    final manager = $$GoalsTableTableManager($_db, $_db.goals)
-        .filter((f) => f.goalSettingJournal.id($_item.id));
-
-    final cache = $_typedResult.readTableOrNull(_goalsRefsTable($_db));
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
-  }
-
   static MultiTypedResultKey<$GoalEntriesTable, List<GoalEntryEntity>>
       _goalEntriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.goalEntries,
@@ -2229,27 +2313,6 @@ class $$JournalEntriesTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
-  }
-
-  Expression<bool> goalsRefs(
-      Expression<bool> Function($$GoalsTableFilterComposer f) f) {
-    final $$GoalsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.goals,
-        getReferencedColumn: (t) => t.goalSettingJournal,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$GoalsTableFilterComposer(
-              $db: $db,
-              $table: $db.goals,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
   }
 
   Expression<bool> goalEntriesRefs(
@@ -2397,27 +2460,6 @@ class $$JournalEntriesTableAnnotationComposer
     return composer;
   }
 
-  Expression<T> goalsRefs<T extends Object>(
-      Expression<T> Function($$GoalsTableAnnotationComposer a) f) {
-    final $$GoalsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.goals,
-        getReferencedColumn: (t) => t.goalSettingJournal,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$GoalsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.goals,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
-  }
-
   Expression<T> goalEntriesRefs<T extends Object>(
       Expression<T> Function($$GoalEntriesTableAnnotationComposer a) f) {
     final $$GoalEntriesTableAnnotationComposer composer = $composerBuilder(
@@ -2452,10 +2494,7 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
     (JournalEntryEntity, $$JournalEntriesTableReferences),
     JournalEntryEntity,
     PrefetchHooks Function(
-        {bool userId,
-        bool guidedJournal,
-        bool goalsRefs,
-        bool goalEntriesRefs})> {
+        {bool userId, bool guidedJournal, bool goalEntriesRefs})> {
   $$JournalEntriesTableTableManager(
       _$AppDatabase db, $JournalEntriesTable table)
       : super(TableManagerState(
@@ -2512,14 +2551,10 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {userId = false,
               guidedJournal = false,
-              goalsRefs = false,
               goalEntriesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [
-                if (goalsRefs) db.goals,
-                if (goalEntriesRefs) db.goalEntries
-              ],
+              explicitlyWatchedTables: [if (goalEntriesRefs) db.goalEntries],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -2559,18 +2594,6 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
               },
               getPrefetchedDataCallback: (items) async {
                 return [
-                  if (goalsRefs)
-                    await $_getPrefetchedData(
-                        currentTable: table,
-                        referencedTable:
-                            $$JournalEntriesTableReferences._goalsRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$JournalEntriesTableReferences(db, table, p0)
-                                .goalsRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.goalSettingJournal == item.id),
-                        typedResults: items),
                   if (goalEntriesRefs)
                     await $_getPrefetchedData(
                         currentTable: table,
@@ -2602,16 +2625,15 @@ typedef $$JournalEntriesTableProcessedTableManager = ProcessedTableManager<
     (JournalEntryEntity, $$JournalEntriesTableReferences),
     JournalEntryEntity,
     PrefetchHooks Function(
-        {bool userId,
-        bool guidedJournal,
-        bool goalsRefs,
-        bool goalEntriesRefs})>;
+        {bool userId, bool guidedJournal, bool goalEntriesRefs})>;
 typedef $$GoalsTableCreateCompanionBuilder = GoalsCompanion Function({
   required String id,
   required String userId,
   Value<DateTime> createdAt,
   required String title,
-  required String goalSettingJournal,
+  required List<Map<String, String>> guideQuestions,
+  required List<String> notificationSchedule,
+  Value<bool> isArchived,
   Value<int> rowid,
 });
 typedef $$GoalsTableUpdateCompanionBuilder = GoalsCompanion Function({
@@ -2619,7 +2641,9 @@ typedef $$GoalsTableUpdateCompanionBuilder = GoalsCompanion Function({
   Value<String> userId,
   Value<DateTime> createdAt,
   Value<String> title,
-  Value<String> goalSettingJournal,
+  Value<List<Map<String, String>>> guideQuestions,
+  Value<List<String>> notificationSchedule,
+  Value<bool> isArchived,
   Value<int> rowid,
 });
 
@@ -2634,19 +2658,6 @@ final class $$GoalsTableReferences
     final manager = $$UsersTableTableManager($_db, $_db.users)
         .filter((f) => f.id($_item.userId));
     final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
-  }
-
-  static $JournalEntriesTable _goalSettingJournalTable(_$AppDatabase db) =>
-      db.journalEntries.createAlias($_aliasNameGenerator(
-          db.goals.goalSettingJournal, db.journalEntries.id));
-
-  $$JournalEntriesTableProcessedTableManager get goalSettingJournal {
-    final manager = $$JournalEntriesTableTableManager($_db, $_db.journalEntries)
-        .filter((f) => f.id($_item.goalSettingJournal));
-    final item = $_typedResult.readTableOrNull(_goalSettingJournalTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -2684,6 +2695,20 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
   ColumnFilters<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<List<Map<String, String>>,
+          List<Map<String, String>>, String>
+      get guideQuestions => $composableBuilder(
+          column: $table.guideQuestions,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get notificationSchedule => $composableBuilder(
+          column: $table.notificationSchedule,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnFilters(column));
+
   $$UsersTableFilterComposer get userId {
     final $$UsersTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -2696,26 +2721,6 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
             $$UsersTableFilterComposer(
               $db: $db,
               $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-
-  $$JournalEntriesTableFilterComposer get goalSettingJournal {
-    final $$JournalEntriesTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.goalSettingJournal,
-        referencedTable: $db.journalEntries,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$JournalEntriesTableFilterComposer(
-              $db: $db,
-              $table: $db.journalEntries,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2764,6 +2769,17 @@ class $$GoalsTableOrderingComposer
   ColumnOrderings<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get guideQuestions => $composableBuilder(
+      column: $table.guideQuestions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notificationSchedule => $composableBuilder(
+      column: $table.notificationSchedule,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnOrderings(column));
+
   $$UsersTableOrderingComposer get userId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -2776,26 +2792,6 @@ class $$GoalsTableOrderingComposer
             $$UsersTableOrderingComposer(
               $db: $db,
               $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-
-  $$JournalEntriesTableOrderingComposer get goalSettingJournal {
-    final $$JournalEntriesTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.goalSettingJournal,
-        referencedTable: $db.journalEntries,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$JournalEntriesTableOrderingComposer(
-              $db: $db,
-              $table: $db.journalEntries,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2823,6 +2819,17 @@ class $$GoalsTableAnnotationComposer
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<List<Map<String, String>>, String>
+      get guideQuestions => $composableBuilder(
+          column: $table.guideQuestions, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String>
+      get notificationSchedule => $composableBuilder(
+          column: $table.notificationSchedule, builder: (column) => column);
+
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => column);
+
   $$UsersTableAnnotationComposer get userId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -2835,26 +2842,6 @@ class $$GoalsTableAnnotationComposer
             $$UsersTableAnnotationComposer(
               $db: $db,
               $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-
-  $$JournalEntriesTableAnnotationComposer get goalSettingJournal {
-    final $$JournalEntriesTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.goalSettingJournal,
-        referencedTable: $db.journalEntries,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$JournalEntriesTableAnnotationComposer(
-              $db: $db,
-              $table: $db.journalEntries,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2896,8 +2883,7 @@ class $$GoalsTableTableManager extends RootTableManager<
     $$GoalsTableUpdateCompanionBuilder,
     (GoalEntity, $$GoalsTableReferences),
     GoalEntity,
-    PrefetchHooks Function(
-        {bool userId, bool goalSettingJournal, bool goalEntriesRefs})> {
+    PrefetchHooks Function({bool userId, bool goalEntriesRefs})> {
   $$GoalsTableTableManager(_$AppDatabase db, $GoalsTable table)
       : super(TableManagerState(
           db: db,
@@ -2913,7 +2899,10 @@ class $$GoalsTableTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<String> title = const Value.absent(),
-            Value<String> goalSettingJournal = const Value.absent(),
+            Value<List<Map<String, String>>> guideQuestions =
+                const Value.absent(),
+            Value<List<String>> notificationSchedule = const Value.absent(),
+            Value<bool> isArchived = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GoalsCompanion(
@@ -2921,7 +2910,9 @@ class $$GoalsTableTableManager extends RootTableManager<
             userId: userId,
             createdAt: createdAt,
             title: title,
-            goalSettingJournal: goalSettingJournal,
+            guideQuestions: guideQuestions,
+            notificationSchedule: notificationSchedule,
+            isArchived: isArchived,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -2929,7 +2920,9 @@ class $$GoalsTableTableManager extends RootTableManager<
             required String userId,
             Value<DateTime> createdAt = const Value.absent(),
             required String title,
-            required String goalSettingJournal,
+            required List<Map<String, String>> guideQuestions,
+            required List<String> notificationSchedule,
+            Value<bool> isArchived = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GoalsCompanion.insert(
@@ -2937,17 +2930,16 @@ class $$GoalsTableTableManager extends RootTableManager<
             userId: userId,
             createdAt: createdAt,
             title: title,
-            goalSettingJournal: goalSettingJournal,
+            guideQuestions: guideQuestions,
+            notificationSchedule: notificationSchedule,
+            isArchived: isArchived,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
                   (e.readTable(table), $$GoalsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: (
-              {userId = false,
-              goalSettingJournal = false,
-              goalEntriesRefs = false}) {
+          prefetchHooksCallback: ({userId = false, goalEntriesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [if (goalEntriesRefs) db.goalEntries],
@@ -2971,16 +2963,6 @@ class $$GoalsTableTableManager extends RootTableManager<
                     referencedTable: $$GoalsTableReferences._userIdTable(db),
                     referencedColumn:
                         $$GoalsTableReferences._userIdTable(db).id,
-                  ) as T;
-                }
-                if (goalSettingJournal) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.goalSettingJournal,
-                    referencedTable:
-                        $$GoalsTableReferences._goalSettingJournalTable(db),
-                    referencedColumn:
-                        $$GoalsTableReferences._goalSettingJournalTable(db).id,
                   ) as T;
                 }
 
@@ -3018,8 +3000,7 @@ typedef $$GoalsTableProcessedTableManager = ProcessedTableManager<
     $$GoalsTableUpdateCompanionBuilder,
     (GoalEntity, $$GoalsTableReferences),
     GoalEntity,
-    PrefetchHooks Function(
-        {bool userId, bool goalSettingJournal, bool goalEntriesRefs})>;
+    PrefetchHooks Function({bool userId, bool goalEntriesRefs})>;
 typedef $$GoalEntriesTableCreateCompanionBuilder = GoalEntriesCompanion
     Function({
   required String journalEntryId,

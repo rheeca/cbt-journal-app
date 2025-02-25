@@ -1,6 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
-import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/user/user_controller.dart';
 import 'package:flutter/material.dart';
@@ -85,13 +84,18 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 child: FilledButton(
                   onPressed: () async {
                     final userId = di<UserController>().currentUser!.userId;
-                    final goalSettingJournalId =
-                        di<JournalController>().selectedJournalEntry!.id;
+                    final List<DayOfWeek> notificationSchedule = [];
+                    for (int i = 0; i < _selectedDays.length; i++) {
+                      if (_selectedDays[i] == true) {
+                        notificationSchedule.add(DayOfWeek.values[i]);
+                      }
+                    }
 
                     final goal = Goal.createNew(
                         userId: userId,
                         title: titleController.text,
-                        goalSettingJournal: goalSettingJournalId,
+                        guideQuestions: [],
+                        notificationSchedule: notificationSchedule,
                         journalEntries: []);
                     await di<AppDatabase>().insertGoal(goal);
                     await di<GoalsController>().load();
@@ -124,17 +128,4 @@ enum Frequency {
   const Frequency({required this.label, required this.days});
   final String label;
   final List<DayOfWeek> days;
-}
-
-enum DayOfWeek {
-  monday(singleLetter: 'M'),
-  tuesday(singleLetter: 'T'),
-  wednesday(singleLetter: 'W'),
-  thursday(singleLetter: 'T'),
-  friday(singleLetter: 'F'),
-  saturday(singleLetter: 'S'),
-  sunday(singleLetter: 'S');
-
-  const DayOfWeek({required this.singleLetter});
-  final String singleLetter;
 }

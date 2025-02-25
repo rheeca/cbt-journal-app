@@ -1,3 +1,4 @@
+import 'package:cbt_journal/models/common.dart';
 import 'package:uuid/uuid.dart';
 
 class Goal {
@@ -5,23 +6,29 @@ class Goal {
   String userId;
   DateTime createdAt;
   String title;
-  String goalSettingJournal;
+  List<GuideQuestion> guideQuestions;
+  List<DayOfWeek> notificationSchedule;
   List<String> journalEntries;
+  bool isArchived;
 
   Goal({
     required this.id,
     required this.userId,
     required this.createdAt,
     required this.title,
-    required this.goalSettingJournal,
+    required this.guideQuestions,
+    required this.notificationSchedule,
     required this.journalEntries,
+    required this.isArchived,
   });
 
-  Goal.createNew(
-      {required this.userId,
-      this.title = 'Untitled',
-      required this.goalSettingJournal,
-      required this.journalEntries})
-      : id = const Uuid().v4(),
+  Goal.createNew({
+    required this.userId,
+    this.title = 'Untitled',
+    required this.guideQuestions,
+    required this.notificationSchedule,
+    required this.journalEntries,
+    this.isArchived = false,
+  })  : id = const Uuid().v4(),
         createdAt = DateTime.now();
 }

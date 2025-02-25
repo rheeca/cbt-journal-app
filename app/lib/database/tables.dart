@@ -47,7 +47,10 @@ class Goals extends Table {
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get title => text().withLength(min: 1, max: 200)();
-  TextColumn get goalSettingJournal => text().references(JournalEntries, #id)();
+  TextColumn get guideQuestions => text().map(const QuestionListConverter())();
+  TextColumn get notificationSchedule =>
+      text().map(const StringListConverter())();
+  BoolColumn get isArchived => boolean().clientDefault(() => false)();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -72,6 +75,21 @@ class StringListConverter extends TypeConverter<List<String>, String> {
 
   @override
   String toSql(List<String> value) {
+    return json.encode(value);
+  }
+}
+
+class QuestionListConverter
+    extends TypeConverter<List<Map<String, String>>, String> {
+  const QuestionListConverter();
+
+  @override
+  List<Map<String, String>> fromSql(String fromDb) {
+    return List<Map<String, String>>.from(json.decode(fromDb));
+  }
+
+  @override
+  String toSql(List<Map<String, String>> value) {
     return json.encode(value);
   }
 }
