@@ -2,6 +2,7 @@ import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/user/user_controller.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -31,6 +32,13 @@ class GoalsController extends ChangeNotifier {
   final List<JournalEntry> _journalEntries = [];
   List<JournalEntry> get journalEntries => List.unmodifiable(_journalEntries);
 
+  JournalEntry? _currentJournal;
+  JournalEntry? get currentJournal => _currentJournal;
+  set currentJournal(JournalEntry? journal) {
+    _currentJournal = journal;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();
@@ -53,12 +61,14 @@ class GoalsController extends ChangeNotifier {
     }
 
     if (_selectedGoal != null) {
-      _selectedGoal = _goals.firstWhere((e) => e.id == _selectedGoal!.id);
+      _selectedGoal = _goals.firstWhereOrNull((e) => e.id == _selectedGoal!.id);
 
-      _journalEntries.clear();
-      _journalEntries.addAll(di<JournalController>()
-          .journalEntries
-          .where((e) => _selectedGoal!.journalEntries.contains(e.id)));
+      if (_selectedGoal != null) {
+        _journalEntries.clear();
+        _journalEntries.addAll(di<JournalController>()
+            .journalEntries
+            .where((e) => _selectedGoal!.journalEntries.contains(e.id)));
+      }
     }
 
     notifyListeners();

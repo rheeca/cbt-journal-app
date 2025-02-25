@@ -128,6 +128,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
                 widget.mode == EditJournalMode.create) {
               // TODO: Ask if user wants to create a goal
               if (context.mounted) {
+                di<GoalsController>().currentJournal = journalEntry;
                 Navigator.popAndPushNamed(context, '/goal/create');
               }
             } else if (widget.mode == EditJournalMode.create) {

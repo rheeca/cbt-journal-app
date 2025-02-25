@@ -48,6 +48,16 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
 
     final goals = watchPropertyValue((GoalsController c) => c.goals);
 
+    final now = DateTime.now();
+    final todaysGoals = goals.where((e) {
+      for (final i in e.notificationSchedule) {
+        if ((i.index + 1) == now.weekday) {
+          return true;
+        }
+      }
+      return false;
+    });
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -94,7 +104,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                 )
               : Expanded(
                   child: ListView(
-                    children: goals
+                    children: todaysGoals
                         .map(
                           (e) => Card(
                               child: Container(

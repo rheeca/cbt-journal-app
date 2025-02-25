@@ -95,10 +95,17 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       title = 'Title';
                     }
 
+                    final List<GuideQuestion> guideQuestions = [];
+                    JournalEntry? journalEntry =
+                        di<GoalsController>().currentJournal;
+                    if (journalEntry != null) {
+                      guideQuestions.addAll(journalEntry.content);
+                    }
+
                     final goal = Goal.createNew(
                         userId: userId,
                         title: title,
-                        guideQuestions: [],
+                        guideQuestions: guideQuestions,
                         notificationSchedule: notificationSchedule,
                         journalEntries: []);
                     await di<AppDatabase>().insertGoal(goal);

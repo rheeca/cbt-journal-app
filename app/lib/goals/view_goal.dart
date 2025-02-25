@@ -58,13 +58,31 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
       ),
       body: Container(
         margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
             Text(selectedGoal.title,
-                style: Theme.of(context).textTheme.titleMedium),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 20.0),
+            Text('Description', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12.0),
-            const Text('Journal Entries'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 12.0,
+              children: selectedGoal.guideQuestions.map((e) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(e.question),
+                    Text(e.answer),
+                  ],
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20.0),
+            Text(
+              'Journal Entries',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12.0),
             const Expanded(
               child: _JournalListView(),
@@ -91,7 +109,7 @@ class _JournalListView extends StatelessWidget with WatchItMixin {
               color: Colors.blueGrey,
               size: 50,
             )
-          : ListView(
+          : Column(
               children: entries
                   .map(
                     (e) => Card(
