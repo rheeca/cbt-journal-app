@@ -90,10 +90,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                         notificationSchedule.add(DayOfWeek.values[i]);
                       }
                     }
+                    String title = titleController.text;
+                    if (title == '') {
+                      title = 'Title';
+                    }
 
                     final goal = Goal.createNew(
                         userId: userId,
-                        title: titleController.text,
+                        title: title,
                         guideQuestions: [],
                         notificationSchedule: notificationSchedule,
                         journalEntries: []);

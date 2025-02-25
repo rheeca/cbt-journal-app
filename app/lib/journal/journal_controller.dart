@@ -26,6 +26,13 @@ class JournalController extends ChangeNotifier {
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
 
+  Goal? _selectedGoal;
+  Goal? get selectedGoal => _selectedGoal;
+  set selectedGoal(Goal? goal) {
+    _selectedGoal = goal;
+    notifyListeners();
+  }
+
   void load() async {
     _isLoading = true;
     notifyListeners();
@@ -57,7 +64,7 @@ class JournalController extends ChangeNotifier {
           createdAt: e.createdAt,
           guidedJournal: e.guidedJournal,
           title: e.title,
-          content: e.content ?? [],
+          content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
         )));
 
     notifyListeners();

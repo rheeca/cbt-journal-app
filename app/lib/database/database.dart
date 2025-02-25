@@ -70,6 +70,11 @@ extension GoalQuery on AppDatabase {
   Future<List<GoalEntryEntity>> getGoalEntriesByGoal(String goalId) {
     return (select(goalEntries)..where((t) => t.goalId.equals(goalId))).get();
   }
+
+  Future<void> deleteGoalEntry(String id) {
+    return (delete(goalEntries)..where((t) => t.journalEntryId.isValue(id)))
+        .go();
+  }
 }
 
 extension GuidedJournalQuery on AppDatabase {
@@ -125,7 +130,7 @@ extension JournalEntryQuery on AppDatabase {
       createdAt: Value(item.createdAt),
       guidedJournal: Value(item.guidedJournal),
       title: Value(item.title),
-      content: Value(item.content),
+      content: Value(item.content.map((e) => e.toMap()).toList()),
     ));
   }
 

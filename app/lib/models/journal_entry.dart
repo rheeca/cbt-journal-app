@@ -1,3 +1,4 @@
+import 'package:cbt_journal/models/model.dart';
 import 'package:uuid/uuid.dart';
 
 class JournalEntry {
@@ -6,7 +7,7 @@ class JournalEntry {
   DateTime createdAt;
   String guidedJournal;
   String? title;
-  List<String> content;
+  List<GuideQuestion> content;
 
   JournalEntry({
     required this.id,

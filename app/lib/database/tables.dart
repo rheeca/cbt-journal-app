@@ -21,8 +21,7 @@ class JournalEntries extends Table {
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get guidedJournal => text().references(GuidedJournals, #id)();
   TextColumn get title => text().withLength(min: 1, max: 200).nullable()();
-  TextColumn get content =>
-      text().nullable().map(const StringListConverter())();
+  TextColumn get content => text().map(const QuestionListConverter())();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -85,7 +84,12 @@ class QuestionListConverter
 
   @override
   List<Map<String, String>> fromSql(String fromDb) {
-    return List<Map<String, String>>.from(json.decode(fromDb));
+    List<dynamic> decoded = json.decode(fromDb);
+
+    return decoded
+        .cast<Map<String, dynamic>>()
+        .map((e) => e.map((key, value) => MapEntry(key, value.toString())))
+        .toList();
   }
 
   @override

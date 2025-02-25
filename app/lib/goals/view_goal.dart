@@ -1,7 +1,10 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
+import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class ViewGoalScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
@@ -61,10 +64,71 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
             Text(selectedGoal.title,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12.0),
-            const Text('Journal entry here'),
+            const Text('Journal Entries'),
+            const SizedBox(height: 12.0),
+            const Expanded(
+              child: _JournalListView(),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _JournalListView extends StatelessWidget with WatchItMixin {
+  const _JournalListView();
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoadingGoals =
+        watchPropertyValue((GoalsController c) => c.isLoading);
+    final entries = watchPropertyValue((GoalsController c) => c.journalEntries);
+
+    return Container(
+      child: isLoadingGoals
+          ? LoadingAnimationWidget.waveDots(
+              color: Colors.blueGrey,
+              size: 50,
+            )
+          : ListView(
+              children: entries
+                  .map(
+                    (e) => Card(
+                      child: InkWell(
+                        onTap: () async {
+                          di<JournalController>().selectedJournalEntry = e;
+                          await Navigator.pushNamed(
+                              context, '/view-journal-entry');
+
+                          di<JournalController>().selectedJournalEntry = null;
+                        },
+                        child: Row(children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e.title ?? 'Untitled',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  DateFormat('MMM-dd-yyyy kk:mm')
+                                      .format(e.createdAt),
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }

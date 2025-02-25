@@ -107,7 +107,18 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                                   Text(e.title),
                                   const Expanded(child: SizedBox()),
                                   FilledButton(
-                                      onPressed: () {},
+                                      onPressed: () async {
+                                        di<JournalController>().selectedGoal =
+                                            e;
+                                        await Navigator.pushNamed(
+                                          context,
+                                          '/journal-entry/create',
+                                          arguments: dailyJournal,
+                                        );
+
+                                        di<JournalController>().selectedGoal =
+                                            null;
+                                      },
                                       child: const Text('Check-in'))
                                 ],
                               ),

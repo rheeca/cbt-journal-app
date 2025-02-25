@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,9 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
                 child: const Text('Delete'),
                 onPressed: () {
                   di<AppDatabase>().deleteJournalEntry(journal.id);
+                  di<AppDatabase>().deleteGoalEntry(journal.id);
                   di<JournalController>().loadJournalEntries();
+                  di<GoalsController>().load();
                   Navigator.pop(context);
                 },
               ),
@@ -76,14 +79,14 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(guidedJournal.guideQuestions[e],
+                  Text(journal.content[e].question,
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8.0),
                   (guidedJournal.journalType[e] == JournalType.mood)
-                      ? Sentiment.getSentimentByValue(journal.content[e])
+                      ? Sentiment.getSentimentByValue(journal.content[e].answer)
                               ?.icon ??
                           Sentiment.neutral.icon
-                      : Text(journal.content[e]),
+                      : Text(journal.content[e].answer),
                 ],
               ),
             );

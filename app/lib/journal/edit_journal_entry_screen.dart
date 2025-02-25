@@ -1,6 +1,7 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
-import 'package:cbt_journal/models/journal_entry.dart';
+import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/user/user_controller.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:flutter/material.dart';
@@ -41,12 +42,19 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
     if (widget.mode == EditJournalMode.edit) {
       journalEntry = di<JournalController>().selectedJournalEntry;
       contentController.text =
-          getAtIndexOrNull(journalEntry!.content, currentQuestion) ?? '';
+          getAtIndexOrNull(journalEntry!.content, currentQuestion)?.answer ??
+              '';
     } else {
+      String title = widget.guidedJournal.title;
+      Goal? selectedGoal = di<JournalController>().selectedGoal;
+      if (selectedGoal != null) {
+        title = '${selectedGoal.title}: $title';
+      }
+
       journalEntry = JournalEntry.createNew(
           userId: di<UserController>().currentUser!.userId,
           guidedJournal: widget.guidedJournal.id,
-          title: widget.guidedJournal.title,
+          title: title,
           content: []);
       di<JournalController>().selectedJournalEntry = journalEntry;
     }
@@ -69,10 +77,17 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
               Navigator.pop(context);
             } else {
               setState(() {
-                updateOrAppend(journalEntry!.content, currentQuestion,
-                    contentController.text);
+                updateOrAppend(
+                  journalEntry!.content,
+                  currentQuestion,
+                  GuideQuestion(
+                    question: guideQuestions[currentQuestion],
+                    answer: contentController.text,
+                  ),
+                );
                 contentController.text =
-                    getAtIndexOrNull(journalEntry!.content, previousQuestion) ??
+                    getAtIndexOrNull(journalEntry!.content, previousQuestion)
+                            ?.answer ??
                         '';
                 currentQuestion = previousQuestion;
               });
@@ -93,9 +108,21 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
           if (nextQuestion >= guideQuestions.length) {
             // Journal is completed
             updateOrAppend(
-                journalEntry!.content, currentQuestion, contentController.text);
+                journalEntry!.content,
+                currentQuestion,
+                GuideQuestion(
+                  question: guideQuestions[currentQuestion],
+                  answer: contentController.text,
+                ));
             await di<AppDatabase>().insertJournalEntry(journalEntry!);
             di<JournalController>().loadJournalEntries();
+
+            Goal? selectedGoal = di<JournalController>().selectedGoal;
+            if (selectedGoal != null) {
+              selectedGoal.journalEntries.add(journalEntry!.id);
+              await di<AppDatabase>().insertGoal(selectedGoal);
+              di<GoalsController>().load();
+            }
 
             if (widget.guidedJournal.title == 'Set a Goal' &&
                 widget.mode == EditJournalMode.create) {
@@ -113,10 +140,18 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
             }
           } else {
             setState(() {
-              updateOrAppend(journalEntry!.content, currentQuestion,
-                  contentController.text);
+              updateOrAppend(
+                journalEntry!.content,
+                currentQuestion,
+                GuideQuestion(
+                  question: guideQuestions[currentQuestion],
+                  answer: contentController.text,
+                ),
+              );
               contentController.text =
-                  getAtIndexOrNull(journalEntry!.content, nextQuestion) ?? '';
+                  getAtIndexOrNull(journalEntry!.content, nextQuestion)
+                          ?.answer ??
+                      '';
               currentQuestion = nextQuestion;
             });
           }

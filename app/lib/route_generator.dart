@@ -1,4 +1,5 @@
 import 'package:cbt_journal/goals/create_goal.dart';
+import 'package:cbt_journal/goals/edit_goal_screen.dart';
 import 'package:cbt_journal/goals/view_goal.dart';
 import 'package:cbt_journal/home_screen.dart';
 import 'package:cbt_journal/journal/confirm_create_journal_screen.dart';
@@ -22,6 +23,10 @@ class RouteGenerator {
       case '/goal/create':
         return MaterialPageRoute(
           builder: (_) => const CreateGoalScreen(),
+        );
+      case '/goal/edit':
+        return MaterialPageRoute(
+          builder: (_) => const EditGoalScreen(),
         );
       case '/goal/view':
         return MaterialPageRoute(
