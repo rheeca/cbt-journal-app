@@ -17,6 +17,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   _CreateGoalScreenState();
 
   final titleController = TextEditingController();
+  Frequency? _frequency;
+  final List<bool> _selectedDays = DayOfWeek.values.map((e) => false).toList();
 
   @override
   void dispose() {
@@ -32,30 +34,73 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: titleController,
+                textAlign: TextAlign.center,
                 decoration: const InputDecoration(
-                    border: InputBorder.none, hintText: 'Title'),
+                    border: InputBorder.none,
+                    hintText: 'Title',
+                    hintStyle:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w300)),
               ),
-              FilledButton(
-                onPressed: () async {
-                  final userId = di<UserController>().currentUser!.userId;
-                  final goalSettingJournalId =
-                      di<JournalController>().selectedJournalEntry!.id;
+              const Text('How often do you want to check-in?'),
+              const SizedBox(height: 24.0),
+              Center(
+                child: ToggleButtons(
+                  onPressed: (int index) {
+                    _frequency = null;
+                    setState(() {
+                      _selectedDays[index] = !_selectedDays[index];
+                    });
+                  },
+                  isSelected: _selectedDays,
+                  children: DayOfWeek.values
+                      .map((e) => Text(e.singleLetter))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 24.0),
+              Column(
+                  children: Frequency.values
+                      .map((e) => RadioListTile(
+                          title: Text(e.label),
+                          value: e,
+                          groupValue: _frequency,
+                          visualDensity: VisualDensity.compact,
+                          onChanged: (Frequency? value) {
+                            setState(() {
+                              _frequency = value;
+                              _selectedDays.fillRange(
+                                  0, _selectedDays.length, false);
+                              for (final i in e.days) {
+                                _selectedDays[i.index] = true;
+                              }
+                            });
+                          }))
+                      .toList()),
+              const SizedBox(height: 40.0),
+              Center(
+                child: FilledButton(
+                  onPressed: () async {
+                    final userId = di<UserController>().currentUser!.userId;
+                    final goalSettingJournalId =
+                        di<JournalController>().selectedJournalEntry!.id;
 
-                  final goal = Goal.createNew(
-                      userId: userId,
-                      title: titleController.text,
-                      goalSettingJournal: goalSettingJournalId,
-                      journalEntries: []);
-                  await di<AppDatabase>().insertGoal(goal);
-                  await di<GoalsController>().load();
+                    final goal = Goal.createNew(
+                        userId: userId,
+                        title: titleController.text,
+                        goalSettingJournal: goalSettingJournalId,
+                        journalEntries: []);
+                    await di<AppDatabase>().insertGoal(goal);
+                    await di<GoalsController>().load();
 
-                  // TODO: Loading indicator until goal is saved
-                  if (context.mounted) Navigator.pop(context);
-                },
-                child: const Text('Create Goal'),
+                    // TODO: Loading indicator until goal is saved
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Create Goal'),
+                ),
               )
             ],
           ),
@@ -63,4 +108,33 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       ),
     );
   }
+}
+
+enum Frequency {
+  daily(label: 'Daily', days: DayOfWeek.values),
+  weekdays(label: 'Weekdays', days: [
+    DayOfWeek.monday,
+    DayOfWeek.tuesday,
+    DayOfWeek.wednesday,
+    DayOfWeek.thursday,
+    DayOfWeek.friday
+  ]),
+  weekends(label: 'Weekends', days: [DayOfWeek.saturday, DayOfWeek.sunday]);
+
+  const Frequency({required this.label, required this.days});
+  final String label;
+  final List<DayOfWeek> days;
+}
+
+enum DayOfWeek {
+  monday(singleLetter: 'M'),
+  tuesday(singleLetter: 'T'),
+  wednesday(singleLetter: 'W'),
+  thursday(singleLetter: 'T'),
+  friday(singleLetter: 'F'),
+  saturday(singleLetter: 'S'),
+  sunday(singleLetter: 'S');
+
+  const DayOfWeek({required this.singleLetter});
+  final String singleLetter;
 }

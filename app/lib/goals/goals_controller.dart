@@ -24,7 +24,7 @@ class GoalsController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    loadGoals();
+    await loadGoals();
 
     _isLoading = false;
     notifyListeners();

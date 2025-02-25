@@ -18,6 +18,14 @@ final theme = ThemeData(
       fontSize: 14,
       fontWeight: FontWeight.w600,
     ),
+    labelLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+    ),
+    labelMedium: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+    ),
     labelSmall: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w400,

@@ -22,12 +22,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          FilledButton(
+          FilledButton.icon(
               onPressed: () {
                 Navigator.pushNamed(context, '/journal-entry/create',
                     arguments: goalJournal);
               },
-              child: const Text('Create a Goal')),
+              icon: const Icon(Icons.add),
+              label: const Text('Create a Goal')),
           const SizedBox(height: 24.0),
           const Expanded(child: _GoalsListView()),
         ],
