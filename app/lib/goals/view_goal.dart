@@ -33,7 +33,9 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
             menuChildren: [
               MenuItemButton(
                 child: const Text('Edit'),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/goal/edit');
+                },
               ),
               MenuItemButton(
                 child: const Text('Delete'),
@@ -72,7 +74,8 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(e.question),
+                    Text(e.question,
+                        style: Theme.of(context).textTheme.titleSmall),
                     Text(e.answer),
                   ],
                 );
