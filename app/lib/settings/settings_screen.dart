@@ -18,16 +18,22 @@ class SettingsScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
 class _SettingsState extends State<SettingsScreen> {
   final _formkey = GlobalKey<FormState>();
   late final TextEditingController _passwordController;
+  late final TextEditingController _newPasswordController;
+  late final TextEditingController _confirmPasswordController;
 
   @override
   void initState() {
     super.initState();
     _passwordController = TextEditingController();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
     _passwordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -75,7 +81,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 50.0),
               TextButton(
-                onPressed: () {},
+                onPressed: () => _showChangePasswordDialog(context),
                 style: TextButton.styleFrom(padding: null),
                 child: const Text('Change Password'),
               ),
@@ -159,6 +165,159 @@ class _SettingsState extends State<SettingsScreen> {
                   Navigator.popUntil(context, (route) => route.isFirst);
                   Navigator.pushReplacementNamed(context, '/auth/sign-in');
                 }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showChangePasswordDialog(BuildContext context) {
+    _passwordController.text = '';
+    _newPasswordController.text = '';
+    _confirmPasswordController.text = '';
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: Form(
+            key: _formkey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextFormField(
+                    controller: _passwordController,
+                    validator: MultiValidator([
+                      RequiredValidator(errorText: 'Password is required'),
+                    ]).call,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      hintText: 'Current Password',
+                      labelText: 'Current Password',
+                      errorStyle: TextStyle(fontSize: 14.0),
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red),
+                          borderRadius: BorderRadius.all(Radius.circular(9.0))),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextFormField(
+                    controller: _newPasswordController,
+                    validator: MultiValidator([
+                      RequiredValidator(errorText: 'Password is required'),
+                    ]).call,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      hintText: 'New Password',
+                      labelText: 'New Password',
+                      errorStyle: TextStyle(fontSize: 14.0),
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red),
+                          borderRadius: BorderRadius.all(Radius.circular(9.0))),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextFormField(
+                    controller: _confirmPasswordController,
+                    validator: (val) {
+                      return MatchValidator(errorText: 'Passwords do not match')
+                          .validateMatch(_newPasswordController.text,
+                              _confirmPasswordController.text);
+                    },
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      hintText: 'Confirm password',
+                      labelText: 'Confirm password',
+                      errorStyle: TextStyle(fontSize: 14.0),
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red),
+                          borderRadius: BorderRadius.all(Radius.circular(9.0))),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelMedium),
+              child: const Text('Update'),
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user == null) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                  return;
+                }
+
+                try {
+                  await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    email: user.email ?? '',
+                    password: _passwordController.text,
+                  );
+                } catch (e) {
+                  logger.e('Failed to reauthenticate user.', error: e);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    return _showDialog(context, 'Wrong password.');
+                  }
+                }
+
+                if (_formkey.currentState!.validate()) {
+                  await user.updatePassword(_newPasswordController.text);
+                } else {
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    return _showDialog(context, 'Passwords do not match.');
+                  }
+                }
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  return _showDialog(context, 'Successfully changed password!');
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showDialog(BuildContext context, String text) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(text),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge),
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],
