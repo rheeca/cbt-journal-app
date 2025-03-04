@@ -20,7 +20,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return ui.SignInScreen(
       providers: providers,
       actions: [
-        ui.AuthStateChangeAction<ui.UserCreated>((context, state) {
+        ui.AuthStateChangeAction<ui.UserCreated>((context, state) async {
           final user = state.credential.user;
           if (user != null) {
             di<AppDatabase>().insertUser(UserModel(
@@ -28,8 +28,18 @@ class _SignInScreenState extends State<SignInScreen> {
               email: user.email ?? '',
               displayName: user.displayName ?? '',
             ));
+
+            final loggedIn = await onSignIn();
+
+            if (loggedIn && context.mounted) {
+              Navigator.pushReplacementNamed(context, '/user/name/edit');
+            } else if (context.mounted) {
+              // TODO: Alert to failed sign-in
+              Navigator.pushReplacementNamed(context, '/auth/sign-in');
+            }
+          } else if (context.mounted) {
+            Navigator.pushReplacementNamed(context, '/auth/sign-in');
           }
-          Navigator.pushReplacementNamed(context, '/auth/sign-in');
         }),
         ui.AuthStateChangeAction<ui.SignedIn>((context, state) async {
           final loggedIn = await onSignIn();

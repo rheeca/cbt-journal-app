@@ -1,3 +1,4 @@
+import 'package:cbt_journal/user/edit_username.dart';
 import 'package:cbt_journal/user/sign_in_screen.dart';
 import 'package:cbt_journal/goals/create_goal.dart';
 import 'package:cbt_journal/goals/edit_goal_screen.dart';
@@ -55,6 +56,10 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+      case '/user/name/edit':
+        return MaterialPageRoute(
+          builder: (_) => const EditUsernameScreen(),
+        );
       case '/view-journal-entry':
         return MaterialPageRoute(
             builder: (_) => const ViewJournalEntryScreen());
