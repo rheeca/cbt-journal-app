@@ -1,6 +1,7 @@
 import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/user/user_controller.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
@@ -19,8 +20,9 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
     _load();
   }
 
-  Future<void> _load() async {
-    di<GoalsController>().load();
+  void _load() async {
+    await di<GoalsController>().load();
+    await di<JournalController>().load();
   }
 
   @override
@@ -41,7 +43,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
     final guidedJournals =
         watchPropertyValue((JournalController c) => c.guidedJournals);
     final dailyJournal =
-        guidedJournals.firstWhere((e) => e.title == 'Daily Check-in');
+        guidedJournals.firstWhereOrNull((e) => e.title == 'Daily Check-in');
 
     final isLoadingGoals =
         watchPropertyValue((GoalsController c) => c.isLoading);

@@ -1,3 +1,4 @@
+import 'package:cbt_journal/user/sign_in_screen.dart';
 import 'package:cbt_journal/goals/create_goal.dart';
 import 'package:cbt_journal/goals/edit_goal_screen.dart';
 import 'package:cbt_journal/goals/view_goal.dart';
@@ -16,6 +17,8 @@ class RouteGenerator {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case '/auth/sign-in':
+        return MaterialPageRoute(builder: (_) => const SignInScreen());
       case '/settings':
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),

@@ -66,6 +66,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
             TextField(
               controller: titleController,
               textAlign: TextAlign.center,
+              autofocus: true,
               decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Title',

@@ -1,7 +1,7 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:watch_it/watch_it.dart';
 
 class UserController extends ChangeNotifier {
@@ -17,15 +17,15 @@ class UserController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final db = di<AppDatabase>();
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      final db = di<AppDatabase>();
+      final user = await db.getUser(firebaseUser.uid);
 
-    // TODO: user login
-    await dotenv.load(fileName: ".env");
-    final user = await db.getUser(dotenv.env['USER_ID'] ?? '');
-
-    if (user != null) {
-      _currentUser = UserModel(
-          userId: user.id, email: user.email, displayName: user.displayName);
+      if (user != null) {
+        _currentUser = UserModel(
+            userId: user.id, email: user.email, displayName: user.displayName);
+      }
     }
 
     _isLoading = false;

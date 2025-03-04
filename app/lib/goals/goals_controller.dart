@@ -50,7 +50,12 @@ class GoalsController extends ChangeNotifier {
   }
 
   Future<void> loadGoals() async {
-    final userId = di<UserController>().currentUser!.userId;
+    final user = di<UserController>().currentUser;
+    if (user == null) {
+      return;
+    }
+
+    final userId = user.userId;
     final userGoals = await di<AppDatabase>().getGoalsByUser(userId);
 
     _goals.clear();

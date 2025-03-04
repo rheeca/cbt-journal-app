@@ -33,7 +33,7 @@ class JournalController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void load() async {
+  Future<void> load() async {
     _isLoading = true;
     notifyListeners();
 

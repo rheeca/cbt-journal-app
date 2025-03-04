@@ -2,6 +2,7 @@ import 'package:cbt_journal/discover/discover_screen.dart';
 import 'package:cbt_journal/goals/goals_screen.dart';
 import 'package:cbt_journal/home/home_detail_screen.dart';
 import 'package:cbt_journal/journal/journal_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,7 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               title: const Text('Logout'),
-              onTap: () {},
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.pushReplacementNamed(context, ('/auth/sign-in'));
+              },
             )
           ],
         ),
