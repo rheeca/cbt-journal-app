@@ -15,6 +15,13 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    });
+  }
 }
 
 extension GoalQuery on AppDatabase {
@@ -110,6 +117,10 @@ extension UserQuery on AppDatabase {
       displayName: Value(user.displayName),
     ));
   }
+
+  Future<void> deleteUser(String id) {
+    return (delete(users)..where((t) => t.id.isValue(id))).go();
+  }
 }
 
 extension JournalEntryQuery on AppDatabase {
@@ -135,7 +146,6 @@ extension JournalEntryQuery on AppDatabase {
   }
 
   Future<void> deleteJournalEntry(String id) {
-    // TODO: If the guided journal is 'Set a Goal', also delete from GoalEntries
     return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
   }
 }

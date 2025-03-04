@@ -16,7 +16,11 @@ class GuidedJournals extends Table {
 @DataClassName("JournalEntryEntity")
 class JournalEntries extends Table {
   TextColumn get id => text()();
-  TextColumn get userId => text().references(Users, #id)();
+  TextColumn get userId => text().references(
+        Users,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get guidedJournal => text().references(GuidedJournals, #id)();
@@ -42,7 +46,11 @@ class Users extends Table {
 @DataClassName("GoalEntity")
 class Goals extends Table {
   TextColumn get id => text()();
-  TextColumn get userId => text().references(Users, #id)();
+  TextColumn get userId => text().references(
+        Users,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get title => text().withLength(min: 1, max: 200)();
@@ -57,8 +65,16 @@ class Goals extends Table {
 
 @DataClassName("GoalEntryEntity")
 class GoalEntries extends Table {
-  TextColumn get journalEntryId => text().references(JournalEntries, #id)();
-  TextColumn get goalId => text().references(Goals, #id)();
+  TextColumn get journalEntryId => text().references(
+        JournalEntries,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  TextColumn get goalId => text().references(
+        Goals,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
 
   @override
   Set<Column> get primaryKey => {journalEntryId};
