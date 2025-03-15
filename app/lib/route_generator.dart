@@ -1,3 +1,4 @@
+import 'package:cbt_journal/settings/edit_profile.dart';
 import 'package:cbt_journal/user/edit_username.dart';
 import 'package:cbt_journal/user/sign_in_screen.dart';
 import 'package:cbt_journal/goals/create_goal.dart';
@@ -56,6 +57,10 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+      case '/user/edit':
+        return MaterialPageRoute(
+          builder: (_) => const EditProfileScreen(),
+        );
       case '/user/name/edit':
         return MaterialPageRoute(
           builder: (_) => const EditUsernameScreen(),

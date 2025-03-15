@@ -31,4 +31,15 @@ class UserController extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  void updateUser(UserModel user) {
+    _isLoading = true;
+    notifyListeners();
+
+    _currentUser = user;
+    di<AppDatabase>().insertUser(user);
+
+    _isLoading = false;
+    notifyListeners();
+  }
 }

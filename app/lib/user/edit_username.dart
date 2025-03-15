@@ -1,6 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -48,10 +48,15 @@ class _EditUsernameScreenState extends State<EditUsernameScreen> {
               const SizedBox(height: 12.0),
               FilledButton(
                 onPressed: () {
-                  UserModel? user = di<UserController>().currentUser;
-                  if (user != null) {
-                    user.displayName = controller.text;
-                    di<AppDatabase>().insertUser(user);
+                  final firebaseUser = FirebaseAuth.instance.currentUser;
+                  if (firebaseUser != null) {
+                    di<AppDatabase>().insertUser(
+                      UserModel(
+                        userId: firebaseUser.uid,
+                        email: firebaseUser.email ?? '',
+                        displayName: controller.text,
+                      ),
+                    );
                     Navigator.pushReplacementNamed(context, '/');
                   } else {
                     Navigator.pushReplacementNamed(context, '/auth/sign-in');

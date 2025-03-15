@@ -1,6 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -29,9 +29,9 @@ class _SignInScreenState extends State<SignInScreen> {
               displayName: user.displayName ?? '',
             ));
 
-            final loggedIn = await onSignIn();
+            final firebaseUser = FirebaseAuth.instance.currentUser;
 
-            if (loggedIn && context.mounted) {
+            if (firebaseUser != null && context.mounted) {
               Navigator.pushReplacementNamed(context, '/user/name/edit');
             } else if (context.mounted) {
               // TODO: Alert to failed sign-in
@@ -42,8 +42,8 @@ class _SignInScreenState extends State<SignInScreen> {
           }
         }),
         ui.AuthStateChangeAction<ui.SignedIn>((context, state) async {
-          final loggedIn = await onSignIn();
-          if (loggedIn && context.mounted) {
+          final firebaseUser = FirebaseAuth.instance.currentUser;
+          if (firebaseUser != null && context.mounted) {
             Navigator.pushReplacementNamed(context, '/');
           } else if (context.mounted) {
             // TODO: Alert to failed sign-in
@@ -52,15 +52,5 @@ class _SignInScreenState extends State<SignInScreen> {
         }),
       ],
     );
-  }
-
-  Future<bool> onSignIn() async {
-    await di<UserController>().load();
-
-    if (di<UserController>().currentUser != null) {
-      return true;
-    } else {
-      return false;
-    }
   }
 }

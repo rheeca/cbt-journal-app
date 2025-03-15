@@ -3,6 +3,7 @@ import 'package:cbt_journal/user/user_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 import 'package:logger/logger.dart';
 
@@ -39,6 +40,13 @@ class _SettingsState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loading = watchPropertyValue((UserController c) => c.isLoading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
+      );
+    }
     final user = watchPropertyValue((UserController c) => c.currentUser);
 
     if (user == null) {
@@ -51,7 +59,9 @@ class _SettingsState extends State<SettingsScreen> {
       appBar: AppBar(
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/user/edit');
+            },
             child: const Text('Edit'),
           ),
         ],
