@@ -1,6 +1,6 @@
 import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/home/home_controller.dart';
-import 'package:cbt_journal/user/edit_username.dart';
+import 'package:cbt_journal/user/create_profile.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +53,7 @@ class _HomePageState extends State<_HomePage> {
     final profileCreated =
         watchPropertyValue((HomeController m) => m.profileCreated);
     if (!profileCreated) {
-      return const EditUsernameScreen();
+      return const CreateProfileScreen();
     }
 
     final username =

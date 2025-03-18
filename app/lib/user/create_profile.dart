@@ -4,14 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
-class EditUsernameScreen extends StatefulWidget {
-  const EditUsernameScreen({super.key});
+class CreateProfileScreen extends StatefulWidget {
+  const CreateProfileScreen({super.key});
 
   @override
-  State<EditUsernameScreen> createState() => _EditUsernameScreenState();
+  State<CreateProfileScreen> createState() => _CreateProfileScreenState();
 }
 
-class _EditUsernameScreenState extends State<EditUsernameScreen> {
+class _CreateProfileScreenState extends State<CreateProfileScreen> {
   late final TextEditingController controller;
 
   @override

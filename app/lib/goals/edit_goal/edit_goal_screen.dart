@@ -1,4 +1,4 @@
-import 'package:cbt_journal/goals/create_goal.dart';
+import 'package:cbt_journal/goals/edit_goal/create_goal.dart';
 import 'package:cbt_journal/goals/edit_goal/edit_goal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:flutter/material.dart';
