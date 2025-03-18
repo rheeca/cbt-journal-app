@@ -1,21 +1,50 @@
+import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
-class JournalScreen extends WatchingStatefulWidget {
+class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
 
   @override
-  State<JournalScreen> createState() => _JournalScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const _JournalPage(),
+      drawer: const AppDrawer(),
+    );
+  }
 }
 
-class _JournalScreenState extends State<JournalScreen> {
+class _JournalPage extends WatchingStatefulWidget {
+  const _JournalPage();
+
+  @override
+  State<_JournalPage> createState() => _JournalPageState();
+}
+
+class _JournalPageState extends State<_JournalPage> {
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() async {
+    await di<JournalController>().load();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLoading = watchPropertyValue((JournalController c) => c.isLoading);
-    if (isLoading) {
-      return const SizedBox();
+    final loading = watchPropertyValue((JournalController c) => c.isLoading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
+      );
     }
 
     final journalEntries =
@@ -48,13 +77,8 @@ class _JournalScreenState extends State<JournalScreen> {
                           ),
                         ),
                       ]),
-                      onTap: () async {
-                        di<JournalController>().selectedJournalEntry = e;
-                        await Navigator.pushNamed(
-                            context, '/view-journal-entry');
-
-                        di<JournalController>().selectedJournalEntry = null;
-                        setState(() {});
+                      onTap: () {
+                        context.push('/journal/view/${e.id}');
                       },
                     ),
                   ))

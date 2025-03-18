@@ -1,24 +1,18 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:watch_it/watch_it.dart';
 
 var logger = Logger();
 
 class JournalController extends ChangeNotifier {
-  JournalController();
+  JournalController({required AppDatabase database}) : _database = database;
+
+  final AppDatabase _database;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-
-  JournalEntry? _selectedJournalEntry;
-  JournalEntry? get selectedJournalEntry => _selectedJournalEntry;
-  set selectedJournalEntry(JournalEntry? value) {
-    _selectedJournalEntry = value;
-    notifyListeners();
-  }
 
   final List<JournalEntry> _journalEntries = [];
   List<JournalEntry> get journalEntries => _journalEntries;
@@ -26,82 +20,37 @@ class JournalController extends ChangeNotifier {
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
 
-  Goal? _selectedGoal;
-  Goal? get selectedGoal => _selectedGoal;
-  set selectedGoal(Goal? goal) {
-    _selectedGoal = goal;
-    notifyListeners();
-  }
-
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();
 
-    try {
-      await loadJournalEntries();
-      await loadGuidedJournals();
-    } catch (e) {
-      logger.e('Failed to get journal entries. Error: $e');
-    } finally {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
       _isLoading = false;
       notifyListeners();
-    }
-  }
-
-  Future<void> loadJournalEntries() async {
-    final AppDatabase db = di<AppDatabase>();
-    final userId = di<UserController>().currentUser?.userId;
-    if (userId == null) {
-      throw 'user is null';
+      return;
     }
 
-    final journalEntries = await db.getJournalEntriesByUser(userId);
-
+    final journalEntries = await _database.getJournalEntriesByUser(userId);
     _journalEntries.clear();
-    _journalEntries.addAll(journalEntries.map((e) => JournalEntry(
-          id: e.id,
-          userId: e.userId,
-          createdAt: e.createdAt,
-          guidedJournal: e.guidedJournal,
-          title: e.title,
-          content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
-        )));
+    _journalEntries.addAll(journalEntries);
 
-    notifyListeners();
-  }
-
-  Future<void> loadGuidedJournals() async {
-    final AppDatabase db = di<AppDatabase>();
-    List<GuidedJournalEntity> items = await db.getAllGuidedJournals();
-
+    final guidedJournals = await _database.getAllGuidedJournals();
     _guidedJournals.clear();
-    _guidedJournals.addAll(items
-        .map((e) => GuidedJournal(
-            id: e.id,
-            title: e.title,
-            guideQuestions: e.guideQuestions,
-            description: e.description,
-            journalType: e.journalType
-                .map((e) => JournalType.values.byName(e))
-                .toList()))
-        .toList());
+    _guidedJournals.addAll(guidedJournals);
 
+    _isLoading = false;
     notifyListeners();
   }
-}
 
-enum Sentiment {
-  verySad(value: '1', icon: Icon(Icons.sentiment_very_dissatisfied)),
-  sad(value: '2', icon: Icon(Icons.sentiment_dissatisfied)),
-  neutral(value: '3', icon: Icon(Icons.sentiment_neutral)),
-  happy(value: '4', icon: Icon(Icons.sentiment_satisfied_alt)),
-  veryHappy(value: '5', icon: Icon(Icons.sentiment_very_satisfied));
+  Future<void> deleteJournalEntry(String id) async {
+    _isLoading = true;
+    notifyListeners();
 
-  const Sentiment({required this.icon, required this.value});
-  final Icon icon;
-  final String value;
+    await _database.deleteJournalEntry(id);
+    _journalEntries.removeWhere((e) => e.id == id);
 
-  static Sentiment? getSentimentByValue(String value) {
-    return Sentiment.values.firstWhere((e) => e.value == value);
+    _isLoading = false;
+    notifyListeners();
   }
 }

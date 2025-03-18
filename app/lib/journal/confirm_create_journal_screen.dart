@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ConfirmCreateJournalScreen extends StatefulWidget {
   const ConfirmCreateJournalScreen({super.key});
@@ -27,7 +28,7 @@ class _ConfirmCreateJournalScreenState
             ),
             ElevatedButton(
               onPressed: () {
-                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) context.pop();
               },
               child: const Text('Confirm'),
             ),

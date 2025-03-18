@@ -1,14 +1,15 @@
-import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
-import 'package:cbt_journal/journal/journal_controller.dart';
-import 'package:cbt_journal/models/model.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class ViewGoalScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
-  const ViewGoalScreen({super.key});
+  const ViewGoalScreen({super.key, required this.goalId});
+
+  final String goalId;
 
   @override
   State<ViewGoalScreen> createState() => _ViewGoalScreenState();
@@ -17,8 +18,17 @@ class ViewGoalScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
 class _ViewGoalScreenState extends State<ViewGoalScreen> {
   @override
   Widget build(BuildContext context) {
-    Goal? selectedGoal =
-        watchPropertyValue((GoalsController c) => c.selectedGoal);
+    final loading = watchPropertyValue((GoalsController c) => c.isLoading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
+      );
+    }
+
+    final goals = watchPropertyValue((GoalsController c) => c.goals);
+    final selectedGoal = goals.firstWhereOrNull((e) => e.id == widget.goalId);
+
     if (selectedGoal == null) {
       return Scaffold(
         appBar: AppBar(),
@@ -33,16 +43,23 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
             menuChildren: [
               MenuItemButton(
                 child: const Text('Edit'),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/goal/edit');
+                onPressed: () async {
+                  final updated =
+                      await context.push<bool>('/goal/edit/${selectedGoal.id}');
+                  if (updated == true) {
+                    di<GoalsController>().load();
+                  }
                 },
               ),
               MenuItemButton(
                 child: const Text('Delete'),
                 onPressed: () {
-                  di<AppDatabase>().deleteGoal(selectedGoal.id);
-                  di<GoalsController>().load();
-                  Navigator.pop(context);
+                  di<GoalsController>().deleteGoal(selectedGoal.id);
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/goals');
+                  }
                 },
               ),
             ],
@@ -87,7 +104,8 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12.0),
-            const Expanded(
+            const SizedBox(
+              height: 600,
               child: _JournalListView(),
             ),
           ],
@@ -112,17 +130,13 @@ class _JournalListView extends StatelessWidget with WatchItMixin {
               color: Colors.blueGrey,
               size: 50,
             )
-          : Column(
+          : ListView(
               children: entries
                   .map(
                     (e) => Card(
                       child: InkWell(
                         onTap: () async {
-                          di<JournalController>().selectedJournalEntry = e;
-                          await Navigator.pushNamed(
-                              context, '/view-journal-entry');
-
-                          di<JournalController>().selectedJournalEntry = null;
+                          context.push('/journal/view/${e.id}');
                         },
                         child: Row(children: [
                           Padding(

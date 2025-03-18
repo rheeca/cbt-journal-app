@@ -1,39 +1,56 @@
-import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/goals/create_goal.dart';
-import 'package:cbt_journal/goals/goals_controller.dart';
+import 'package:cbt_journal/goals/edit_goal/edit_goal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class EditGoalScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
-  const EditGoalScreen({super.key});
+  const EditGoalScreen({super.key, required this.goalId});
+
+  final String goalId;
 
   @override
   State<EditGoalScreen> createState() => _EditGoalScreenState();
 }
 
 class _EditGoalScreenState extends State<EditGoalScreen> {
-  final titleController = TextEditingController();
-  Goal? _selectedGoal;
+  late final TextEditingController titleController;
   Frequency? _frequency;
   final List<bool> _selectedDays = DayOfWeek.values.map((e) => false).toList();
 
   @override
   void initState() {
     super.initState();
-    _selectedGoal = di<GoalsController>().selectedGoal;
+    _load();
+    titleController = TextEditingController();
+  }
 
-    if (_selectedGoal != null) {
-      titleController.text = _selectedGoal!.title;
-      for (final i in _selectedGoal!.notificationSchedule) {
-        _selectedDays[i.index] = true;
-      }
-    }
+  void _load() async {
+    await di<EditGoalController>().load(goalId: widget.goalId);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedGoal == null) {
+    final loading = watchPropertyValue((EditGoalController c) => c.loading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
+      );
+    }
+
+    final selectedGoal =
+        watchPropertyValue((EditGoalController c) => c.selectedGoal);
+
+    if (selectedGoal != null) {
+      titleController.text = selectedGoal.title;
+      for (final i in selectedGoal.notificationSchedule) {
+        _selectedDays[i.index] = true;
+      }
+    }
+    if (selectedGoal == null) {
       return const SizedBox();
     }
 
@@ -43,18 +60,11 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
           IconButton(
             icon: const Icon(Icons.done),
             onPressed: () async {
-              final List<DayOfWeek> notificationSchedule = [];
-              for (int i = 0; i < _selectedDays.length; i++) {
-                if (_selectedDays[i] == true) {
-                  notificationSchedule.add(DayOfWeek.values[i]);
-                }
-              }
-              _selectedGoal!.notificationSchedule = notificationSchedule;
-              _selectedGoal!.title = titleController.text;
+              di<EditGoalController>()
+                  .updateGoal(_selectedDays, titleController.text);
+              await di<EditGoalController>().insertGoalInDb();
 
-              await di<AppDatabase>().insertGoal(_selectedGoal!);
-              await di<GoalsController>().load();
-              if (context.mounted) Navigator.pop(context);
+              if (context.mounted) context.pop(true);
             },
           ),
         ],
@@ -82,6 +92,8 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                   setState(() {
                     _selectedDays[index] = !_selectedDays[index];
                   });
+                  di<EditGoalController>()
+                      .updateGoal(_selectedDays, titleController.text);
                 },
                 isSelected: _selectedDays,
                 children:
@@ -105,6 +117,8 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                               _selectedDays[i.index] = true;
                             }
                           });
+                          di<EditGoalController>()
+                              .updateGoal(_selectedDays, titleController.text);
                         }))
                     .toList()),
             const SizedBox(height: 24.0),
@@ -115,7 +129,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 12.0,
-                children: _selectedGoal!.guideQuestions.map((e) {
+                children: selectedGoal.guideQuestions.map((e) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

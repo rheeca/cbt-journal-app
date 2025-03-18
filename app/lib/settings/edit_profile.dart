@@ -1,9 +1,10 @@
 import 'dart:developer';
 
 import 'package:cbt_journal/models/model.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:cbt_journal/settings/settings_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:watch_it/watch_it.dart';
 
 class EditProfileScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
@@ -33,11 +34,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    UserModel? user = watchPropertyValue((UserController c) => c.currentUser);
+    UserModel? user =
+        watchPropertyValue((SettingsController c) => c.currentUser);
 
     if (user == null) {
       return const Scaffold(
-        body: Center(child: Text('Error')),
+        body: Center(child: Text('No user')),
       );
     }
 
@@ -82,9 +84,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   }
                 }
 
-                di<UserController>().updateUser(user);
+                di<SettingsController>().insertUserIntoDb(user);
                 if (context.mounted) {
-                  Navigator.pop(context);
+                  context.pop(true);
                 }
               },
               child: const Text('Save'),

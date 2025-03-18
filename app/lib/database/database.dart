@@ -1,3 +1,5 @@
+import 'package:cbt_journal/models/common.dart';
+import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:logger/logger.dart';
@@ -25,6 +27,31 @@ class AppDatabase extends _$AppDatabase {
 }
 
 extension GoalQuery on AppDatabase {
+  Future<md.Goal?> getGoalById(String goalId) async {
+    final goal = await (select(goals)..where((t) => t.id.equals(goalId)))
+        .getSingleOrNull();
+
+    if (goal != null) {
+      final goalEntriesFromDb = await getGoalEntriesByGoal(goal.id);
+      return md.Goal(
+        id: goal.id,
+        userId: goal.userId,
+        createdAt: goal.createdAt,
+        title: goal.title,
+        guideQuestions: goal.guideQuestions
+            .map((e) => md.GuideQuestion.fromMap(e))
+            .toList(),
+        notificationSchedule: goal.notificationSchedule
+            .map((e) => md.DayOfWeek.values.byName(e))
+            .toList(),
+        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
+        isArchived: goal.isArchived,
+      );
+    } else {
+      return null;
+    }
+  }
+
   Future<List<md.Goal>> getGoalsByUser(String userId) async {
     List<md.Goal> userGoals = [];
 
@@ -78,6 +105,12 @@ extension GoalQuery on AppDatabase {
     return (select(goalEntries)..where((t) => t.goalId.equals(goalId))).get();
   }
 
+  Future<List<GoalEntryEntity>> getGoalEntriesByJournal(String journalId) {
+    return (select(goalEntries)
+          ..where((t) => t.journalEntryId.equals(journalId)))
+        .get();
+  }
+
   Future<void> deleteGoalEntry(String id) {
     return (delete(goalEntries)..where((t) => t.journalEntryId.isValue(id)))
         .go();
@@ -85,13 +118,55 @@ extension GoalQuery on AppDatabase {
 }
 
 extension GuidedJournalQuery on AppDatabase {
-  Future<GuidedJournalEntity?> getGuidedJournal(String id) {
-    return (select(guidedJournals)..where((t) => t.id.equals(id)))
+  Future<GuidedJournal?> getGuidedJournal(String id) async {
+    final item = await (select(guidedJournals)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
+    if (item != null) {
+      return GuidedJournal(
+          id: item.id,
+          title: item.title,
+          guideQuestions: item.guideQuestions,
+          description: item.description,
+          journalType: item.journalType
+              .map((e) => JournalType.values.byName(e))
+              .toList());
+    } else {
+      return null;
+    }
   }
 
-  Future<List<GuidedJournalEntity>> getAllGuidedJournals() {
-    return (select(guidedJournals)).get();
+  Future<GuidedJournal?> getGuidedJournalByTitle(String title) async {
+    final item = await (select(guidedJournals)
+          ..where((t) => t.title.equals(title)))
+        .getSingleOrNull();
+    if (item != null) {
+      return GuidedJournal(
+          id: item.id,
+          title: item.title,
+          guideQuestions: item.guideQuestions,
+          description: item.description,
+          journalType: item.journalType
+              .map((e) => JournalType.values.byName(e))
+              .toList());
+    } else {
+      return null;
+    }
+  }
+
+  Future<List<GuidedJournal>> getAllGuidedJournals() async {
+    final items = await (select(guidedJournals)).get();
+    return items
+        .map(
+          (e) => GuidedJournal(
+              id: e.id,
+              title: e.title,
+              guideQuestions: e.guideQuestions,
+              description: e.description,
+              journalType: e.journalType
+                  .map((e) => JournalType.values.byName(e))
+                  .toList()),
+        )
+        .toList();
   }
 
   Future<int> insertGuidedJournal(md.GuidedJournal gj) {
@@ -106,8 +181,15 @@ extension GuidedJournalQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<UserEntity?> getUser(String userId) {
-    return (select(users)..where((t) => t.id.equals(userId))).getSingleOrNull();
+  Future<md.UserModel?> getUser(String userId) async {
+    final user = await (select(users)..where((t) => t.id.equals(userId)))
+        .getSingleOrNull();
+    if (user != null) {
+      return md.UserModel(
+          userId: user.id, email: user.email, displayName: user.displayName);
+    } else {
+      return null;
+    }
   }
 
   Future<int> insertUser(md.UserModel user) {
@@ -124,14 +206,42 @@ extension UserQuery on AppDatabase {
 }
 
 extension JournalEntryQuery on AppDatabase {
-  Future<List<JournalEntryEntity>> getJournalEntriesByUser(String userId) {
-    return (select(journalEntries)
+  Future<List<JournalEntry>> getJournalEntriesByUser(String userId) async {
+    final items = await (select(journalEntries)
           ..where((t) => t.userId.equals(userId))
           ..orderBy([
             (u) =>
                 OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
           ]))
         .get();
+    return items
+        .map((e) => JournalEntry(
+              id: e.id,
+              userId: e.userId,
+              createdAt: e.createdAt,
+              guidedJournal: e.guidedJournal,
+              title: e.title,
+              content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+            ))
+        .toList();
+  }
+
+  Future<JournalEntry?> getJournalEntryById(String journalId) async {
+    final item = await (select(journalEntries)
+          ..where((t) => t.id.equals(journalId)))
+        .getSingleOrNull();
+    if (item != null) {
+      return JournalEntry(
+        id: item.id,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        guidedJournal: item.guidedJournal,
+        title: item.title,
+        content: item.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+      );
+    } else {
+      return null;
+    }
   }
 
   Future<int> insertJournalEntry(md.JournalEntry item) {

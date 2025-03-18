@@ -1,88 +1,204 @@
+import 'package:cbt_journal/discover/discover_screen.dart';
+import 'package:cbt_journal/goals/goals_screen.dart';
+import 'package:cbt_journal/home/home_detail_screen.dart';
+import 'package:cbt_journal/journal/journal_screen.dart';
 import 'package:cbt_journal/settings/edit_profile.dart';
-import 'package:cbt_journal/user/edit_username.dart';
 import 'package:cbt_journal/user/sign_in_screen.dart';
 import 'package:cbt_journal/goals/create_goal.dart';
 import 'package:cbt_journal/goals/edit_goal_screen.dart';
 import 'package:cbt_journal/goals/view_goal.dart';
-import 'package:cbt_journal/home_screen.dart';
 import 'package:cbt_journal/journal/confirm_create_journal_screen.dart';
 import 'package:cbt_journal/journal/edit_journal_entry_screen.dart';
 import 'package:cbt_journal/journal/view_journal_entry_screen.dart';
-import 'package:cbt_journal/models/model.dart' show GuidedJournal;
 import 'package:cbt_journal/settings/settings_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class RouteGenerator {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    final args = settings.arguments;
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shell');
 
-    switch (settings.name) {
-      case '/':
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
-      case '/auth/sign-in':
-        return MaterialPageRoute(builder: (_) => const SignInScreen());
-      case '/settings':
-        return MaterialPageRoute(
-          builder: (_) => const SettingsScreen(),
-        );
-      case '/goal/create':
-        return MaterialPageRoute(
-          builder: (_) => const CreateGoalScreen(),
-        );
-      case '/goal/edit':
-        return MaterialPageRoute(
-          builder: (_) => const EditGoalScreen(),
-        );
-      case '/goal/view':
-        return MaterialPageRoute(
-          builder: (_) => const ViewGoalScreen(),
-        );
-      case '/journal-entry/create':
-        if (args is GuidedJournal) {
-          return MaterialPageRoute(
-            builder: (_) => EditJournalEntryScreen(
-                mode: EditJournalMode.create, guidedJournal: args),
+GoRouter getRouter(User? user) {
+  return GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/',
+    debugLogDiagnostics: true,
+    routes: <RouteBase>[
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (BuildContext context, GoRouterState state, Widget child) {
+          return ScaffoldWithNavBar(
+            child: child,
           );
-        }
-        return _errorRoute();
-      case '/journal-entry/create/confirm':
-        return MaterialPageRoute(
-          builder: (_) => const ConfirmCreateJournalScreen(),
-        );
-      case '/journal-entry/edit':
-        if (args is GuidedJournal) {
-          return MaterialPageRoute(
-            builder: (_) => EditJournalEntryScreen(
-                mode: EditJournalMode.edit, guidedJournal: args),
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/discover',
+            builder: (context, state) => const DiscoverScreen(),
+          ),
+          GoRoute(
+            path: '/goals',
+            builder: (context, state) => const GoalsScreen(),
+          ),
+          GoRoute(
+            path: '/myjournal',
+            builder: (context, state) => const JournalScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) => const EditProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/signin',
+        builder: (context, state) => const SignInScreen(),
+      ),
+
+      // Journal
+      GoRoute(
+        path: '/journal/view/:journal_id',
+        builder: (context, state) {
+          return ViewJournalEntryScreen(
+            journalId: state.pathParameters['journal_id']!,
           );
-        }
-        return _errorRoute();
-      case '/user/edit':
-        return MaterialPageRoute(
-          builder: (_) => const EditProfileScreen(),
-        );
-      case '/user/name/edit':
-        return MaterialPageRoute(
-          builder: (_) => const EditUsernameScreen(),
-        );
-      case '/view-journal-entry':
-        return MaterialPageRoute(
-            builder: (_) => const ViewJournalEntryScreen());
-      default:
-        return _errorRoute();
-    }
+        },
+      ),
+      GoRoute(
+        path: '/journal/create/:guided_journal_id',
+        builder: (context, state) {
+          return EditJournalEntryScreen(
+            mode: EditJournalMode.create,
+            guidedJournalId: state.pathParameters['guided_journal_id']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/journal/edit/:journal_id',
+        builder: (context, state) {
+          return EditJournalEntryScreen(
+            mode: EditJournalMode.edit,
+            journalId: state.pathParameters['journal_id']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/journal/confirm',
+        builder: (context, state) {
+          return const ConfirmCreateJournalScreen();
+        },
+      ),
+
+      // Goal
+      GoRoute(
+        path: '/goal/view/:goal_id',
+        builder: (context, state) {
+          return ViewGoalScreen(
+            goalId: state.pathParameters['goal_id']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/goal/create/:journal_id',
+        builder: (context, state) {
+          return CreateGoalScreen(
+            journalId: state.pathParameters['journal_id']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/goal/edit/:goal_id',
+        builder: (context, state) {
+          return EditGoalScreen(
+            goalId: state.pathParameters['goal_id']!,
+          );
+        },
+      ),
+    ],
+    redirect: (context, state) {
+      if (user == null) {
+        return '/signin';
+      } else {
+        return null;
+      }
+    },
+  );
+}
+
+class ScaffoldWithNavBar extends StatelessWidget {
+  const ScaffoldWithNavBar({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (int index) {
+          _onItemTapped(index, context);
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Discover',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events),
+            label: 'Goals',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_note),
+            label: 'My Journal',
+          ),
+        ],
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+      ),
+    );
   }
 
-  static Route<dynamic> _errorRoute() {
-    return MaterialPageRoute(builder: (_) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Error'),
-        ),
-        body: const Center(
-          child: Text('ERROR'),
-        ),
-      );
-    });
+  static int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (location.startsWith('/discover')) {
+      return 1;
+    }
+    if (location.startsWith('/goals')) {
+      return 2;
+    }
+    if (location.startsWith('/myjournal')) {
+      return 3;
+    }
+    return 0;
+  }
+
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        context.go('/');
+      case 1:
+        context.go('/discover');
+      case 2:
+        context.go('/goals');
+      case 3:
+        context.go('/myjournal');
+    }
   }
 }

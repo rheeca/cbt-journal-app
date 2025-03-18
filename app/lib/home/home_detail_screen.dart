@@ -1,19 +1,33 @@
-import 'package:cbt_journal/goals/goals_controller.dart';
-import 'package:cbt_journal/journal/journal_controller.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:cbt_journal/common/navigation.dart';
+import 'package:cbt_journal/home/home_controller.dart';
+import 'package:cbt_journal/user/edit_username.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
-class HomeDetailScreen extends WatchingStatefulWidget {
-  const HomeDetailScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeDetailScreen> createState() => _HomeDetailScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const _HomePage(),
+      drawer: const AppDrawer(),
+    );
+  }
 }
 
-class _HomeDetailScreenState extends State<HomeDetailScreen> {
+class _HomePage extends WatchingStatefulWidget {
+  const _HomePage();
+
+  @override
+  State<_HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<_HomePage> {
   @override
   void initState() {
     super.initState();
@@ -21,14 +35,13 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
   }
 
   void _load() async {
-    await di<GoalsController>().load();
-    await di<JournalController>().load();
+    await di<HomeController>().load();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = watchPropertyValue((JournalController c) => c.isLoading);
-    if (isLoading) {
+    final loading = watchPropertyValue((HomeController c) => c.loading);
+    if (loading) {
       return Center(
         child: LoadingAnimationWidget.waveDots(
           color: Colors.blueGrey.shade200,
@@ -37,19 +50,21 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
       );
     }
 
+    final profileCreated =
+        watchPropertyValue((HomeController m) => m.profileCreated);
+    if (!profileCreated) {
+      return const EditUsernameScreen();
+    }
+
     final username =
-        watchPropertyValue((UserController m) => m.currentUser?.displayName) ??
+        watchPropertyValue((HomeController m) => m.currentUser?.displayName) ??
             '';
     final guidedJournals =
-        watchPropertyValue((JournalController c) => c.guidedJournals);
+        watchPropertyValue((HomeController c) => c.guidedJournals);
     final dailyJournal =
         guidedJournals.firstWhereOrNull((e) => e.title == 'Daily Check-in');
 
-    final isLoadingGoals =
-        watchPropertyValue((GoalsController c) => c.isLoading);
-
-    final goals = watchPropertyValue((GoalsController c) => c.goals);
-
+    final goals = watchPropertyValue((HomeController c) => c.goals);
     final now = DateTime.now();
     final todaysGoals = goals.where((e) {
       for (final i in e.notificationSchedule) {
@@ -83,8 +98,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                     const SizedBox(height: 50),
                     FilledButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/journal-entry/create',
-                              arguments: dailyJournal);
+                          context.push('/journal/create/${dailyJournal!.id}');
                         },
                         child: const Text('Start')),
                   ],
@@ -99,12 +113,8 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
               Text('Today\'s Goals'),
             ],
           ),
-          isLoadingGoals
-              ? LoadingAnimationWidget.waveDots(
-                  color: Colors.blueGrey,
-                  size: 50,
-                )
-              : Expanded(
+          todaysGoals.isNotEmpty
+              ? Expanded(
                   child: ListView(
                     children: todaysGoals
                         .map(
@@ -119,17 +129,9 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                                   Text(e.title),
                                   const Expanded(child: SizedBox()),
                                   FilledButton(
-                                      onPressed: () async {
-                                        di<JournalController>().selectedGoal =
-                                            e;
-                                        await Navigator.pushNamed(
-                                          context,
-                                          '/journal-entry/create',
-                                          arguments: dailyJournal,
-                                        );
-
-                                        di<JournalController>().selectedGoal =
-                                            null;
+                                      onPressed: () {
+                                        context.push(
+                                            '/journal/create/${dailyJournal!.id}');
                                       },
                                       child: const Text('Check-in'))
                                 ],
@@ -140,6 +142,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
                         .toList(),
                   ),
                 )
+              : const Text('No goals for today')
         ],
       ),
     );

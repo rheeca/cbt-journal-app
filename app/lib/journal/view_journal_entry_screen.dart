@@ -1,28 +1,43 @@
-import 'package:cbt_journal/database/database.dart';
-import 'package:cbt_journal/goals/goals_controller.dart';
+import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
 class ViewJournalEntryScreen extends StatefulWidget
     with WatchItStatefulWidgetMixin {
-  const ViewJournalEntryScreen({super.key});
+  const ViewJournalEntryScreen({super.key, required this.journalId});
+
+  final String journalId;
 
   @override
   State<ViewJournalEntryScreen> createState() => _ViewJournalEntryScreenState();
 }
 
 class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
+  bool _isPopping = false;
+
   @override
   Widget build(BuildContext context) {
-    final JournalEntry? journal =
-        watchPropertyValue((JournalController c) => c.selectedJournalEntry);
-    if (journal == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Text('Empty'),
+    if (_isPopping) return const SizedBox();
+
+    final loading = watchPropertyValue((JournalController c) => c.isLoading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
       );
+    }
+
+    final List<JournalEntry> journalEntries =
+        watchPropertyValue((JournalController c) => c.journalEntries);
+    final journal =
+        journalEntries.firstWhereOrNull((e) => e.id == widget.journalId);
+    if (journal == null) {
+      return const Text('Empty');
     }
 
     final guidedJournals =
@@ -41,19 +56,21 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
               MenuItemButton(
                 child: const Text('Edit'),
                 onPressed: () async {
-                  await Navigator.pushNamed(context, '/journal-entry/edit',
-                      arguments: guidedJournal);
-                  setState(() {});
+                  final updated =
+                      await context.push<bool>('/journal/edit/${journal.id}');
+                  if (updated == true) {
+                    di<JournalController>().load();
+                  }
                 },
               ),
               MenuItemButton(
                 child: const Text('Delete'),
                 onPressed: () {
-                  di<AppDatabase>().deleteJournalEntry(journal.id);
-                  di<AppDatabase>().deleteGoalEntry(journal.id);
-                  di<JournalController>().loadJournalEntries();
-                  di<GoalsController>().load();
-                  Navigator.pop(context);
+                  // TODO: Prevent rebuilding while popping to avoid black screen.
+                  // Or other solutions.
+                  _isPopping = true;
+                  di<JournalController>().deleteJournalEntry(journal.id);
+                  context.pop();
                 },
               ),
             ],

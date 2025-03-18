@@ -1,22 +1,45 @@
+import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
-import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 
-class GoalsScreen extends StatefulWidget with WatchItStatefulWidgetMixin {
+class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
 
   @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const _GoalsPage(),
+      drawer: const AppDrawer(),
+    );
+  }
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
+class _GoalsPage extends StatefulWidget with WatchItStatefulWidgetMixin {
+  const _GoalsPage();
+
+  @override
+  State<_GoalsPage> createState() => _GoalsPageState();
+}
+
+class _GoalsPageState extends State<_GoalsPage> {
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() async {
+    await di<GoalsController>().load();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final goalJournal = di<JournalController>()
-        .guidedJournals
-        .firstWhere((e) => e.title == 'Set a Goal');
+    final goalJournal =
+        watchPropertyValue((GoalsController c) => c.setGoalGuidedJournal);
 
     return Center(
       child: Column(
@@ -24,8 +47,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
         children: [
           FilledButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/journal-entry/create',
-                    arguments: goalJournal);
+                context.push('/journal/create/${goalJournal!.id}');
               },
               icon: const Icon(Icons.add),
               label: const Text('Create a Goal')),
@@ -42,39 +64,38 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isLoadingGoals =
-        watchPropertyValue((GoalsController c) => c.isLoading);
+    final loading = watchPropertyValue((GoalsController c) => c.isLoading);
+    if (loading) {
+      return LoadingAnimationWidget.waveDots(
+        color: Colors.blueGrey,
+        size: 50,
+      );
+    }
+
     final goals = watchPropertyValue((GoalsController c) => c.goals);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: isLoadingGoals
-          ? LoadingAnimationWidget.waveDots(
-              color: Colors.blueGrey,
-              size: 50,
-            )
-          : ListView(
-              children: goals
-                  .map(
-                    (e) => Card(
-                      child: InkWell(
-                        onTap: () {
-                          di<GoalsController>().selectedGoal = e;
-                          Navigator.pushNamed(context, '/goal/view');
-                        },
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-                          child: Text(
-                            e.title,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      ),
+      child: ListView(
+        children: goals
+            .map(
+              (e) => Card(
+                child: InkWell(
+                  onTap: () {
+                    context.push('/goal/view/${e.id}');
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+                    child: Text(
+                      e.title,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  )
-                  .toList(),
-            ),
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }

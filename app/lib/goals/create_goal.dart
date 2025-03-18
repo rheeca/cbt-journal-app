@@ -1,12 +1,14 @@
-import 'package:cbt_journal/database/database.dart';
-import 'package:cbt_journal/goals/goals_controller.dart';
+import 'package:cbt_journal/goals/edit_goal/edit_goal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:watch_it/watch_it.dart';
 
 class CreateGoalScreen extends StatefulWidget {
-  const CreateGoalScreen({super.key});
+  const CreateGoalScreen({super.key, required this.journalId});
+
+  final String journalId;
 
   @override
   State<CreateGoalScreen> createState() => _CreateGoalScreenState();
@@ -20,9 +22,19 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   final List<bool> _selectedDays = DayOfWeek.values.map((e) => false).toList();
 
   @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
   void dispose() {
     titleController.dispose();
     super.dispose();
+  }
+
+  void _load() async {
+    await di<EditGoalController>().load(journalId: widget.journalId);
   }
 
   @override
@@ -83,7 +95,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               Center(
                 child: FilledButton(
                   onPressed: () async {
-                    final userId = di<UserController>().currentUser!.userId;
+                    final userId = FirebaseAuth.instance.currentUser!.uid;
                     final List<DayOfWeek> notificationSchedule = [];
                     for (int i = 0; i < _selectedDays.length; i++) {
                       if (_selectedDays[i] == true) {
@@ -97,7 +109,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                     final List<GuideQuestion> guideQuestions = [];
                     JournalEntry? journalEntry =
-                        di<GoalsController>().currentJournal;
+                        di<EditGoalController>().setGoalJournal;
                     if (journalEntry != null) {
                       guideQuestions.addAll(journalEntry.content);
                     }
@@ -108,11 +120,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                         guideQuestions: guideQuestions,
                         notificationSchedule: notificationSchedule,
                         journalEntries: []);
-                    await di<AppDatabase>().insertGoal(goal);
-                    await di<GoalsController>().load();
+                    await di<EditGoalController>().insertGoalInDb(goal: goal);
 
                     // TODO: Loading indicator until goal is saved
-                    if (context.mounted) Navigator.pop(context);
+                    if (context.mounted) context.push('/goals');
                   },
                   child: const Text('Create Goal'),
                 ),

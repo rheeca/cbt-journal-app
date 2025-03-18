@@ -1,8 +1,9 @@
 import 'package:cbt_journal/database/database.dart';
-import 'package:cbt_journal/user/user_controller.dart';
+import 'package:cbt_journal/settings/settings_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:watch_it/watch_it.dart';
 import 'package:logger/logger.dart';
@@ -25,6 +26,7 @@ class _SettingsState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _load();
     _passwordController = TextEditingController();
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
@@ -38,20 +40,24 @@ class _SettingsState extends State<SettingsScreen> {
     super.dispose();
   }
 
+  void _load() async {
+    await di<SettingsController>().load();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loading = watchPropertyValue((UserController c) => c.isLoading);
+    final loading = watchPropertyValue((SettingsController c) => c.loading);
     if (loading) {
       return LoadingAnimationWidget.waveDots(
         color: Colors.blueGrey,
         size: 50,
       );
     }
-    final user = watchPropertyValue((UserController c) => c.currentUser);
+    final user = watchPropertyValue((SettingsController c) => c.currentUser);
 
     if (user == null) {
       return const Scaffold(
-        body: Center(child: Text('Error')),
+        body: Center(child: Text('No user')),
       );
     }
 
@@ -59,8 +65,11 @@ class _SettingsState extends State<SettingsScreen> {
       appBar: AppBar(
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/user/edit');
+            onPressed: () async {
+              final updated = await context.push('/settings/edit');
+              if (updated == true) {
+                di<SettingsController>().load();
+              }
             },
             child: const Text('Edit'),
           ),
@@ -138,7 +147,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
             TextButton(
@@ -149,9 +158,7 @@ class _SettingsState extends State<SettingsScreen> {
                 final user = FirebaseAuth.instance.currentUser;
 
                 if (user == null) {
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
+                  if (context.mounted) context.pop();
                   return;
                 }
 
@@ -163,7 +170,7 @@ class _SettingsState extends State<SettingsScreen> {
                 } catch (e) {
                   logger.e('Failed to reauthenticate user.', error: e);
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    context.pop();
                   }
                   return;
                 }
@@ -172,8 +179,7 @@ class _SettingsState extends State<SettingsScreen> {
                 await user.delete();
 
                 if (context.mounted) {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                  Navigator.pushReplacementNamed(context, '/auth/sign-in');
+                  context.go('/signin');
                 }
               },
             ),
@@ -264,7 +270,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
             TextButton(
@@ -276,7 +282,7 @@ class _SettingsState extends State<SettingsScreen> {
 
                 if (user == null) {
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    context.pop();
                   }
                   return;
                 }
@@ -289,7 +295,7 @@ class _SettingsState extends State<SettingsScreen> {
                 } catch (e) {
                   logger.e('Failed to reauthenticate user.', error: e);
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    context.pop();
                     return _showDialog(context, 'Wrong password.');
                   }
                 }
@@ -298,13 +304,13 @@ class _SettingsState extends State<SettingsScreen> {
                   await user.updatePassword(_newPasswordController.text);
                 } else {
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    context.pop();
                     return _showDialog(context, 'Passwords do not match.');
                   }
                 }
 
                 if (context.mounted) {
-                  Navigator.pop(context);
+                  context.pop();
                   return _showDialog(context, 'Successfully changed password!');
                 }
               },
@@ -327,7 +333,7 @@ class _SettingsState extends State<SettingsScreen> {
                   textStyle: Theme.of(context).textTheme.labelLarge),
               child: const Text('Okay'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
           ],

@@ -1,8 +1,15 @@
+import 'package:cbt_journal/models/journal_entry.dart';
+
 class GuideQuestion {
   String question;
   String answer;
+  JournalType type;
 
-  GuideQuestion({required this.question, required this.answer});
+  GuideQuestion({
+    required this.question,
+    required this.answer,
+    this.type = JournalType.text,
+  });
 
   Map<String, String> toMap() {
     return <String, String>{
@@ -13,7 +20,8 @@ class GuideQuestion {
 
   GuideQuestion.fromMap(Map<String, String> map)
       : question = map['question'] ?? '',
-        answer = map['answer'] ?? '';
+        answer = map['answer'] ?? '',
+        type = JournalType.text;
 }
 
 enum DayOfWeek {
