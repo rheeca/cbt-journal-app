@@ -2,6 +2,7 @@ import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
@@ -16,6 +17,9 @@ class JournalController extends ChangeNotifier {
 
   final List<JournalEntry> _journalEntries = [];
   List<JournalEntry> get journalEntries => _journalEntries;
+
+  final Map<String, JournalEntry> _moodEntriesByDate = {};
+  Map<String, JournalEntry> get moodEntriesByDate => _moodEntriesByDate;
 
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
@@ -39,6 +43,18 @@ class JournalController extends ChangeNotifier {
     final journalEntries = await _database.getJournalEntriesByUser(userId);
     _journalEntries.clear();
     _journalEntries.addAll(journalEntries);
+
+    _moodEntriesByDate.clear();
+    for (final e in _journalEntries) {
+      final date = DateFormat('yyyy-MM-d').format(e.createdAt);
+      // TODO: make guided journals types an enum.
+      // Checking for Daily Check-in journal.
+      if (e.guidedJournal == '5f3d321c-e835-470d-89c2-b2478a297481' &&
+          ((_moodEntriesByDate[date]?.createdAt)?.isBefore(e.createdAt) ??
+              true)) {
+        _moodEntriesByDate[date] = e;
+      }
+    }
 
     final guidedJournals = await _database.getAllGuidedJournals();
     _guidedJournals.clear();

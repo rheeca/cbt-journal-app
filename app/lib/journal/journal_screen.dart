@@ -1,4 +1,5 @@
 import 'package:cbt_journal/common/navigation.dart';
+import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -135,51 +136,79 @@ class _CalendarPageState extends State<_CalendarPage> {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: TableCalendar(
-        firstDay: firstDay,
-        // last day of the current month
-        lastDay: DateTime(now.year, now.month + 1, 0),
-        focusedDay: _focusedDay,
-        availableCalendarFormats: const {
-          CalendarFormat.month: 'Month',
-        },
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-        onDaySelected: (selectedDay, focusedDay) {
-          if (!isSameDay(_selectedDay, selectedDay)) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-          }
-        },
-        calendarBuilders: CalendarBuilders(
-          defaultBuilder: _defaultDayBuilder(),
-          outsideBuilder: (context, day, focusedDay) => const SizedBox(),
-          todayBuilder: (context, day, focusedDay) {
-            return Center(
-              child: Container(
-                width: 40.0,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const DropdownMenu<String>(
+            initialSelection: 'Mood',
+            dropdownMenuEntries: [
+              DropdownMenuEntry(value: 'Mood', label: 'Mood'),
+            ],
+          ),
+          TableCalendar(
+            firstDay: firstDay,
+            // last day of the current month
+            lastDay: DateTime(now.year, now.month + 1, 0),
+            focusedDay: _focusedDay,
+            availableCalendarFormats: const {
+              CalendarFormat.month: 'Month',
+            },
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              if (!isSameDay(_selectedDay, selectedDay)) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              }
+            },
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: _defaultDayBuilder(),
+              outsideBuilder: (context, day, focusedDay) => const SizedBox(),
+              disabledBuilder: (context, day, focusedDay) {
+                if (focusedDay.month != day.month) {
+                  return const SizedBox();
+                }
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24),
+                      Text(
+                        day.day.toString(),
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.sentiment_satisfied_alt),
-                    Text(day.day.toString()),
-                  ],
-                ),
-              ),
-            );
-          },
-          selectedBuilder: _defaultDayBuilder(),
-        ),
+                );
+              },
+              todayBuilder: (context, day, focusedDay) {
+                return Center(
+                  child: Container(
+                    width: 40.0,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        getMoodEntry(day),
+                        Text(day.day.toString()),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              selectedBuilder: _defaultDayBuilder(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -190,11 +219,25 @@ class _CalendarPageState extends State<_CalendarPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.sentiment_satisfied_alt),
+            getMoodEntry(day),
             Text(day.day.toString()),
           ],
         ),
       );
     };
+  }
+
+  Widget getMoodEntry(DateTime day) {
+    final moodEntries = di<JournalController>().moodEntriesByDate;
+    final mood =
+        moodEntries[DateFormat('yyyy-MM-d').format(day)]?.content.first.answer;
+    final icon =
+        mood != null ? Sentiment.getSentimentByValue(mood)?.icon : null;
+
+    if (icon != null) {
+      return icon;
+    } else {
+      return const SizedBox(height: 24.0);
+    }
   }
 }
