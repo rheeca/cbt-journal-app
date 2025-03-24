@@ -20,6 +20,9 @@ class JournalController extends ChangeNotifier {
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
 
+  UserModel? _currentUser;
+  UserModel? get currentUser => _currentUser;
+
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();
@@ -30,6 +33,8 @@ class JournalController extends ChangeNotifier {
       notifyListeners();
       return;
     }
+
+    _currentUser = await _database.getUser(userId);
 
     final journalEntries = await _database.getJournalEntriesByUser(userId);
     _journalEntries.clear();

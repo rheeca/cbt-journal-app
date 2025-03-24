@@ -186,7 +186,11 @@ extension UserQuery on AppDatabase {
         .getSingleOrNull();
     if (user != null) {
       return md.UserModel(
-          userId: user.id, email: user.email, displayName: user.displayName);
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        createdAt: user.createdAt,
+      );
     } else {
       return null;
     }
@@ -197,6 +201,7 @@ extension UserQuery on AppDatabase {
       id: Value(user.userId),
       email: Value(user.email),
       displayName: Value(user.displayName),
+      createdAt: Value(user.createdAt),
     ));
   }
 

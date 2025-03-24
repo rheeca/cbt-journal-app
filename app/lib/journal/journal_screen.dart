@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:watch_it/watch_it.dart';
 
 class JournalScreen extends StatelessWidget {
@@ -11,10 +12,23 @@ class JournalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: const _JournalPage(),
-      drawer: const AppDrawer(),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Entries'),
+              Tab(text: 'Calendar'),
+            ],
+          ),
+        ),
+        body: const TabBarView(children: [
+          _JournalPage(),
+          _CalendarPage(),
+        ]),
+        drawer: const AppDrawer(),
+      ),
     );
   }
 }
@@ -86,5 +100,101 @@ class _JournalPageState extends State<_JournalPage> {
         ),
       ),
     );
+  }
+}
+
+class _CalendarPage extends StatefulWidget with WatchItStatefulWidgetMixin {
+  const _CalendarPage();
+
+  @override
+  State<_CalendarPage> createState() => _CalendarPageState();
+}
+
+class _CalendarPageState extends State<_CalendarPage> {
+  final DateTime now = DateTime.now();
+  late DateTime _focusedDay;
+  DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusedDay = now;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = watchPropertyValue((JournalController c) => c.currentUser);
+    if (user == null) {
+      return const SizedBox();
+    }
+
+    final firstDay = DateTime(
+      user.createdAt.year,
+      user.createdAt.month,
+      user.createdAt.day,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: TableCalendar(
+        firstDay: firstDay,
+        // last day of the current month
+        lastDay: DateTime(now.year, now.month + 1, 0),
+        focusedDay: _focusedDay,
+        availableCalendarFormats: const {
+          CalendarFormat.month: 'Month',
+        },
+        selectedDayPredicate: (day) {
+          return isSameDay(_selectedDay, day);
+        },
+        onDaySelected: (selectedDay, focusedDay) {
+          if (!isSameDay(_selectedDay, selectedDay)) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          }
+        },
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: _defaultDayBuilder(),
+          outsideBuilder: (context, day, focusedDay) => const SizedBox(),
+          todayBuilder: (context, day, focusedDay) {
+            return Center(
+              child: Container(
+                width: 40.0,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.sentiment_satisfied_alt),
+                    Text(day.day.toString()),
+                  ],
+                ),
+              ),
+            );
+          },
+          selectedBuilder: _defaultDayBuilder(),
+        ),
+      ),
+    );
+  }
+
+  FocusedDayBuilder _defaultDayBuilder() {
+    return (context, day, focusedDay) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.sentiment_satisfied_alt),
+            Text(day.day.toString()),
+          ],
+        ),
+      );
+    };
   }
 }

@@ -55,6 +55,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         userId: firebaseUser.uid,
                         email: firebaseUser.email ?? '',
                         displayName: controller.text,
+                        createdAt: DateTime.now(),
                       ),
                     );
                   }
