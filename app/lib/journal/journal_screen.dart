@@ -1,4 +1,5 @@
 import 'package:cbt_journal/common/navigation.dart';
+import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:flutter/material.dart';
@@ -157,8 +158,17 @@ class _CalendarPageState extends State<_CalendarPage> {
             selectedDayPredicate: (day) {
               return isSameDay(_selectedDay, day);
             },
-            onDaySelected: (selectedDay, focusedDay) {
+            onDaySelected: (selectedDay, focusedDay) async {
               if (!isSameDay(_selectedDay, selectedDay)) {
+                di<JournalController>().selectDate(selectedDay);
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return DayViewScreen(date: selectedDay);
+                    },
+                  ),
+                );
+
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;

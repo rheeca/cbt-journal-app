@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 var logger = Logger();
 
@@ -20,6 +21,9 @@ class JournalController extends ChangeNotifier {
 
   final Map<String, JournalEntry> _moodEntriesByDate = {};
   Map<String, JournalEntry> get moodEntriesByDate => _moodEntriesByDate;
+
+  final List<JournalEntry> _selectedDateEntries = [];
+  List<JournalEntry> get selectedDateEntries => _selectedDateEntries;
 
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
@@ -73,5 +77,11 @@ class JournalController extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  void selectDate(DateTime date) {
+    _selectedDateEntries.clear();
+    _selectedDateEntries
+        .addAll(_journalEntries.where((e) => isSameDay(e.createdAt, date)));
   }
 }
