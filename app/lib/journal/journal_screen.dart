@@ -2,6 +2,7 @@ import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -116,6 +117,7 @@ class _CalendarPageState extends State<_CalendarPage> {
   final DateTime now = DateTime.now();
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  String _dropdownSelect = GuidedJournalType.values.first.title;
 
   @override
   void initState() {
@@ -136,15 +138,58 @@ class _CalendarPageState extends State<_CalendarPage> {
       user.createdAt.day,
     );
 
+    final guidedJournals =
+        watchPropertyValue((JournalController c) => c.guidedJournals);
+
+    final goals = watchPropertyValue((JournalController c) => c.goals);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const DropdownMenu<String>(
-            initialSelection: 'Mood',
-            dropdownMenuEntries: [
-              DropdownMenuEntry(value: 'Mood', label: 'Mood'),
+          Row(
+            children: [
+              const Expanded(child: SizedBox()),
+              ElevatedButton(
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Container(
+                        height: 500,
+                        decoration: const BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(10.0)),
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(20.0),
+                            width: double.infinity,
+                            child: ListView(
+                              children: [
+                                buildGroup(
+                                    "Journal Types",
+                                    guidedJournals
+                                        .map((e) => e.title)
+                                        .toList()),
+                                buildGroup("Goals",
+                                    goals.map((e) => e.title).toList()),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  children: [
+                    Text(_dropdownSelect),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+              ),
             ],
           ),
           TableCalendar(
@@ -208,7 +253,7 @@ class _CalendarPageState extends State<_CalendarPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        getMoodEntry(day),
+                        hasJournalEntry(day),
                         Text(day.day.toString()),
                       ],
                     ),
@@ -223,13 +268,37 @@ class _CalendarPageState extends State<_CalendarPage> {
     );
   }
 
+  Widget buildGroup(String title, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        ...items.map((e) => ListTile(
+              onTap: () {
+                setState(() {
+                  _dropdownSelect = e;
+                });
+                context.pop();
+              },
+              title: Text(e),
+            )),
+      ],
+    );
+  }
+
   FocusedDayBuilder _defaultDayBuilder() {
     return (context, day, focusedDay) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            getMoodEntry(day),
+            hasJournalEntry(day),
             Text(day.day.toString()),
           ],
         ),
@@ -237,17 +306,46 @@ class _CalendarPageState extends State<_CalendarPage> {
     };
   }
 
-  Widget getMoodEntry(DateTime day) {
-    final moodEntries = di<JournalController>().moodEntriesByDate;
-    final mood =
-        moodEntries[DateFormat('yyyy-MM-d').format(day)]?.content.first.answer;
-    final icon =
-        mood != null ? Sentiment.getSentimentByValue(mood)?.icon : null;
+  Widget hasJournalEntry(DateTime day) {
+    final moodEntriesByDate = di<JournalController>().moodEntriesByDate;
+    final journalEntriesByDate = di<JournalController>().journalEntriesByDate;
+
+    Icon? icon;
+
+    if (_dropdownSelect == GuidedJournalType.dailyCheckin.title) {
+      final mood = moodEntriesByDate[DateFormat('yyyy-MM-d').format(day)]
+          ?.content
+          .first
+          .answer;
+      icon = mood != null ? Sentiment.getSentimentByValue(mood)?.icon : null;
+    } else {
+      final entries =
+          journalEntriesByDate[DateFormat('yyyy-MM-d').format(day)] ?? [];
+      icon = entries.where((e) => e.title == _dropdownSelect).isNotEmpty
+          ? Icon(GuidedJournalType.getByTitle(_dropdownSelect)?.icon)
+          : null;
+    }
 
     if (icon != null) {
       return icon;
     } else {
       return const SizedBox(height: 24.0);
     }
+  }
+}
+
+enum GuidedJournalType {
+  dailyCheckin('Daily Check-in', Icons.note_alt),
+  gratitude('Gratitude', Icons.volunteer_activism),
+  setAGoal('Set a Goal', Icons.emoji_events),
+  challengeThought('Challenge Thought', Icons.emoji_objects),
+  celebrateWins('Celebrate Wins', Icons.celebration);
+
+  const GuidedJournalType(this.title, this.icon);
+  final String title;
+  final IconData icon;
+
+  static GuidedJournalType? getByTitle(String title) {
+    return GuidedJournalType.values.firstWhereOrNull((e) => e.title == title);
   }
 }

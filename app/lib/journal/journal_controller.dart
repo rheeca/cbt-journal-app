@@ -22,11 +22,18 @@ class JournalController extends ChangeNotifier {
   final Map<String, JournalEntry> _moodEntriesByDate = {};
   Map<String, JournalEntry> get moodEntriesByDate => _moodEntriesByDate;
 
+  final Map<String, List<JournalEntry>> _journalEntriesByDate = {};
+  Map<String, List<JournalEntry>> get journalEntriesByDate =>
+      _journalEntriesByDate;
+
   final List<JournalEntry> _selectedDateEntries = [];
   List<JournalEntry> get selectedDateEntries => _selectedDateEntries;
 
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => _guidedJournals;
+
+  final List<Goal> _goals = [];
+  List<Goal> get goals => _goals;
 
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;
@@ -49,20 +56,32 @@ class JournalController extends ChangeNotifier {
     _journalEntries.addAll(journalEntries);
 
     _moodEntriesByDate.clear();
+    _journalEntriesByDate.clear();
     for (final e in _journalEntries) {
       final date = DateFormat('yyyy-MM-d').format(e.createdAt);
       // TODO: make guided journals types an enum.
       // Checking for Daily Check-in journal.
-      if (e.guidedJournal == '5f3d321c-e835-470d-89c2-b2478a297481' &&
-          ((_moodEntriesByDate[date]?.createdAt)?.isBefore(e.createdAt) ??
-              true)) {
-        _moodEntriesByDate[date] = e;
+      if (e.guidedJournal == '5f3d321c-e835-470d-89c2-b2478a297481') {
+        if ((_moodEntriesByDate[date]?.createdAt)?.isBefore(e.createdAt) ??
+            true) {
+          _moodEntriesByDate[date] = e;
+        }
+      } else {
+        if (_journalEntriesByDate[date] == null) {
+          _journalEntriesByDate[date] = [e];
+        } else {
+          _journalEntriesByDate[date]!.add(e);
+        }
       }
     }
 
     final guidedJournals = await _database.getAllGuidedJournals();
     _guidedJournals.clear();
     _guidedJournals.addAll(guidedJournals);
+
+    final goals = await _database.getGoalsByUser(userId);
+    _goals.clear();
+    _goals.addAll(goals);
 
     _isLoading = false;
     notifyListeners();
