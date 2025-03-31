@@ -1,6 +1,7 @@
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/util/util.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -186,6 +187,8 @@ class _InputWidget extends WatchingWidget {
   Widget build(BuildContext context) {
     if (guideQuestion.type == JournalType.mood) {
       return _MoodJournal(guideQuestion.question, contentController);
+    } else if (guideQuestion.type == JournalType.distortion) {
+      return _DistortionJournal(guideQuestion.question, contentController);
     } else {
       return _TextJournal(guideQuestion.question, contentController);
     }
@@ -260,4 +263,87 @@ class _TextJournal extends WatchingWidget {
   }
 }
 
+class _DistortionJournal extends StatefulWidget {
+  const _DistortionJournal(this.guideQuestion, this.contentController);
+  final String guideQuestion;
+  final TextEditingController contentController;
+
+  @override
+  State<_DistortionJournal> createState() => _DistortionJournalState();
+}
+
+class _DistortionJournalState extends State<_DistortionJournal> {
+  final Set<CognitiveDistortion> selectedDistortions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    final elements = widget.contentController.text
+        .split(',')
+        .map((e) => CognitiveDistortion.getByName(e))
+        .whereType<CognitiveDistortion>()
+        .toList();
+    selectedDistortions.addAll(elements);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(widget.guideQuestion),
+        const SizedBox(height: 12.0),
+        Expanded(
+          child: ListView(
+            children: CognitiveDistortion.values.map((e) {
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedDistortions.contains(e)
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
+                        : null,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Text(e.label),
+                    subtitle: Text(e.description),
+                    onTap: () {
+                      setState(() {
+                        selectedDistortions.contains(e)
+                            ? selectedDistortions.remove(e)
+                            : selectedDistortions.add(e);
+                      });
+                      widget.contentController.text =
+                          selectedDistortions.map((e) => e.name).join(',');
+                    },
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 24.0),
+      ],
+    );
+  }
+}
+
 enum EditJournalMode { create, edit }
+
+enum CognitiveDistortion {
+  allOrNothing(label: 'All-or-nothing thinking', description: ''),
+  catastrophizing(label: 'Catastrophizing', description: ''),
+  minimizingPositive(label: 'Minimizing the positive', description: ''),
+  emotionalReasoning(label: 'Emotional reasoning', description: ''),
+  labeling(label: 'Labeling', description: '');
+
+  const CognitiveDistortion({required this.label, required this.description});
+  final String label;
+  final String description;
+
+  static CognitiveDistortion? getByName(String name) {
+    return CognitiveDistortion.values.firstWhereOrNull((e) => e.name == name);
+  }
+}

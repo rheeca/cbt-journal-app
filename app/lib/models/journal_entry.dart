@@ -48,4 +48,4 @@ class GuidedJournal {
       : id = const Uuid().v4();
 }
 
-enum JournalType { mood, text }
+enum JournalType { mood, text, distortion }

@@ -1,4 +1,5 @@
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
+import 'package:cbt_journal/journal/edit_journal/edit_journal_entry_screen.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:collection/collection.dart';
@@ -99,11 +100,10 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
                   Text(journal.content[e].question,
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8.0),
-                  (guidedJournal.journalType[e] == JournalType.mood)
-                      ? Sentiment.getSentimentByValue(journal.content[e].answer)
-                              ?.icon ??
-                          Sentiment.neutral.icon
-                      : Text(journal.content[e].answer),
+                  _ContentText(
+                    journalType: guidedJournal.journalType[e],
+                    content: journal.content[e].answer,
+                  ),
                 ],
               ),
             );
@@ -111,5 +111,31 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
         ),
       ),
     );
+  }
+}
+
+class _ContentText extends StatelessWidget {
+  const _ContentText({required this.journalType, required this.content});
+  final JournalType journalType;
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    if (journalType == JournalType.mood) {
+      return Sentiment.getSentimentByValue(content)?.icon ??
+          Sentiment.neutral.icon;
+    } else if (journalType == JournalType.distortion) {
+      final distortions = content.split(',');
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: distortions
+            .map(
+              (e) => Text(CognitiveDistortion.getByName(e)?.label ?? ''),
+            )
+            .toList(),
+      );
+    } else {
+      return Text(content);
+    }
   }
 }
