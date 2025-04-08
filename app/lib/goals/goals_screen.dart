@@ -86,9 +86,15 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-                    child: Text(
-                      e.type.label,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    child: Row(
+                      children: [
+                        Icon(e.type.icon),
+                        const SizedBox(width: 8),
+                        Text(
+                          e.type.label,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
                     ),
                   ),
                 ),

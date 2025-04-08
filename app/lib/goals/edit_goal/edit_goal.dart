@@ -19,10 +19,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
 
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const _SelectGoal(),
-    const _SelectFrequency(),
-  ];
+  final List<Widget> _pages = [];
 
   @override
   void initState() {
@@ -32,6 +29,17 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
 
   void _load() async {
     await di<EditGoalController>().load(goalId: widget.goalId);
+    final guideQuestions =
+        di<EditGoalController>().setGoalGuidedJournal!.guideQuestions;
+    final textControllers = di<EditGoalController>().textControllers;
+    _pages.addAll([
+      const _SelectGoal(),
+      ...List.generate(
+        guideQuestions.length,
+        (index) => _TextInput(guideQuestions[index], textControllers[index]),
+      ),
+      const _SelectFrequency(),
+    ]);
   }
 
   @override
@@ -204,6 +212,31 @@ class _SelectFrequencyState extends State<_SelectFrequency> {
               child: const Text('Save Goal'),
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class _TextInput extends WatchingWidget {
+  const _TextInput(this.guideQuestion, this.contentController);
+  final String guideQuestion;
+  final TextEditingController contentController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
+      child: Column(
+        children: [
+          Text(guideQuestion),
+          const SizedBox(height: 12.0),
+          Expanded(
+              child: TextField(
+            controller: contentController,
+            maxLines: null,
+            decoration: null,
+          )),
         ],
       ),
     );

@@ -19,12 +19,11 @@ class EditGoalController extends ChangeNotifier {
     notifyListeners();
   }
 
-  JournalEntry? _setGoalJournal;
-  JournalEntry? get setGoalJournal => _setGoalJournal;
-  set setGoalJournal(JournalEntry? journal) {
-    _setGoalJournal = journal;
-    notifyListeners();
-  }
+  GuidedJournal? _setGoalGuidedJournal;
+  GuidedJournal? get setGoalGuidedJournal => _setGoalGuidedJournal;
+
+  final List<TextEditingController> _textControllers = [];
+  List<TextEditingController> get textControllers => _textControllers;
 
   GoalActivity? _selectedGoalActivity;
   GoalActivity? get selectedGoalActivity => _selectedGoalActivity;
@@ -41,18 +40,25 @@ class EditGoalController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> load({String? goalId, String? journalId}) async {
+  Future<void> load({String? goalId}) async {
     _loading = true;
     notifyListeners();
 
+    _setGoalGuidedJournal =
+        await _database.getGuidedJournalByTitle('Set a Goal');
+
     if (goalId != null) {
       _selectedGoal = await _database.getGoalById(goalId);
+      for (int i = 0; i < _selectedGoal!.guideQuestions.length; i++) {
+        _textControllers.add(TextEditingController(
+            text: _selectedGoal!.guideQuestions[i].answer));
+      }
       _selectedGoalActivity = _selectedGoal?.type;
       _selectedDays.addAll(_selectedGoal?.notificationSchedule ?? []);
-    }
-
-    if (journalId != null) {
-      _setGoalJournal = await _database.getJournalEntryById(journalId);
+    } else {
+      _textControllers.addAll(List.generate(
+          _setGoalGuidedJournal!.guideQuestions.length,
+          (_) => TextEditingController()));
     }
 
     _loading = false;
@@ -63,8 +69,10 @@ class EditGoalController extends ChangeNotifier {
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     final List<GuideQuestion> guideQuestions = [];
-    if (_setGoalJournal != null) {
-      guideQuestions.addAll(_setGoalJournal!.content);
+    for (int i = 0; i < _textControllers.length; i++) {
+      guideQuestions.add(GuideQuestion(
+          question: _setGoalGuidedJournal!.guideQuestions[i],
+          answer: _textControllers[i].text));
     }
 
     if (_selectedGoalActivity == null) {
@@ -82,6 +90,7 @@ class EditGoalController extends ChangeNotifier {
     } else {
       _selectedGoal!.type = _selectedGoalActivity!;
       _selectedGoal!.notificationSchedule = _selectedDays.toList();
+      _selectedGoal!.guideQuestions = guideQuestions;
     }
     await _database.insertGoal(_selectedGoal!);
   }
