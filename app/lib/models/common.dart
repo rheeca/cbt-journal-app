@@ -4,24 +4,34 @@ class GuideQuestion {
   String question;
   String answer;
   JournalType type;
+  AnswerType answerType;
+  String answerCanvas;
 
   GuideQuestion({
     required this.question,
     required this.answer,
     this.type = JournalType.text,
+    this.answerType = AnswerType.text,
+    this.answerCanvas = '[]',
   });
 
   Map<String, String> toMap() {
     return <String, String>{
       'question': question,
       'answer': answer,
+      'type': type.name,
+      'answerType': answerType.name,
+      'answerCanvas': answerCanvas,
     };
   }
 
   GuideQuestion.fromMap(Map<String, String> map)
       : question = map['question'] ?? '',
         answer = map['answer'] ?? '',
-        type = JournalType.text;
+        type = JournalType.getByName(map['type'] ?? '') ?? JournalType.text,
+        answerType =
+            AnswerType.getByName(map['answerType'] ?? '') ?? AnswerType.text,
+        answerCanvas = map['answerCanvas'] ?? '';
 }
 
 enum DayOfWeek {

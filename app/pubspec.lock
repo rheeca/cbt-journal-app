@@ -380,13 +380,13 @@ packages:
     source: hosted
     version: "5.2.1"
   flutter_drawing_board:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_drawing_board
-      sha256: b7eef8c506a12485853e8b4cdc110d1d307993279b588f3a35902a7d7082dbd4
+      sha256: "82700847d7f367c9af1eaf186c88f74a6be821dbe783871e4736bf724f015192"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8"
+    version: "0.7.0+2"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -831,6 +831,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.40.0"
+  stack_board:
+    dependency: "direct main"
+    description:
+      name: stack_board
+      sha256: "7a9f2fb360229992053a9123197cc21753d6cb44a29ea20efbc8f79830841bbb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.6+1"
   stack_trace:
     dependency: transitive
     description:
@@ -991,6 +999,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  widgets_to_image:
+    dependency: "direct main"
+    description:
+      name: widgets_to_image
+      sha256: "9a251b95d3a9f10d72420dde9b7e3b0da5eddd47fb19cad066bc68c60b0d1dfb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   xdg_directories:
     dependency: transitive
     description:

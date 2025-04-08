@@ -71,8 +71,9 @@ class EditGoalController extends ChangeNotifier {
     final List<GuideQuestion> guideQuestions = [];
     for (int i = 0; i < _textControllers.length; i++) {
       guideQuestions.add(GuideQuestion(
-          question: _setGoalGuidedJournal!.guideQuestions[i],
-          answer: _textControllers[i].text));
+        question: _setGoalGuidedJournal!.guideQuestions[i],
+        answer: _textControllers[i].text,
+      ));
     }
 
     if (_selectedGoalActivity == null) {

@@ -1,4 +1,5 @@
 import 'package:cbt_journal/models/model.dart';
+import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
 class JournalEntry {
@@ -48,4 +49,24 @@ class GuidedJournal {
       : id = const Uuid().v4();
 }
 
-enum JournalType { mood, text, distortion }
+enum JournalType {
+  mood,
+  text,
+  distortion;
+
+  const JournalType();
+
+  static JournalType? getByName(String name) {
+    return JournalType.values.firstWhereOrNull((e) => e.name == name);
+  }
+}
+
+enum AnswerType {
+  text,
+  canvas;
+
+  const AnswerType();
+  static AnswerType? getByName(String name) {
+    return AnswerType.values.firstWhereOrNull((e) => e.name == name);
+  }
+}
