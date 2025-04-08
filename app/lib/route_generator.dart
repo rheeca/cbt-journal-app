@@ -4,8 +4,7 @@ import 'package:cbt_journal/home/home_screen.dart';
 import 'package:cbt_journal/journal/journal_screen.dart';
 import 'package:cbt_journal/settings/edit_profile.dart';
 import 'package:cbt_journal/user/sign_in_screen.dart';
-import 'package:cbt_journal/goals/edit_goal/create_goal.dart';
-import 'package:cbt_journal/goals/edit_goal/edit_goal_screen.dart';
+import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/goals/view_goal.dart';
 import 'package:cbt_journal/journal/confirm_create_journal_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_entry_screen.dart';
@@ -80,7 +79,7 @@ GoRouter getRouter(User? user) {
         path: '/journal/create/:guided_journal_id',
         builder: (context, state) {
           return EditJournalEntryScreen(
-            mode: EditJournalMode.create,
+            mode: EditMode.create,
             guidedJournalId: state.pathParameters['guided_journal_id']!,
           );
         },
@@ -89,7 +88,7 @@ GoRouter getRouter(User? user) {
         path: '/journal/edit/:journal_id',
         builder: (context, state) {
           return EditJournalEntryScreen(
-            mode: EditJournalMode.edit,
+            mode: EditMode.edit,
             journalId: state.pathParameters['journal_id']!,
           );
         },
@@ -111,11 +110,9 @@ GoRouter getRouter(User? user) {
         },
       ),
       GoRoute(
-        path: '/goal/create/:journal_id',
+        path: '/goal/create',
         builder: (context, state) {
-          return CreateGoalScreen(
-            journalId: state.pathParameters['journal_id']!,
-          );
+          return const EditGoalScreen();
         },
       ),
       GoRoute(

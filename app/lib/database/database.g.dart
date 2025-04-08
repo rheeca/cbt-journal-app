@@ -1003,6 +1003,11 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 200),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _guideQuestionsMeta =
       const VerificationMeta('guideQuestions');
   @override
@@ -1037,6 +1042,7 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
         userId,
         createdAt,
         title,
+        type,
         guideQuestions,
         notificationSchedule,
         isArchived
@@ -1072,6 +1078,12 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
     context.handle(_guideQuestionsMeta, const VerificationResult.success());
     context.handle(
         _notificationScheduleMeta, const VerificationResult.success());
@@ -1098,6 +1110,8 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       guideQuestions: $GoalsTable.$converterguideQuestions.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}guide_questions'])!),
@@ -1125,6 +1139,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
   final String userId;
   final DateTime createdAt;
   final String title;
+  final String type;
   final List<Map<String, String>> guideQuestions;
   final List<String> notificationSchedule;
   final bool isArchived;
@@ -1133,6 +1148,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       required this.userId,
       required this.createdAt,
       required this.title,
+      required this.type,
       required this.guideQuestions,
       required this.notificationSchedule,
       required this.isArchived});
@@ -1143,6 +1159,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
     map['user_id'] = Variable<String>(userId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['title'] = Variable<String>(title);
+    map['type'] = Variable<String>(type);
     {
       map['guide_questions'] = Variable<String>(
           $GoalsTable.$converterguideQuestions.toSql(guideQuestions));
@@ -1162,6 +1179,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: Value(userId),
       createdAt: Value(createdAt),
       title: Value(title),
+      type: Value(type),
       guideQuestions: Value(guideQuestions),
       notificationSchedule: Value(notificationSchedule),
       isArchived: Value(isArchived),
@@ -1176,6 +1194,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: serializer.fromJson<String>(json['userId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       title: serializer.fromJson<String>(json['title']),
+      type: serializer.fromJson<String>(json['type']),
       guideQuestions: serializer
           .fromJson<List<Map<String, String>>>(json['guideQuestions']),
       notificationSchedule:
@@ -1191,6 +1210,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       'userId': serializer.toJson<String>(userId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'title': serializer.toJson<String>(title),
+      'type': serializer.toJson<String>(type),
       'guideQuestions':
           serializer.toJson<List<Map<String, String>>>(guideQuestions),
       'notificationSchedule':
@@ -1204,6 +1224,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           String? userId,
           DateTime? createdAt,
           String? title,
+          String? type,
           List<Map<String, String>>? guideQuestions,
           List<String>? notificationSchedule,
           bool? isArchived}) =>
@@ -1212,6 +1233,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
         userId: userId ?? this.userId,
         createdAt: createdAt ?? this.createdAt,
         title: title ?? this.title,
+        type: type ?? this.type,
         guideQuestions: guideQuestions ?? this.guideQuestions,
         notificationSchedule: notificationSchedule ?? this.notificationSchedule,
         isArchived: isArchived ?? this.isArchived,
@@ -1222,6 +1244,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       userId: data.userId.present ? data.userId.value : this.userId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       title: data.title.present ? data.title.value : this.title,
+      type: data.type.present ? data.type.value : this.type,
       guideQuestions: data.guideQuestions.present
           ? data.guideQuestions.value
           : this.guideQuestions,
@@ -1240,6 +1263,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('title: $title, ')
+          ..write('type: $type, ')
           ..write('guideQuestions: $guideQuestions, ')
           ..write('notificationSchedule: $notificationSchedule, ')
           ..write('isArchived: $isArchived')
@@ -1248,8 +1272,8 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, createdAt, title, guideQuestions,
-      notificationSchedule, isArchived);
+  int get hashCode => Object.hash(id, userId, createdAt, title, type,
+      guideQuestions, notificationSchedule, isArchived);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1258,6 +1282,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           other.userId == this.userId &&
           other.createdAt == this.createdAt &&
           other.title == this.title &&
+          other.type == this.type &&
           other.guideQuestions == this.guideQuestions &&
           other.notificationSchedule == this.notificationSchedule &&
           other.isArchived == this.isArchived);
@@ -1268,6 +1293,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   final Value<String> userId;
   final Value<DateTime> createdAt;
   final Value<String> title;
+  final Value<String> type;
   final Value<List<Map<String, String>>> guideQuestions;
   final Value<List<String>> notificationSchedule;
   final Value<bool> isArchived;
@@ -1277,6 +1303,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.title = const Value.absent(),
+    this.type = const Value.absent(),
     this.guideQuestions = const Value.absent(),
     this.notificationSchedule = const Value.absent(),
     this.isArchived = const Value.absent(),
@@ -1287,6 +1314,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     required String userId,
     this.createdAt = const Value.absent(),
     required String title,
+    required String type,
     required List<Map<String, String>> guideQuestions,
     required List<String> notificationSchedule,
     this.isArchived = const Value.absent(),
@@ -1294,6 +1322,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   })  : id = Value(id),
         userId = Value(userId),
         title = Value(title),
+        type = Value(type),
         guideQuestions = Value(guideQuestions),
         notificationSchedule = Value(notificationSchedule);
   static Insertable<GoalEntity> custom({
@@ -1301,6 +1330,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     Expression<String>? userId,
     Expression<DateTime>? createdAt,
     Expression<String>? title,
+    Expression<String>? type,
     Expression<String>? guideQuestions,
     Expression<String>? notificationSchedule,
     Expression<bool>? isArchived,
@@ -1311,6 +1341,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       if (userId != null) 'user_id': userId,
       if (createdAt != null) 'created_at': createdAt,
       if (title != null) 'title': title,
+      if (type != null) 'type': type,
       if (guideQuestions != null) 'guide_questions': guideQuestions,
       if (notificationSchedule != null)
         'notification_schedule': notificationSchedule,
@@ -1324,6 +1355,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       Value<String>? userId,
       Value<DateTime>? createdAt,
       Value<String>? title,
+      Value<String>? type,
       Value<List<Map<String, String>>>? guideQuestions,
       Value<List<String>>? notificationSchedule,
       Value<bool>? isArchived,
@@ -1333,6 +1365,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       title: title ?? this.title,
+      type: type ?? this.type,
       guideQuestions: guideQuestions ?? this.guideQuestions,
       notificationSchedule: notificationSchedule ?? this.notificationSchedule,
       isArchived: isArchived ?? this.isArchived,
@@ -1354,6 +1387,9 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
     if (guideQuestions.present) {
       map['guide_questions'] = Variable<String>(
@@ -1380,6 +1416,7 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
           ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('title: $title, ')
+          ..write('type: $type, ')
           ..write('guideQuestions: $guideQuestions, ')
           ..write('notificationSchedule: $notificationSchedule, ')
           ..write('isArchived: $isArchived, ')
@@ -2663,6 +2700,7 @@ typedef $$GoalsTableCreateCompanionBuilder = GoalsCompanion Function({
   required String userId,
   Value<DateTime> createdAt,
   required String title,
+  required String type,
   required List<Map<String, String>> guideQuestions,
   required List<String> notificationSchedule,
   Value<bool> isArchived,
@@ -2673,6 +2711,7 @@ typedef $$GoalsTableUpdateCompanionBuilder = GoalsCompanion Function({
   Value<String> userId,
   Value<DateTime> createdAt,
   Value<String> title,
+  Value<String> type,
   Value<List<Map<String, String>>> guideQuestions,
   Value<List<String>> notificationSchedule,
   Value<bool> isArchived,
@@ -2726,6 +2765,9 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
 
   ColumnFilters<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<List<Map<String, String>>,
           List<Map<String, String>>, String>
@@ -2801,6 +2843,9 @@ class $$GoalsTableOrderingComposer
   ColumnOrderings<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get guideQuestions => $composableBuilder(
       column: $table.guideQuestions,
       builder: (column) => ColumnOrderings(column));
@@ -2850,6 +2895,9 @@ class $$GoalsTableAnnotationComposer
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<List<Map<String, String>>, String>
       get guideQuestions => $composableBuilder(
@@ -2931,6 +2979,7 @@ class $$GoalsTableTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<String> title = const Value.absent(),
+            Value<String> type = const Value.absent(),
             Value<List<Map<String, String>>> guideQuestions =
                 const Value.absent(),
             Value<List<String>> notificationSchedule = const Value.absent(),
@@ -2942,6 +2991,7 @@ class $$GoalsTableTableManager extends RootTableManager<
             userId: userId,
             createdAt: createdAt,
             title: title,
+            type: type,
             guideQuestions: guideQuestions,
             notificationSchedule: notificationSchedule,
             isArchived: isArchived,
@@ -2952,6 +3002,7 @@ class $$GoalsTableTableManager extends RootTableManager<
             required String userId,
             Value<DateTime> createdAt = const Value.absent(),
             required String title,
+            required String type,
             required List<Map<String, String>> guideQuestions,
             required List<String> notificationSchedule,
             Value<bool> isArchived = const Value.absent(),
@@ -2962,6 +3013,7 @@ class $$GoalsTableTableManager extends RootTableManager<
             userId: userId,
             createdAt: createdAt,
             title: title,
+            type: type,
             guideQuestions: guideQuestions,
             notificationSchedule: notificationSchedule,
             isArchived: isArchived,

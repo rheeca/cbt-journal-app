@@ -1,3 +1,4 @@
+import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:drift/drift.dart';
@@ -38,6 +39,7 @@ extension GoalQuery on AppDatabase {
         userId: goal.userId,
         createdAt: goal.createdAt,
         title: goal.title,
+        type: GoalActivity.getByName(goal.type)!,
         guideQuestions: goal.guideQuestions
             .map((e) => md.GuideQuestion.fromMap(e))
             .toList(),
@@ -64,6 +66,7 @@ extension GoalQuery on AppDatabase {
         userId: g.userId,
         createdAt: g.createdAt,
         title: g.title,
+        type: GoalActivity.getByName(g.type)!,
         guideQuestions:
             g.guideQuestions.map((e) => md.GuideQuestion.fromMap(e)).toList(),
         notificationSchedule: g.notificationSchedule
@@ -89,6 +92,7 @@ extension GoalQuery on AppDatabase {
       userId: Value(item.userId),
       createdAt: Value(item.createdAt),
       title: Value(item.title),
+      type: Value(item.type.name),
       guideQuestions: Value(item.guideQuestions.map((e) => e.toMap()).toList()),
       notificationSchedule:
           Value(item.notificationSchedule.map((e) => e.name).toList()),

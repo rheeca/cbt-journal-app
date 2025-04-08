@@ -54,6 +54,7 @@ class Goals extends Table {
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get type => text()();
   TextColumn get guideQuestions => text().map(const QuestionListConverter())();
   TextColumn get notificationSchedule =>
       text().map(const StringListConverter())();

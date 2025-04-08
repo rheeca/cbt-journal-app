@@ -15,7 +15,7 @@ class EditJournalEntryScreen extends WatchingStatefulWidget {
     this.guidedJournalId,
     this.journalId,
   });
-  final EditJournalMode mode;
+  final EditMode mode;
   final String? guidedJournalId;
   final String? journalId;
 
@@ -48,10 +48,9 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
   }
 
   void _load() async {
-    throwIf(
-        widget.mode == EditJournalMode.create && widget.guidedJournalId == null,
+    throwIf(widget.mode == EditMode.create && widget.guidedJournalId == null,
         'Cannot create new journal without guided journal type.');
-    throwIf(widget.mode == EditJournalMode.edit && widget.journalId == null,
+    throwIf(widget.mode == EditMode.edit && widget.journalId == null,
         'Cannot edit journal without existing journal id.');
 
     await di<EditJournalController>()
@@ -61,7 +60,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
   void _initializeJournal() {
     final guidedJournal = di<EditJournalController>().selectedGuidedJournal;
 
-    if (widget.mode == EditJournalMode.create) {
+    if (widget.mode == EditMode.create) {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (guidedJournal != null && userId != null) {
         journalEntry = JournalEntry.createNew(
@@ -148,14 +147,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
                   .insertJournalEntry(journalEntry!);
             }
 
-            if (di<EditJournalController>().selectedGuidedJournal?.title ==
-                    'Set a Goal' &&
-                widget.mode == EditJournalMode.create) {
-              // TODO: Ask if user wants to create a goal
-              if (context.mounted) {
-                context.go('/goal/create/${journalEntry!.id}');
-              }
-            } else if (widget.mode == EditJournalMode.create) {
+            if (widget.mode == EditMode.create) {
               if (context.mounted) {
                 context.pushReplacement('/journal/confirm');
               }
@@ -330,7 +322,7 @@ class _DistortionJournalState extends State<_DistortionJournal> {
   }
 }
 
-enum EditJournalMode { create, edit }
+enum EditMode { create, edit }
 
 enum CognitiveDistortion {
   allOrNothing(label: 'All-or-nothing thinking', description: ''),

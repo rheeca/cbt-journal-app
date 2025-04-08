@@ -126,7 +126,7 @@ class _HomePageState extends State<_HomePage> {
                                   horizontal: 12.0, vertical: 12.0),
                               child: Row(
                                 children: [
-                                  Text(e.title),
+                                  Text(e.type.label),
                                   const Expanded(child: SizedBox()),
                                   FilledButton(
                                       onPressed: () {

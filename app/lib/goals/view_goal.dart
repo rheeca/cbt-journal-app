@@ -79,7 +79,7 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
         margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
         child: ListView(
           children: [
-            Text(selectedGoal.title,
+            Text(selectedGoal.type.label,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 20.0),
             Text('Description', style: Theme.of(context).textTheme.titleMedium),

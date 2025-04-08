@@ -38,16 +38,15 @@ class _GoalsPageState extends State<_GoalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final goalJournal =
-        watchPropertyValue((GoalsController c) => c.setGoalGuidedJournal);
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           FilledButton.icon(
-              onPressed: () {
-                context.push('/journal/create/${goalJournal!.id}');
+              onPressed: () async {
+                await context.push('/goal/create');
+                _load();
+                setState(() {});
               },
               icon: const Icon(Icons.add),
               label: const Text('Create a Goal')),
@@ -81,13 +80,14 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
             .map(
               (e) => Card(
                 child: InkWell(
-                  onTap: () {
-                    context.push('/goal/view/${e.id}');
+                  onTap: () async {
+                    await context.push('/goal/view/${e.id}');
+                    di<GoalsController>().load();
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
                     child: Text(
-                      e.title,
+                      e.type.label,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),

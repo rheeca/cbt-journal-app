@@ -1,5 +1,7 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditGoalController extends ChangeNotifier {
@@ -24,12 +26,29 @@ class EditGoalController extends ChangeNotifier {
     notifyListeners();
   }
 
+  GoalActivity? _selectedGoalActivity;
+  GoalActivity? get selectedGoalActivity => _selectedGoalActivity;
+  set selectedGoalActivity(GoalActivity? value) {
+    _selectedGoalActivity = value;
+    notifyListeners();
+  }
+
+  final Set<DayOfWeek> _selectedDays = {};
+  Set<DayOfWeek> get selectedDays => _selectedDays;
+  set selectedDays(Set<DayOfWeek> value) {
+    _selectedDays.clear();
+    _selectedDays.addAll(value);
+    notifyListeners();
+  }
+
   Future<void> load({String? goalId, String? journalId}) async {
     _loading = true;
     notifyListeners();
 
     if (goalId != null) {
       _selectedGoal = await _database.getGoalById(goalId);
+      _selectedGoalActivity = _selectedGoal?.type;
+      _selectedDays.addAll(_selectedGoal?.notificationSchedule ?? []);
     }
 
     if (journalId != null) {
@@ -40,23 +59,30 @@ class EditGoalController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> insertGoalInDb({Goal? goal}) async {
-    if (goal != null) {
-      await _database.insertGoal(goal);
-    } else if (_selectedGoal != null) {
-      await _database.insertGoal(_selectedGoal!);
-    }
-  }
+  Future<void> insertGoalInDb() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
 
-  void updateGoal(List<bool> selectedDays, String title) {
-    final List<DayOfWeek> notificationSchedule = [];
-    for (int i = 0; i < selectedDays.length; i++) {
-      if (selectedDays[i] == true) {
-        notificationSchedule.add(DayOfWeek.values[i]);
-      }
+    final List<GuideQuestion> guideQuestions = [];
+    if (_setGoalJournal != null) {
+      guideQuestions.addAll(_setGoalJournal!.content);
     }
-    _selectedGoal?.title = title;
-    _selectedGoal?.notificationSchedule.clear();
-    _selectedGoal?.notificationSchedule.addAll(notificationSchedule);
+
+    if (_selectedGoalActivity == null) {
+      return;
+    }
+
+    if (_selectedGoal == null) {
+      _selectedGoal = Goal.createNew(
+        userId: userId,
+        type: _selectedGoalActivity!,
+        guideQuestions: guideQuestions,
+        notificationSchedule: _selectedDays.toList(),
+        journalEntries: [],
+      );
+    } else {
+      _selectedGoal!.type = _selectedGoalActivity!;
+      _selectedGoal!.notificationSchedule = _selectedDays.toList();
+    }
+    await _database.insertGoal(_selectedGoal!);
   }
 }
