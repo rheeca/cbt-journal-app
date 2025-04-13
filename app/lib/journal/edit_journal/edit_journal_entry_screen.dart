@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/edit_journal/stack_objects.dart';
@@ -15,6 +16,7 @@ import 'package:stack_board/stack_board_item.dart';
 import 'package:stack_board/stack_case.dart';
 import 'package:stack_board/stack_items.dart';
 import 'package:watch_it/watch_it.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
 
 class EditJournalEntryScreen extends WatchingStatefulWidget {
   const EditJournalEntryScreen({
@@ -40,6 +42,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
   late final TextEditingController titleController;
   late final TextEditingController contentController;
   late final StackBoardController boardController;
+  late final WidgetsToImageController toImageController;
 
   @override
   void initState() {
@@ -49,6 +52,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
     titleController = TextEditingController();
     contentController = TextEditingController();
     boardController = StackBoardController();
+    toImageController = WidgetsToImageController();
   }
 
   @override
@@ -92,7 +96,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
           getAtIndexOrNull(journalEntry!.content, currentQuestion)?.answer ??
               '';
       loadBoard(getAtIndexOrNull(journalEntry!.content, currentQuestion)
-              ?.answerCanvas ??
+              ?.answerCanvasElements ??
           '[]');
     }
 
@@ -154,7 +158,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () {
+          onPressed: () async {
             final previousQuestion = currentQuestion - 1;
             if (previousQuestion < 0) {
               if (context.canPop()) {
@@ -163,13 +167,21 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
                 context.go('/discover');
               }
             } else {
+              final elements = boardController.getAllData();
+              Uint8List? image;
+              if (elements.isNotEmpty) {
+                image = await toImageController.capture();
+              }
+
               setState(() {
                 guideQuestions[currentQuestion].answer = contentController.text;
                 contentController.text =
                     guideQuestions[previousQuestion].answer;
-                guideQuestions[currentQuestion].answerCanvas =
-                    jsonEncode(boardController.getAllData());
-                loadBoard(guideQuestions[previousQuestion].answerCanvas);
+                guideQuestions[currentQuestion].answerCanvasElements =
+                    jsonEncode(elements);
+                guideQuestions[currentQuestion].answerCanvasImage = image;
+                loadBoard(
+                    guideQuestions[previousQuestion].answerCanvasElements);
                 currentQuestion = previousQuestion;
               });
             }
@@ -196,6 +208,7 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
             contentController: contentController,
             answerType: answerType,
             boardController: boardController,
+            toImageController: toImageController,
           )),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -203,8 +216,12 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
           if (nextQuestion >= guideQuestions.length) {
             // Journal is completed
             guideQuestions[currentQuestion].answer = contentController.text;
-            guideQuestions[currentQuestion].answerCanvas =
+            guideQuestions[currentQuestion].answerCanvasElements =
                 jsonEncode(boardController.getAllData());
+            if (boardController.getAllData().isNotEmpty) {
+              guideQuestions[currentQuestion].answerCanvasImage =
+                  await toImageController.capture();
+            }
             if (journalEntry != null) {
               journalEntry!.content = guideQuestions;
               await di<EditJournalController>()
@@ -219,12 +236,19 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
               if (context.mounted) context.pop(true);
             }
           } else {
+            final elements = boardController.getAllData();
+            Uint8List? image;
+            if (elements.isNotEmpty) {
+              image = await toImageController.capture();
+            }
+
             setState(() {
               guideQuestions[currentQuestion].answer = contentController.text;
               contentController.text = guideQuestions[nextQuestion].answer;
-              guideQuestions[currentQuestion].answerCanvas =
-                  jsonEncode(boardController.getAllData());
-              loadBoard(guideQuestions[nextQuestion].answerCanvas);
+              guideQuestions[currentQuestion].answerCanvasElements =
+                  jsonEncode(elements);
+              guideQuestions[currentQuestion].answerCanvasImage = image;
+              loadBoard(guideQuestions[nextQuestion].answerCanvasElements);
               currentQuestion = nextQuestion;
             });
           }
@@ -242,11 +266,13 @@ class _InputWidget extends WatchingWidget {
     required this.contentController,
     required this.answerType,
     required this.boardController,
+    required this.toImageController,
   });
   final GuideQuestion guideQuestion;
   final TextEditingController contentController;
   final AnswerType answerType;
   final StackBoardController boardController;
+  final WidgetsToImageController toImageController;
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +281,11 @@ class _InputWidget extends WatchingWidget {
     } else if (guideQuestion.type == JournalType.distortion) {
       return _DistortionJournal(guideQuestion.question, contentController);
     } else if (answerType == AnswerType.canvas) {
-      return _CanvasJournal(guideQuestion.question, boardController);
+      return _CanvasJournal(
+        guideQuestion.question,
+        boardController,
+        toImageController,
+      );
     } else {
       return _TextJournal(guideQuestion.question, contentController);
     }
@@ -398,9 +428,14 @@ class _DistortionJournalState extends State<_DistortionJournal> {
 }
 
 class _CanvasJournal extends WatchingWidget {
-  const _CanvasJournal(this.guideQuestion, this.controller);
+  const _CanvasJournal(
+    this.guideQuestion,
+    this.controller,
+    this.toImageController,
+  );
   final String guideQuestion;
   final StackBoardController controller;
+  final WidgetsToImageController toImageController;
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +444,11 @@ class _CanvasJournal extends WatchingWidget {
         children: [
           Text(guideQuestion),
           const SizedBox(height: 12.0),
-          Expanded(child: CustomStackBoard(controller: controller)),
+          Expanded(
+              child: WidgetsToImage(
+            controller: toImageController,
+            child: CustomStackBoard(controller: controller),
+          )),
         ],
       ),
       floatingActionButton: Row(

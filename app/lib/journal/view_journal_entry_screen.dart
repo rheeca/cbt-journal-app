@@ -89,8 +89,7 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
       ),
       body: Container(
         margin: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 64.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: indexList.map((e) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -104,6 +103,11 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
                     journalType: guidedJournal.journalType[e],
                     content: journal.content[e].answer,
                   ),
+                  if (journal.content[e].answerCanvasImage?.isNotEmpty == true)
+                    Image.memory(
+                      journal.content[e].answerCanvasImage!,
+                      fit: BoxFit.contain,
+                    )
                 ],
               ),
             );

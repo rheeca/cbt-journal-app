@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:cbt_journal/models/journal_entry.dart';
 
 class GuideQuestion {
@@ -5,14 +8,16 @@ class GuideQuestion {
   String answer;
   JournalType type;
   AnswerType answerType;
-  String answerCanvas;
+  String answerCanvasElements;
+  Uint8List? answerCanvasImage;
 
   GuideQuestion({
     required this.question,
     required this.answer,
     this.type = JournalType.text,
     this.answerType = AnswerType.text,
-    this.answerCanvas = '[]',
+    this.answerCanvasElements = '[]',
+    this.answerCanvasImage,
   });
 
   Map<String, String> toMap() {
@@ -21,7 +26,9 @@ class GuideQuestion {
       'answer': answer,
       'type': type.name,
       'answerType': answerType.name,
-      'answerCanvas': answerCanvas,
+      'answerCanvasElements': answerCanvasElements,
+      'answerCanvasImage':
+          answerCanvasImage != null ? base64Encode(answerCanvasImage!) : '',
     };
   }
 
@@ -31,7 +38,10 @@ class GuideQuestion {
         type = JournalType.getByName(map['type'] ?? '') ?? JournalType.text,
         answerType =
             AnswerType.getByName(map['answerType'] ?? '') ?? AnswerType.text,
-        answerCanvas = map['answerCanvas'] ?? '';
+        answerCanvasElements = map['answerCanvasElements'] ?? '[]',
+        answerCanvasImage = (map['answerCanvasImage'] ?? '').isNotEmpty
+            ? base64Decode(map['answerCanvasImage']!)
+            : null;
 }
 
 enum DayOfWeek {
