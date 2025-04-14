@@ -276,6 +276,243 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   }
 }
 
+class $GoalCheckInsTable extends GoalCheckIns
+    with TableInfo<$GoalCheckInsTable, GoalCheckInEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GoalCheckInsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES users (id) ON DELETE CASCADE'));
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+      'date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _goalsMeta = const VerificationMeta('goals');
+  @override
+  late final GeneratedColumnWithTypeConverter<Set<String>, String> goals =
+      GeneratedColumn<String>('goals', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Set<String>>($GoalCheckInsTable.$convertergoals);
+  @override
+  List<GeneratedColumn> get $columns => [userId, date, goals];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'goal_check_ins';
+  @override
+  VerificationContext validateIntegrity(Insertable<GoalCheckInEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    context.handle(_goalsMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, date};
+  @override
+  GoalCheckInEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GoalCheckInEntity(
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+      goals: $GoalCheckInsTable.$convertergoals.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}goals'])!),
+    );
+  }
+
+  @override
+  $GoalCheckInsTable createAlias(String alias) {
+    return $GoalCheckInsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Set<String>, String> $convertergoals =
+      const StringSetConverter();
+}
+
+class GoalCheckInEntity extends DataClass
+    implements Insertable<GoalCheckInEntity> {
+  final String userId;
+  final DateTime date;
+  final Set<String> goals;
+  const GoalCheckInEntity(
+      {required this.userId, required this.date, required this.goals});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['date'] = Variable<DateTime>(date);
+    {
+      map['goals'] =
+          Variable<String>($GoalCheckInsTable.$convertergoals.toSql(goals));
+    }
+    return map;
+  }
+
+  GoalCheckInsCompanion toCompanion(bool nullToAbsent) {
+    return GoalCheckInsCompanion(
+      userId: Value(userId),
+      date: Value(date),
+      goals: Value(goals),
+    );
+  }
+
+  factory GoalCheckInEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GoalCheckInEntity(
+      userId: serializer.fromJson<String>(json['userId']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      goals: serializer.fromJson<Set<String>>(json['goals']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'date': serializer.toJson<DateTime>(date),
+      'goals': serializer.toJson<Set<String>>(goals),
+    };
+  }
+
+  GoalCheckInEntity copyWith(
+          {String? userId, DateTime? date, Set<String>? goals}) =>
+      GoalCheckInEntity(
+        userId: userId ?? this.userId,
+        date: date ?? this.date,
+        goals: goals ?? this.goals,
+      );
+  GoalCheckInEntity copyWithCompanion(GoalCheckInsCompanion data) {
+    return GoalCheckInEntity(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      date: data.date.present ? data.date.value : this.date,
+      goals: data.goals.present ? data.goals.value : this.goals,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoalCheckInEntity(')
+          ..write('userId: $userId, ')
+          ..write('date: $date, ')
+          ..write('goals: $goals')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(userId, date, goals);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GoalCheckInEntity &&
+          other.userId == this.userId &&
+          other.date == this.date &&
+          other.goals == this.goals);
+}
+
+class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
+  final Value<String> userId;
+  final Value<DateTime> date;
+  final Value<Set<String>> goals;
+  final Value<int> rowid;
+  const GoalCheckInsCompanion({
+    this.userId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.goals = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GoalCheckInsCompanion.insert({
+    required String userId,
+    required DateTime date,
+    required Set<String> goals,
+    this.rowid = const Value.absent(),
+  })  : userId = Value(userId),
+        date = Value(date),
+        goals = Value(goals);
+  static Insertable<GoalCheckInEntity> custom({
+    Expression<String>? userId,
+    Expression<DateTime>? date,
+    Expression<String>? goals,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (date != null) 'date': date,
+      if (goals != null) 'goals': goals,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GoalCheckInsCompanion copyWith(
+      {Value<String>? userId,
+      Value<DateTime>? date,
+      Value<Set<String>>? goals,
+      Value<int>? rowid}) {
+    return GoalCheckInsCompanion(
+      userId: userId ?? this.userId,
+      date: date ?? this.date,
+      goals: goals ?? this.goals,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (goals.present) {
+      map['goals'] = Variable<String>(
+          $GoalCheckInsTable.$convertergoals.toSql(goals.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoalCheckInsCompanion(')
+          ..write('userId: $userId, ')
+          ..write('date: $date, ')
+          ..write('goals: $goals, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $GuidedJournalsTable extends GuidedJournals
     with TableInfo<$GuidedJournalsTable, GuidedJournalEntity> {
   @override
@@ -1634,6 +1871,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UsersTable users = $UsersTable(this);
+  late final $GoalCheckInsTable goalCheckIns = $GoalCheckInsTable(this);
   late final $GuidedJournalsTable guidedJournals = $GuidedJournalsTable(this);
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
@@ -1643,10 +1881,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, guidedJournals, journalEntries, goals, goalEntries];
+      [users, goalCheckIns, guidedJournals, journalEntries, goals, goalEntries];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('users',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('goal_check_ins', kind: UpdateKind.delete),
+            ],
+          ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('users',
                 limitUpdateKind: UpdateKind.delete),
@@ -1701,6 +1946,20 @@ final class $$UsersTableReferences
     extends BaseReferences<_$AppDatabase, $UsersTable, UserEntity> {
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$GoalCheckInsTable, List<GoalCheckInEntity>>
+      _goalCheckInsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.goalCheckIns,
+          aliasName: $_aliasNameGenerator(db.users.id, db.goalCheckIns.userId));
+
+  $$GoalCheckInsTableProcessedTableManager get goalCheckInsRefs {
+    final manager = $$GoalCheckInsTableTableManager($_db, $_db.goalCheckIns)
+        .filter((f) => f.userId.id($_item.id));
+
+    final cache = $_typedResult.readTableOrNull(_goalCheckInsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
   static MultiTypedResultKey<$JournalEntriesTable, List<JournalEntryEntity>>
       _journalEntriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.journalEntries,
@@ -1750,6 +2009,27 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> goalCheckInsRefs(
+      Expression<bool> Function($$GoalCheckInsTableFilterComposer f) f) {
+    final $$GoalCheckInsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.goalCheckIns,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$GoalCheckInsTableFilterComposer(
+              $db: $db,
+              $table: $db.goalCheckIns,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 
   Expression<bool> journalEntriesRefs(
       Expression<bool> Function($$JournalEntriesTableFilterComposer f) f) {
@@ -1837,6 +2117,27 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => column);
 
+  Expression<T> goalCheckInsRefs<T extends Object>(
+      Expression<T> Function($$GoalCheckInsTableAnnotationComposer a) f) {
+    final $$GoalCheckInsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.goalCheckIns,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$GoalCheckInsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.goalCheckIns,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> journalEntriesRefs<T extends Object>(
       Expression<T> Function($$JournalEntriesTableAnnotationComposer a) f) {
     final $$JournalEntriesTableAnnotationComposer composer = $composerBuilder(
@@ -1891,7 +2192,8 @@ class $$UsersTableTableManager extends RootTableManager<
     $$UsersTableUpdateCompanionBuilder,
     (UserEntity, $$UsersTableReferences),
     UserEntity,
-    PrefetchHooks Function({bool journalEntriesRefs, bool goalsRefs})> {
+    PrefetchHooks Function(
+        {bool goalCheckInsRefs, bool journalEntriesRefs, bool goalsRefs})> {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
       : super(TableManagerState(
           db: db,
@@ -1935,16 +2237,31 @@ class $$UsersTableTableManager extends RootTableManager<
                   (e.readTable(table), $$UsersTableReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: (
-              {journalEntriesRefs = false, goalsRefs = false}) {
+              {goalCheckInsRefs = false,
+              journalEntriesRefs = false,
+              goalsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
+                if (goalCheckInsRefs) db.goalCheckIns,
                 if (journalEntriesRefs) db.journalEntries,
                 if (goalsRefs) db.goals
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (goalCheckInsRefs)
+                    await $_getPrefetchedData(
+                        currentTable: table,
+                        referencedTable:
+                            $$UsersTableReferences._goalCheckInsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$UsersTableReferences(db, table, p0)
+                                .goalCheckInsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.userId == item.id),
+                        typedResults: items),
                   if (journalEntriesRefs)
                     await $_getPrefetchedData(
                         currentTable: table,
@@ -1986,7 +2303,252 @@ typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
     $$UsersTableUpdateCompanionBuilder,
     (UserEntity, $$UsersTableReferences),
     UserEntity,
-    PrefetchHooks Function({bool journalEntriesRefs, bool goalsRefs})>;
+    PrefetchHooks Function(
+        {bool goalCheckInsRefs, bool journalEntriesRefs, bool goalsRefs})>;
+typedef $$GoalCheckInsTableCreateCompanionBuilder = GoalCheckInsCompanion
+    Function({
+  required String userId,
+  required DateTime date,
+  required Set<String> goals,
+  Value<int> rowid,
+});
+typedef $$GoalCheckInsTableUpdateCompanionBuilder = GoalCheckInsCompanion
+    Function({
+  Value<String> userId,
+  Value<DateTime> date,
+  Value<Set<String>> goals,
+  Value<int> rowid,
+});
+
+final class $$GoalCheckInsTableReferences extends BaseReferences<_$AppDatabase,
+    $GoalCheckInsTable, GoalCheckInEntity> {
+  $$GoalCheckInsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) => db.users
+      .createAlias($_aliasNameGenerator(db.goalCheckIns.userId, db.users.id));
+
+  $$UsersTableProcessedTableManager get userId {
+    final manager = $$UsersTableTableManager($_db, $_db.users)
+        .filter((f) => f.id($_item.userId));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$GoalCheckInsTableFilterComposer
+    extends Composer<_$AppDatabase, $GoalCheckInsTable> {
+  $$GoalCheckInsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Set<String>, Set<String>, String> get goals =>
+      $composableBuilder(
+          column: $table.goals,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableFilterComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$GoalCheckInsTableOrderingComposer
+    extends Composer<_$AppDatabase, $GoalCheckInsTable> {
+  $$GoalCheckInsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get goals => $composableBuilder(
+      column: $table.goals, builder: (column) => ColumnOrderings(column));
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableOrderingComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$GoalCheckInsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GoalCheckInsTable> {
+  $$GoalCheckInsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Set<String>, String> get goals =>
+      $composableBuilder(column: $table.goals, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$GoalCheckInsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GoalCheckInsTable,
+    GoalCheckInEntity,
+    $$GoalCheckInsTableFilterComposer,
+    $$GoalCheckInsTableOrderingComposer,
+    $$GoalCheckInsTableAnnotationComposer,
+    $$GoalCheckInsTableCreateCompanionBuilder,
+    $$GoalCheckInsTableUpdateCompanionBuilder,
+    (GoalCheckInEntity, $$GoalCheckInsTableReferences),
+    GoalCheckInEntity,
+    PrefetchHooks Function({bool userId})> {
+  $$GoalCheckInsTableTableManager(_$AppDatabase db, $GoalCheckInsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GoalCheckInsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GoalCheckInsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GoalCheckInsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> userId = const Value.absent(),
+            Value<DateTime> date = const Value.absent(),
+            Value<Set<String>> goals = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GoalCheckInsCompanion(
+            userId: userId,
+            date: date,
+            goals: goals,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String userId,
+            required DateTime date,
+            required Set<String> goals,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GoalCheckInsCompanion.insert(
+            userId: userId,
+            date: date,
+            goals: goals,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$GoalCheckInsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (userId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.userId,
+                    referencedTable:
+                        $$GoalCheckInsTableReferences._userIdTable(db),
+                    referencedColumn:
+                        $$GoalCheckInsTableReferences._userIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$GoalCheckInsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GoalCheckInsTable,
+    GoalCheckInEntity,
+    $$GoalCheckInsTableFilterComposer,
+    $$GoalCheckInsTableOrderingComposer,
+    $$GoalCheckInsTableAnnotationComposer,
+    $$GoalCheckInsTableCreateCompanionBuilder,
+    $$GoalCheckInsTableUpdateCompanionBuilder,
+    (GoalCheckInEntity, $$GoalCheckInsTableReferences),
+    GoalCheckInEntity,
+    PrefetchHooks Function({bool userId})>;
 typedef $$GuidedJournalsTableCreateCompanionBuilder = GuidedJournalsCompanion
     Function({
   required String id,
@@ -3393,6 +3955,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
+  $$GoalCheckInsTableTableManager get goalCheckIns =>
+      $$GoalCheckInsTableTableManager(_db, _db.goalCheckIns);
   $$GuidedJournalsTableTableManager get guidedJournals =>
       $$GuidedJournalsTableTableManager(_db, _db.guidedJournals);
   $$JournalEntriesTableTableManager get journalEntries =>

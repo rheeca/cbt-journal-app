@@ -81,6 +81,20 @@ class GoalEntries extends Table {
   Set<Column> get primaryKey => {journalEntryId};
 }
 
+@DataClassName("GoalCheckInEntity")
+class GoalCheckIns extends Table {
+  TextColumn get userId => text().references(
+        Users,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  DateTimeColumn get date => dateTime()();
+  TextColumn get goals => text().map(const StringSetConverter())();
+
+  @override
+  Set<Column> get primaryKey => {userId, date};
+}
+
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 
@@ -92,6 +106,20 @@ class StringListConverter extends TypeConverter<List<String>, String> {
   @override
   String toSql(List<String> value) {
     return json.encode(value);
+  }
+}
+
+class StringSetConverter extends TypeConverter<Set<String>, String> {
+  const StringSetConverter();
+
+  @override
+  Set<String> fromSql(String fromDb) {
+    return Set<String>.from(json.decode(fromDb));
+  }
+
+  @override
+  String toSql(Set<String> value) {
+    return json.encode(value.toList());
   }
 }
 

@@ -35,6 +35,9 @@ class JournalController extends ChangeNotifier {
   final List<Goal> _goals = [];
   List<Goal> get goals => _goals;
 
+  final List<GoalCheckIn> _goalCheckIns = [];
+  List<GoalCheckIn> get goalCheckIns => _goalCheckIns;
+
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;
 
@@ -82,6 +85,10 @@ class JournalController extends ChangeNotifier {
     final goals = await _database.getGoalsByUser(userId);
     _goals.clear();
     _goals.addAll(goals);
+
+    final checkIns = await _database.getGoalCheckInsByUser(userId);
+    _goalCheckIns.clear();
+    _goalCheckIns.addAll(checkIns);
 
     _isLoading = false;
     notifyListeners();

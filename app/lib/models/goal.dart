@@ -1,5 +1,6 @@
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:uuid/uuid.dart';
 
 class Goal {
@@ -35,4 +36,16 @@ class Goal {
     this.isArchived = false,
   })  : id = const Uuid().v4(),
         createdAt = DateTime.now();
+}
+
+class GoalCheckIn {
+  GoalCheckIn({
+    required this.userId,
+    required date,
+    required this.goals,
+  }) : date = dateOnlyUtc(date);
+
+  final String userId;
+  final DateTime date;
+  final Set<String> goals;
 }

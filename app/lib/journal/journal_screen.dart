@@ -1,4 +1,5 @@
 import 'package:cbt_journal/common/navigation.dart';
+import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
@@ -174,7 +175,7 @@ class _CalendarPageState extends State<_CalendarPage> {
                                         .map((e) => e.title)
                                         .toList()),
                                 buildGroup("Goals",
-                                    goals.map((e) => e.title).toList()),
+                                    goals.map((e) => e.type.label).toList()),
                               ],
                             ),
                           ),
@@ -309,6 +310,7 @@ class _CalendarPageState extends State<_CalendarPage> {
   Widget hasJournalEntry(DateTime day) {
     final moodEntriesByDate = di<JournalController>().moodEntriesByDate;
     final journalEntriesByDate = di<JournalController>().journalEntriesByDate;
+    final goalCheckIns = di<JournalController>().goalCheckIns;
 
     Icon? icon;
 
@@ -318,12 +320,25 @@ class _CalendarPageState extends State<_CalendarPage> {
           .first
           .answer;
       icon = mood != null ? Sentiment.getSentimentByValue(mood)?.icon : null;
-    } else {
+    } else if (GuidedJournalType.values
+        .map((e) => e.title)
+        .contains(_dropdownSelect)) {
       final entries =
           journalEntriesByDate[DateFormat('yyyy-MM-d').format(day)] ?? [];
       icon = entries.where((e) => e.title == _dropdownSelect).isNotEmpty
           ? Icon(GuidedJournalType.getByTitle(_dropdownSelect)?.icon)
           : null;
+    } else {
+      final checkIn = goalCheckIns.firstWhereOrNull((e) {
+        return DateUtils.isSameDay(e.date, day);
+      });
+
+      if (checkIn != null) {
+        final goalActivity = GoalActivity.getByLabel(_dropdownSelect)!;
+        icon = checkIn.goals.contains(goalActivity.name)
+            ? Icon(goalActivity.icon)
+            : null;
+      }
     }
 
     if (icon != null) {

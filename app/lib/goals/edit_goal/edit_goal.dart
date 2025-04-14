@@ -282,4 +282,8 @@ enum GoalActivity {
   static GoalActivity? getByName(String name) {
     return GoalActivity.values.firstWhereOrNull((e) => e.name == name);
   }
+
+  static GoalActivity? getByLabel(String label) {
+    return GoalActivity.values.firstWhereOrNull((e) => e.label == label);
+  }
 }

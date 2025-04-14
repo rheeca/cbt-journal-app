@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,9 @@ class HomeController extends ChangeNotifier {
 
   final List<Goal> _goals = [];
   List<Goal> get goals => _goals;
+
+  GoalCheckIn? _goalCheckIns;
+  GoalCheckIn? get goalCheckIns => _goalCheckIns;
 
   final List<GuidedJournal> _guidedJournals = [];
   List<GuidedJournal> get guidedJournals => List.unmodifiable(_guidedJournals);
@@ -41,6 +45,10 @@ class HomeController extends ChangeNotifier {
     _goals.clear();
     _goals.addAll(goals);
 
+    final dateToday = dateOnlyUtc(DateTime.now().toUtc());
+    _goalCheckIns = await _database.getGoalCheckIn(userId, dateToday);
+    _goalCheckIns ??= GoalCheckIn(userId: userId, date: dateToday, goals: {});
+
     final guidedJournals = await _database.getAllGuidedJournals();
     _guidedJournals.clear();
     _guidedJournals.addAll(guidedJournals);
@@ -58,6 +66,12 @@ class HomeController extends ChangeNotifier {
     _profileCreated = true;
 
     _loading = false;
+    notifyListeners();
+  }
+
+  Future<void> updateGoalCheckIns(GoalCheckIn checkIn) async {
+    _goalCheckIns = checkIn;
+    await _database.insertGoalCheckIn(checkIn);
     notifyListeners();
   }
 }

@@ -75,6 +75,9 @@ class _HomePageState extends State<_HomePage> {
       return false;
     });
 
+    final goalCheckIns =
+        watchPropertyValue((HomeController c) => c.goalCheckIns)!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -128,12 +131,19 @@ class _HomePageState extends State<_HomePage> {
                                 children: [
                                   Text(e.type.label),
                                   const Expanded(child: SizedBox()),
-                                  FilledButton(
-                                      onPressed: () {
-                                        context.push(
-                                            '/journal/create/${dailyJournal!.id}');
-                                      },
-                                      child: const Text('Check-in'))
+                                  Checkbox(
+                                    value: goalCheckIns.goals
+                                        .contains(e.type.name),
+                                    onChanged: (bool? value) {
+                                      if (value == true) {
+                                        goalCheckIns.goals.add(e.type.name);
+                                      } else {
+                                        goalCheckIns.goals.remove(e.type.name);
+                                      }
+                                      di<HomeController>()
+                                          .updateGoalCheckIns(goalCheckIns);
+                                    },
+                                  ),
                                 ],
                               ),
                             ),

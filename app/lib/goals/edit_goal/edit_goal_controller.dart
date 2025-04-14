@@ -44,6 +44,11 @@ class EditGoalController extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
+    _selectedGoal = null;
+    _selectedGoalActivity = null;
+    _textControllers.clear();
+    _selectedDays.clear();
+
     _setGoalGuidedJournal =
         await _database.getGuidedJournalByTitle('Set a Goal');
 

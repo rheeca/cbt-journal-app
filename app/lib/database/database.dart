@@ -1,6 +1,7 @@
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:logger/logger.dart';
@@ -11,8 +12,14 @@ part 'database.g.dart';
 
 var logger = Logger();
 
-@DriftDatabase(
-    tables: [GoalEntries, Goals, GuidedJournals, JournalEntries, Users])
+@DriftDatabase(tables: [
+  GoalCheckIns,
+  GoalEntries,
+  Goals,
+  GuidedJournals,
+  JournalEntries,
+  Users,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'cbt_journal_database'));
 
@@ -118,6 +125,45 @@ extension GoalQuery on AppDatabase {
   Future<void> deleteGoalEntry(String id) {
     return (delete(goalEntries)..where((t) => t.journalEntryId.isValue(id)))
         .go();
+  }
+
+  Future<List<md.GoalCheckIn>> getGoalCheckInsByUser(String userId) async {
+    final items = await (select(goalCheckIns)
+          ..where((t) => t.userId.equals(userId)))
+        .get();
+
+    return items
+        .map((e) => md.GoalCheckIn(
+              userId: e.userId,
+              date: e.date,
+              goals: e.goals,
+            ))
+        .toList();
+  }
+
+  Future<md.GoalCheckIn?> getGoalCheckIn(String userId, DateTime date) async {
+    final item = await (select(goalCheckIns)
+          ..where((t) =>
+              t.userId.equals(userId) & t.date.equals(dateOnlyUtc(date))))
+        .getSingleOrNull();
+
+    if (item != null) {
+      return md.GoalCheckIn(
+        userId: item.userId,
+        date: item.date,
+        goals: item.goals,
+      );
+    } else {
+      return null;
+    }
+  }
+
+  Future<int> insertGoalCheckIn(md.GoalCheckIn item) {
+    return into(goalCheckIns).insertOnConflictUpdate(GoalCheckInsCompanion(
+      userId: Value(item.userId),
+      date: Value(dateOnlyUtc(item.date)),
+      goals: Value(item.goals),
+    ));
   }
 }
 
