@@ -1,13 +1,33 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
-package auth;
+package journal;
 
-service User {
-  rpc Login (LoginRequest) returns (LoginResponse) {}
+service UserService {
+  rpc ReadUsers (ReadUsersRequest) returns (ReadUsersResponse) {}
+  rpc WriteUsers (WriteUsersRequest) returns (WriteUsersResponse) {}
 }
 
-message LoginRequest {
+message ReadUsersRequest {
+  repeated string ids = 1;
 }
 
-message LoginResponse {
+message ReadUsersResponse {
+  repeated User users = 1;
+}
+
+message WriteUsersRequest {
+  repeated User users = 1;
+}
+
+message WriteUsersResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  google.protobuf.Timestamp created_at = 3;
+  string display_name = 4;
 }
