@@ -1,5 +1,6 @@
 import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/home/home_controller.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:cbt_journal/user/create_profile.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +13,24 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: const _HomePage(),
-      drawer: const AppDrawer(),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/home_background.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: const _HomePage(),
+          drawer: const AppDrawer(),
+          backgroundColor: Colors.transparent,
+        ),
+      ],
     );
   }
 }
@@ -86,73 +101,102 @@ class _HomePageState extends State<_HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Welcome back, $username!'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Welcome back, $username!',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12.0),
+          const SizedBox(height: 70.0),
           Card(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                alignment: Alignment.center,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 50),
-                    FilledButton(
-                        onPressed: () {
-                          context.push('/journal/create/${dailyJournal!.id}');
-                        },
-                        child: const Text('Start')),
-                  ],
-                ),
+            margin: const EdgeInsets.symmetric(
+              vertical: 8.0,
+              horizontal: 20.0,
+            ),
+            color: AppColor.white.color.withValues(alpha: 0.9),
+            elevation: 8.0,
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'How are you?',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton(
+                          onPressed: () {
+                            context.push('/journal/create/${dailyJournal!.id}');
+                          },
+                          child: const Text('Check In')),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
           const SizedBox(height: 12.0),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Today\'s Goals'),
+              Text(
+                'Today\'s Goals',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontSize: 20,
+                    ),
+              ),
             ],
           ),
           todaysGoals.isNotEmpty
               ? Expanded(
-                  child: ListView(
-                    children: todaysGoals
-                        .map(
-                          (e) => Card(
-                              child: Container(
+                  child: SizedBox(
+                    child: Card(
+                      color: AppColor.white.color.withValues(alpha: 0.9),
+                      margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
+                      child: ListView.separated(
+                        itemCount: todaysGoals.length,
+                        separatorBuilder: (BuildContext context, int index) =>
+                            const Divider(),
+                        itemBuilder: (BuildContext context, int index) {
+                          final item = todaysGoals.toList()[index];
+                          return Container(
                             alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12.0, vertical: 12.0),
-                              child: Row(
-                                children: [
-                                  Text(e.type.label),
-                                  const Expanded(child: SizedBox()),
-                                  Checkbox(
-                                    value: goalCheckIns.goals
-                                        .contains(e.type.name),
-                                    onChanged: (bool? value) {
-                                      if (value == true) {
-                                        goalCheckIns.goals.add(e.type.name);
-                                      } else {
-                                        goalCheckIns.goals.remove(e.type.name);
-                                      }
-                                      di<HomeController>()
-                                          .updateGoalCheckIns(goalCheckIns);
-                                    },
-                                  ),
-                                ],
-                              ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 28.0, vertical: 4.0),
+                            child: Row(
+                              children: [
+                                Text(item.type.label),
+                                const Expanded(child: SizedBox()),
+                                Checkbox(
+                                  value: goalCheckIns.goals
+                                      .contains(item.type.name),
+                                  onChanged: (bool? value) {
+                                    if (value == true) {
+                                      goalCheckIns.goals.add(item.type.name);
+                                    } else {
+                                      goalCheckIns.goals.remove(item.type.name);
+                                    }
+                                    di<HomeController>()
+                                        .updateGoalCheckIns(goalCheckIns);
+                                  },
+                                ),
+                              ],
                             ),
-                          )),
-                        )
-                        .toList(),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 )
-              : const Text('No goals for today')
+              : const Text('No goals for today'),
         ],
       ),
     );

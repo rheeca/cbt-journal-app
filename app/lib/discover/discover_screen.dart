@@ -1,5 +1,6 @@
 import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/discover/discover_controller.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -10,10 +11,23 @@ class DiscoverScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: const _DiscoverPage(),
-      drawer: const AppDrawer(),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            color: AppColor.white.color,
+          ),
+        ),
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: const _DiscoverPage(),
+          drawer: const AppDrawer(),
+          backgroundColor: Colors.transparent,
+        ),
+      ],
     );
   }
 }
@@ -51,29 +65,56 @@ class _DiscoverPageState extends State<_DiscoverPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        children: guidedJournals
-            .map(
-              (e) => Card(
-                  child: Container(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 12.0),
-                  child: Row(
-                    children: [
-                      Text(e.title),
-                      const Expanded(child: SizedBox()),
-                      FilledButton(
-                          onPressed: () {
-                            context.push('/journal/create/${e.id}');
-                          },
-                          child: const Text('Start'))
-                    ],
-                  ),
-                ),
-              )),
-            )
-            .toList(),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'Guided Journals',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12.0),
+          Wrap(
+            children: guidedJournals
+                .map(
+                  (e) => Card(
+                      child: InkWell(
+                    onTap: () {
+                      context.push('/journal/create/${e.id}');
+                    },
+                    child: SizedBox(
+                      height: 150,
+                      width: 170,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Image.asset(
+                              'assets/${e.id}.png',
+                              height: 112.0,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const SizedBox(),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 20.0),
+                            child: Text(
+                              e.title.toUpperCase(),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
+                )
+                .toList(),
+          ),
+        ],
       ),
     );
   }

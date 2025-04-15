@@ -3,6 +3,7 @@ import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -18,20 +19,32 @@ class JournalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Entries'),
-              Tab(text: 'Calendar'),
-            ],
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              color: AppColor.white.color,
+            ),
           ),
-        ),
-        body: const TabBarView(children: [
-          _JournalPage(),
-          _CalendarPage(),
-        ]),
-        drawer: const AppDrawer(),
+          Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              bottom: const TabBar(
+                tabs: [
+                  Tab(text: 'Entries'),
+                  Tab(text: 'Calendar'),
+                ],
+              ),
+            ),
+            body: const TabBarView(children: [
+              _JournalPage(),
+              _CalendarPage(),
+            ]),
+            drawer: const AppDrawer(),
+            backgroundColor: Colors.transparent,
+          ),
+        ],
       ),
     );
   }

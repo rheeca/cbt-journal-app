@@ -143,31 +143,29 @@ class ScaffoldWithNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (int index) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _calculateSelectedIndex(context),
+        onDestinationSelected: (int index) {
           _onItemTapped(index, context);
         },
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        destinations: const <NavigationDestination>[
+          NavigationDestination(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.dashboard),
             label: 'Discover',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.emoji_events),
             label: 'Goals',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.event_note),
             label: 'My Journal',
           ),
         ],
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
       ),
     );
   }

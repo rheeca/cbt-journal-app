@@ -63,8 +63,7 @@ class JournalController extends ChangeNotifier {
     for (final e in _journalEntries) {
       final date = DateFormat('yyyy-MM-d').format(e.createdAt);
       // TODO: make guided journals types an enum.
-      // Checking for Daily Check-in journal.
-      if (e.guidedJournal == '5f3d321c-e835-470d-89c2-b2478a297481') {
+      if (e.guidedJournal == 'dailyCheckIn') {
         if ((_moodEntriesByDate[date]?.createdAt)?.isBefore(e.createdAt) ??
             true) {
           _moodEntriesByDate[date] = e;
