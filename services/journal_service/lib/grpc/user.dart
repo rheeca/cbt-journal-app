@@ -1,18 +1,37 @@
 import 'package:grpc/grpc.dart';
+import 'package:journal_service/database/database.dart';
 import 'package:journal_service/generated/user.pbgrpc.dart';
 
 class UserService extends UserServiceBase {
+  final database = AppDatabase();
+
   @override
   Future<ReadUsersResponse> readUsers(
       ServiceCall call, ReadUsersRequest request) async {
-    print('Received read user request: $request');
-    return ReadUsersResponse();
+    final List<User> users = [];
+    try {
+      await database.getUsers(request.ids);
+    } catch (e) {
+      return ReadUsersResponse(
+        users: [],
+      );
+    }
+
+    return ReadUsersResponse(users: users);
   }
 
   @override
   Future<WriteUsersResponse> writeUsers(
       ServiceCall call, WriteUsersRequest request) async {
-    print('Received write user request: $request');
-    return WriteUsersResponse();
+    try {
+      await database.insertUsers(request.users);
+    } catch (e) {
+      return WriteUsersResponse(
+        status: 500,
+        errorMessage: 'failed to insert users into database',
+      );
+    }
+
+    return WriteUsersResponse(status: 200);
   }
 }
