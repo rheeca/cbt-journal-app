@@ -10,7 +10,8 @@ class UserService extends UserServiceBase {
       ServiceCall call, ReadUsersRequest request) async {
     final List<User> users = [];
     try {
-      await database.getUsers(request.ids);
+      final res = await database.getUsers(request.ids);
+      users.addAll(res);
     } catch (e) {
       return ReadUsersResponse(
         users: [],
