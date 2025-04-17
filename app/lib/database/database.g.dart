@@ -1867,6 +1867,195 @@ class GoalEntriesCompanion extends UpdateCompanion<GoalEntryEntity> {
   }
 }
 
+class $SyncLogsTable extends SyncLogs
+    with TableInfo<$SyncLogsTable, SyncLogEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, type];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_logs';
+  @override
+  VerificationContext validateIntegrity(Insertable<SyncLogEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id, type};
+  @override
+  SyncLogEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncLogEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+    );
+  }
+
+  @override
+  $SyncLogsTable createAlias(String alias) {
+    return $SyncLogsTable(attachedDatabase, alias);
+  }
+}
+
+class SyncLogEntity extends DataClass implements Insertable<SyncLogEntity> {
+  final String id;
+  final String type;
+  const SyncLogEntity({required this.id, required this.type});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['type'] = Variable<String>(type);
+    return map;
+  }
+
+  SyncLogsCompanion toCompanion(bool nullToAbsent) {
+    return SyncLogsCompanion(
+      id: Value(id),
+      type: Value(type),
+    );
+  }
+
+  factory SyncLogEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncLogEntity(
+      id: serializer.fromJson<String>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'type': serializer.toJson<String>(type),
+    };
+  }
+
+  SyncLogEntity copyWith({String? id, String? type}) => SyncLogEntity(
+        id: id ?? this.id,
+        type: type ?? this.type,
+      );
+  SyncLogEntity copyWithCompanion(SyncLogsCompanion data) {
+    return SyncLogEntity(
+      id: data.id.present ? data.id.value : this.id,
+      type: data.type.present ? data.type.value : this.type,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncLogEntity(')
+          ..write('id: $id, ')
+          ..write('type: $type')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, type);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncLogEntity &&
+          other.id == this.id &&
+          other.type == this.type);
+}
+
+class SyncLogsCompanion extends UpdateCompanion<SyncLogEntity> {
+  final Value<String> id;
+  final Value<String> type;
+  final Value<int> rowid;
+  const SyncLogsCompanion({
+    this.id = const Value.absent(),
+    this.type = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncLogsCompanion.insert({
+    required String id,
+    required String type,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        type = Value(type);
+  static Insertable<SyncLogEntity> custom({
+    Expression<String>? id,
+    Expression<String>? type,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (type != null) 'type': type,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncLogsCompanion copyWith(
+      {Value<String>? id, Value<String>? type, Value<int>? rowid}) {
+    return SyncLogsCompanion(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1876,12 +2065,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
   late final $GoalEntriesTable goalEntries = $GoalEntriesTable(this);
+  late final $SyncLogsTable syncLogs = $SyncLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, goalCheckIns, guidedJournals, journalEntries, goals, goalEntries];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        users,
+        goalCheckIns,
+        guidedJournals,
+        journalEntries,
+        goals,
+        goalEntries,
+        syncLogs
+      ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -3949,6 +4146,132 @@ typedef $$GoalEntriesTableProcessedTableManager = ProcessedTableManager<
     (GoalEntryEntity, $$GoalEntriesTableReferences),
     GoalEntryEntity,
     PrefetchHooks Function({bool journalEntryId, bool goalId})>;
+typedef $$SyncLogsTableCreateCompanionBuilder = SyncLogsCompanion Function({
+  required String id,
+  required String type,
+  Value<int> rowid,
+});
+typedef $$SyncLogsTableUpdateCompanionBuilder = SyncLogsCompanion Function({
+  Value<String> id,
+  Value<String> type,
+  Value<int> rowid,
+});
+
+class $$SyncLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncLogsTable> {
+  $$SyncLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+}
+
+class $$SyncLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncLogsTable> {
+  $$SyncLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SyncLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncLogsTable> {
+  $$SyncLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+}
+
+class $$SyncLogsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SyncLogsTable,
+    SyncLogEntity,
+    $$SyncLogsTableFilterComposer,
+    $$SyncLogsTableOrderingComposer,
+    $$SyncLogsTableAnnotationComposer,
+    $$SyncLogsTableCreateCompanionBuilder,
+    $$SyncLogsTableUpdateCompanionBuilder,
+    (
+      SyncLogEntity,
+      BaseReferences<_$AppDatabase, $SyncLogsTable, SyncLogEntity>
+    ),
+    SyncLogEntity,
+    PrefetchHooks Function()> {
+  $$SyncLogsTableTableManager(_$AppDatabase db, $SyncLogsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncLogsCompanion(
+            id: id,
+            type: type,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String type,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncLogsCompanion.insert(
+            id: id,
+            type: type,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SyncLogsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SyncLogsTable,
+    SyncLogEntity,
+    $$SyncLogsTableFilterComposer,
+    $$SyncLogsTableOrderingComposer,
+    $$SyncLogsTableAnnotationComposer,
+    $$SyncLogsTableCreateCompanionBuilder,
+    $$SyncLogsTableUpdateCompanionBuilder,
+    (
+      SyncLogEntity,
+      BaseReferences<_$AppDatabase, $SyncLogsTable, SyncLogEntity>
+    ),
+    SyncLogEntity,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3965,4 +4288,6 @@ class $AppDatabaseManager {
       $$GoalsTableTableManager(_db, _db.goals);
   $$GoalEntriesTableTableManager get goalEntries =>
       $$GoalEntriesTableTableManager(_db, _db.goalEntries);
+  $$SyncLogsTableTableManager get syncLogs =>
+      $$SyncLogsTableTableManager(_db, _db.syncLogs);
 }

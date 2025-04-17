@@ -44,6 +44,15 @@ class GuideQuestion {
             : null;
 }
 
+class SyncLog {
+  SyncLog(this.id, this.type);
+
+  final String id;
+  final DatabaseType type;
+}
+
+enum DatabaseType { goalCheckIn, goal, journalEntry, user }
+
 enum DayOfWeek {
   monday(singleLetter: 'M'),
   tuesday(singleLetter: 'T'),

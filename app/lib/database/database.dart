@@ -1,3 +1,4 @@
+import 'package:cbt_journal/generated/user.pb.dart';
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
@@ -18,6 +19,7 @@ var logger = Logger();
   Goals,
   GuidedJournals,
   JournalEntries,
+  SyncLogs,
   Users,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -246,7 +248,21 @@ extension UserQuery on AppDatabase {
     }
   }
 
+  Future<List<User>> getUsers(List<String> ids) async {
+    final items = await (select(users)..where((t) => t.id.isIn(ids))).get();
+    return items
+        .map((e) => User(
+              id: e.id,
+              email: e.email,
+              createdAt: e.createdAt.toProtoTimestamp(),
+              displayName: e.displayName,
+            ))
+        .toList();
+  }
+
   Future<int> insertUser(md.UserModel user) {
+    insertSyncLog(md.SyncLog(user.userId, DatabaseType.user));
+
     return into(users).insertOnConflictUpdate(UsersCompanion(
       id: Value(user.userId),
       email: Value(user.email),
@@ -256,6 +272,8 @@ extension UserQuery on AppDatabase {
   }
 
   Future<void> deleteUser(String id) {
+    insertSyncLog(md.SyncLog(id, DatabaseType.user));
+
     return (delete(users)..where((t) => t.id.isValue(id))).go();
   }
 }
@@ -312,5 +330,25 @@ extension JournalEntryQuery on AppDatabase {
 
   Future<void> deleteJournalEntry(String id) {
     return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
+  }
+}
+
+extension SyncLogQuery on AppDatabase {
+  Future<List<md.SyncLog>> getSyncLogs() async {
+    final logs = await (select(syncLogs)).get();
+    return logs
+        .map((e) => md.SyncLog(e.id, DatabaseType.values.byName(e.type)))
+        .toList();
+  }
+
+  Future<int> insertSyncLog(md.SyncLog log) {
+    return into(syncLogs).insertOnConflictUpdate(SyncLogsCompanion(
+      id: Value(log.id),
+      type: Value(log.type.name),
+    ));
+  }
+
+  Future<void> clearSyncLogs() {
+    return (delete(syncLogs)).go();
   }
 }

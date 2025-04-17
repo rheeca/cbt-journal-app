@@ -95,6 +95,15 @@ class GoalCheckIns extends Table {
   Set<Column> get primaryKey => {userId, date};
 }
 
+@DataClassName("SyncLogEntity")
+class SyncLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get type => text()();
+
+  @override
+  Set<Column> get primaryKey => {id, type};
+}
+
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 

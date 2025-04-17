@@ -213,6 +213,114 @@ class WriteUsersResponse extends $pb.GeneratedMessage {
   void clearErrorMessage() => $_clearField(2);
 }
 
+class DeleteUsersRequest extends $pb.GeneratedMessage {
+  factory DeleteUsersRequest({
+    $core.Iterable<$core.String>? ids,
+  }) {
+    final $result = create();
+    if (ids != null) {
+      $result.ids.addAll(ids);
+    }
+    return $result;
+  }
+  DeleteUsersRequest._() : super();
+  factory DeleteUsersRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteUsersRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteUsersRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'ids')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteUsersRequest clone() => DeleteUsersRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteUsersRequest copyWith(void Function(DeleteUsersRequest) updates) => super.copyWith((message) => updates(message as DeleteUsersRequest)) as DeleteUsersRequest;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DeleteUsersRequest create() => DeleteUsersRequest._();
+  DeleteUsersRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteUsersRequest> createRepeated() => $pb.PbList<DeleteUsersRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteUsersRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteUsersRequest>(create);
+  static DeleteUsersRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get ids => $_getList(0);
+}
+
+class DeleteUsersResponse extends $pb.GeneratedMessage {
+  factory DeleteUsersResponse({
+    $core.int? status,
+    $core.String? errorMessage,
+  }) {
+    final $result = create();
+    if (status != null) {
+      $result.status = status;
+    }
+    if (errorMessage != null) {
+      $result.errorMessage = errorMessage;
+    }
+    return $result;
+  }
+  DeleteUsersResponse._() : super();
+  factory DeleteUsersResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteUsersResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteUsersResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'status', $pb.PbFieldType.O3)
+    ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteUsersResponse clone() => DeleteUsersResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteUsersResponse copyWith(void Function(DeleteUsersResponse) updates) => super.copyWith((message) => updates(message as DeleteUsersResponse)) as DeleteUsersResponse;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DeleteUsersResponse create() => DeleteUsersResponse._();
+  DeleteUsersResponse createEmptyInstance() => create();
+  static $pb.PbList<DeleteUsersResponse> createRepeated() => $pb.PbList<DeleteUsersResponse>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteUsersResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteUsersResponse>(create);
+  static DeleteUsersResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get status => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set status($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get errorMessage => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set errorMessage($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasErrorMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearErrorMessage() => $_clearField(2);
+}
+
 class User extends $pb.GeneratedMessage {
   factory User({
     $core.String? id,
