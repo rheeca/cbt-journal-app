@@ -1,5 +1,5 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:journal_service/generated/models.dart';
+import 'package:journal_service/generated/google/protobuf/timestamp.pb.dart';
 
 extension DateTimeToTimestamp on DateTime {
   Timestamp toProtoTimestamp() {
