@@ -35,4 +35,19 @@ class UserService extends UserServiceBase {
 
     return WriteUsersResponse(status: 200);
   }
+
+  @override
+  Future<DeleteUsersResponse> deleteUsers(
+      ServiceCall call, DeleteUsersRequest request) async {
+    try {
+      await database.deleteUsers(request.ids);
+    } catch (e) {
+      return DeleteUsersResponse(
+        status: 500,
+        errorMessage: 'failed to delete users from database',
+      );
+    }
+
+    return DeleteUsersResponse(status: 200);
+  }
 }

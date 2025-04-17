@@ -1,7 +1,7 @@
 import 'package:dotenv/dotenv.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_postgres/drift_postgres.dart';
-import 'package:journal_service/generated/models.dart';
+import 'package:journal_service/generated/user.pbgrpc.dart';
 import 'package:journal_service/utils/util.dart';
 import 'package:postgres/postgres.dart';
 
@@ -72,5 +72,9 @@ extension UserQuery on AppDatabase {
 
   Future<void> deleteUser(String id) {
     return (delete(users)..where((t) => t.id.isValue(id))).go();
+  }
+
+  Future<void> deleteUsers(List<String> ids) {
+    return (delete(users)..where((t) => t.id.isIn(ids))).go();
   }
 }
