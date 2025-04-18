@@ -19,11 +19,11 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class ReadGoalsRequest extends $pb.GeneratedMessage {
   factory ReadGoalsRequest({
-    $core.Iterable<$core.String>? ids,
+    $core.String? userId,
   }) {
     final $result = create();
-    if (ids != null) {
-      $result.ids.addAll(ids);
+    if (userId != null) {
+      $result.userId = userId;
     }
     return $result;
   }
@@ -32,7 +32,7 @@ class ReadGoalsRequest extends $pb.GeneratedMessage {
   factory ReadGoalsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReadGoalsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
-    ..pPS(1, _omitFieldNames ? '' : 'ids')
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..hasRequiredFields = false
   ;
 
@@ -58,7 +58,13 @@ class ReadGoalsRequest extends $pb.GeneratedMessage {
   static ReadGoalsRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $pb.PbList<$core.String> get ids => $_getList(0);
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => $_clearField(1);
 }
 
 class ReadGoalsResponse extends $pb.GeneratedMessage {

@@ -17,13 +17,13 @@ import 'dart:typed_data' as $typed_data;
 const ReadGoalsRequest$json = {
   '1': 'ReadGoalsRequest',
   '2': [
-    {'1': 'ids', '3': 1, '4': 3, '5': 9, '10': 'ids'},
+    {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
   ],
 };
 
 /// Descriptor for `ReadGoalsRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readGoalsRequestDescriptor = $convert.base64Decode(
-    'ChBSZWFkR29hbHNSZXF1ZXN0EhAKA2lkcxgBIAMoCVIDaWRz');
+    'ChBSZWFkR29hbHNSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZA==');
 
 @$core.Deprecated('Use readGoalsResponseDescriptor instead')
 const ReadGoalsResponse$json = {

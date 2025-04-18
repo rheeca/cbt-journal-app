@@ -17,13 +17,13 @@ import 'dart:typed_data' as $typed_data;
 const ReadJournalEntriesRequest$json = {
   '1': 'ReadJournalEntriesRequest',
   '2': [
-    {'1': 'ids', '3': 1, '4': 3, '5': 9, '10': 'ids'},
+    {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
   ],
 };
 
 /// Descriptor for `ReadJournalEntriesRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readJournalEntriesRequestDescriptor = $convert.base64Decode(
-    'ChlSZWFkSm91cm5hbEVudHJpZXNSZXF1ZXN0EhAKA2lkcxgBIAMoCVIDaWRz');
+    'ChlSZWFkSm91cm5hbEVudHJpZXNSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZA==');
 
 @$core.Deprecated('Use readJournalEntriesResponseDescriptor instead')
 const ReadJournalEntriesResponse$json = {

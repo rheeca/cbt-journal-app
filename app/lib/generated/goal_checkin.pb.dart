@@ -19,11 +19,11 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class ReadGoalCheckInsRequest extends $pb.GeneratedMessage {
   factory ReadGoalCheckInsRequest({
-    $core.Iterable<$core.String>? ids,
+    $core.String? userId,
   }) {
     final $result = create();
-    if (ids != null) {
-      $result.ids.addAll(ids);
+    if (userId != null) {
+      $result.userId = userId;
     }
     return $result;
   }
@@ -32,7 +32,7 @@ class ReadGoalCheckInsRequest extends $pb.GeneratedMessage {
   factory ReadGoalCheckInsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReadGoalCheckInsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
-    ..pPS(1, _omitFieldNames ? '' : 'ids')
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..hasRequiredFields = false
   ;
 
@@ -58,7 +58,13 @@ class ReadGoalCheckInsRequest extends $pb.GeneratedMessage {
   static ReadGoalCheckInsRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $pb.PbList<$core.String> get ids => $_getList(0);
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => $_clearField(1);
 }
 
 class ReadGoalCheckInsResponse extends $pb.GeneratedMessage {
@@ -213,126 +219,18 @@ class WriteGoalCheckInsResponse extends $pb.GeneratedMessage {
   void clearErrorMessage() => $_clearField(2);
 }
 
-class DeleteGoalCheckInsRequest extends $pb.GeneratedMessage {
-  factory DeleteGoalCheckInsRequest({
-    $core.Iterable<$core.String>? ids,
-  }) {
-    final $result = create();
-    if (ids != null) {
-      $result.ids.addAll(ids);
-    }
-    return $result;
-  }
-  DeleteGoalCheckInsRequest._() : super();
-  factory DeleteGoalCheckInsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeleteGoalCheckInsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteGoalCheckInsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
-    ..pPS(1, _omitFieldNames ? '' : 'ids')
-    ..hasRequiredFields = false
-  ;
-
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  DeleteGoalCheckInsRequest clone() => DeleteGoalCheckInsRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DeleteGoalCheckInsRequest copyWith(void Function(DeleteGoalCheckInsRequest) updates) => super.copyWith((message) => updates(message as DeleteGoalCheckInsRequest)) as DeleteGoalCheckInsRequest;
-
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static DeleteGoalCheckInsRequest create() => DeleteGoalCheckInsRequest._();
-  DeleteGoalCheckInsRequest createEmptyInstance() => create();
-  static $pb.PbList<DeleteGoalCheckInsRequest> createRepeated() => $pb.PbList<DeleteGoalCheckInsRequest>();
-  @$core.pragma('dart2js:noInline')
-  static DeleteGoalCheckInsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteGoalCheckInsRequest>(create);
-  static DeleteGoalCheckInsRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $pb.PbList<$core.String> get ids => $_getList(0);
-}
-
-class DeleteGoalCheckInsResponse extends $pb.GeneratedMessage {
-  factory DeleteGoalCheckInsResponse({
-    $core.int? status,
-    $core.String? errorMessage,
-  }) {
-    final $result = create();
-    if (status != null) {
-      $result.status = status;
-    }
-    if (errorMessage != null) {
-      $result.errorMessage = errorMessage;
-    }
-    return $result;
-  }
-  DeleteGoalCheckInsResponse._() : super();
-  factory DeleteGoalCheckInsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeleteGoalCheckInsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteGoalCheckInsResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'status', $pb.PbFieldType.O3)
-    ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
-    ..hasRequiredFields = false
-  ;
-
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  DeleteGoalCheckInsResponse clone() => DeleteGoalCheckInsResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DeleteGoalCheckInsResponse copyWith(void Function(DeleteGoalCheckInsResponse) updates) => super.copyWith((message) => updates(message as DeleteGoalCheckInsResponse)) as DeleteGoalCheckInsResponse;
-
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static DeleteGoalCheckInsResponse create() => DeleteGoalCheckInsResponse._();
-  DeleteGoalCheckInsResponse createEmptyInstance() => create();
-  static $pb.PbList<DeleteGoalCheckInsResponse> createRepeated() => $pb.PbList<DeleteGoalCheckInsResponse>();
-  @$core.pragma('dart2js:noInline')
-  static DeleteGoalCheckInsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteGoalCheckInsResponse>(create);
-  static DeleteGoalCheckInsResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.int get status => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set status($core.int v) { $_setSignedInt32(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasStatus() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearStatus() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get errorMessage => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set errorMessage($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasErrorMessage() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearErrorMessage() => $_clearField(2);
-}
-
 class GoalCheckIn extends $pb.GeneratedMessage {
   factory GoalCheckIn({
     $core.String? userId,
-    $4.Timestamp? createdAt,
+    $4.Timestamp? date,
     $core.Iterable<$core.String>? goals,
   }) {
     final $result = create();
     if (userId != null) {
       $result.userId = userId;
     }
-    if (createdAt != null) {
-      $result.createdAt = createdAt;
+    if (date != null) {
+      $result.date = date;
     }
     if (goals != null) {
       $result.goals.addAll(goals);
@@ -345,7 +243,7 @@ class GoalCheckIn extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GoalCheckIn', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
-    ..aOM<$4.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $4.Timestamp.create)
+    ..aOM<$4.Timestamp>(2, _omitFieldNames ? '' : 'date', subBuilder: $4.Timestamp.create)
     ..pPS(3, _omitFieldNames ? '' : 'goals')
     ..hasRequiredFields = false
   ;
@@ -381,15 +279,15 @@ class GoalCheckIn extends $pb.GeneratedMessage {
   void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $4.Timestamp get createdAt => $_getN(1);
+  $4.Timestamp get date => $_getN(1);
   @$pb.TagNumber(2)
-  set createdAt($4.Timestamp v) { $_setField(2, v); }
+  set date($4.Timestamp v) { $_setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasCreatedAt() => $_has(1);
+  $core.bool hasDate() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCreatedAt() => $_clearField(2);
+  void clearDate() => $_clearField(2);
   @$pb.TagNumber(2)
-  $4.Timestamp ensureCreatedAt() => $_ensure(1);
+  $4.Timestamp ensureDate() => $_ensure(1);
 
   @$pb.TagNumber(3)
   $pb.PbList<$core.String> get goals => $_getList(2);

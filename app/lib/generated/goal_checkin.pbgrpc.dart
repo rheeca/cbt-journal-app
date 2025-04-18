@@ -29,10 +29,6 @@ class GoalCheckInServiceClient extends $grpc.Client {
       '/journal.GoalCheckInService/WriteGoalCheckIns',
       ($2.WriteGoalCheckInsRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $2.WriteGoalCheckInsResponse.fromBuffer(value));
-  static final _$deleteGoalCheckIns = $grpc.ClientMethod<$2.DeleteGoalCheckInsRequest, $2.DeleteGoalCheckInsResponse>(
-      '/journal.GoalCheckInService/DeleteGoalCheckIns',
-      ($2.DeleteGoalCheckInsRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $2.DeleteGoalCheckInsResponse.fromBuffer(value));
 
   GoalCheckInServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -46,10 +42,6 @@ class GoalCheckInServiceClient extends $grpc.Client {
 
   $grpc.ResponseFuture<$2.WriteGoalCheckInsResponse> writeGoalCheckIns($2.WriteGoalCheckInsRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$writeGoalCheckIns, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$2.DeleteGoalCheckInsResponse> deleteGoalCheckIns($2.DeleteGoalCheckInsRequest request, {$grpc.CallOptions? options}) {
-    return $createUnaryCall(_$deleteGoalCheckIns, request, options: options);
   }
 }
 
@@ -72,13 +64,6 @@ abstract class GoalCheckInServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $2.WriteGoalCheckInsRequest.fromBuffer(value),
         ($2.WriteGoalCheckInsResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$2.DeleteGoalCheckInsRequest, $2.DeleteGoalCheckInsResponse>(
-        'DeleteGoalCheckIns',
-        deleteGoalCheckIns_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $2.DeleteGoalCheckInsRequest.fromBuffer(value),
-        ($2.DeleteGoalCheckInsResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$2.ReadGoalCheckInsResponse> readGoalCheckIns_Pre($grpc.ServiceCall $call, $async.Future<$2.ReadGoalCheckInsRequest> $request) async {
@@ -89,11 +74,6 @@ abstract class GoalCheckInServiceBase extends $grpc.Service {
     return writeGoalCheckIns($call, await $request);
   }
 
-  $async.Future<$2.DeleteGoalCheckInsResponse> deleteGoalCheckIns_Pre($grpc.ServiceCall $call, $async.Future<$2.DeleteGoalCheckInsRequest> $request) async {
-    return deleteGoalCheckIns($call, await $request);
-  }
-
   $async.Future<$2.ReadGoalCheckInsResponse> readGoalCheckIns($grpc.ServiceCall call, $2.ReadGoalCheckInsRequest request);
   $async.Future<$2.WriteGoalCheckInsResponse> writeGoalCheckIns($grpc.ServiceCall call, $2.WriteGoalCheckInsRequest request);
-  $async.Future<$2.DeleteGoalCheckInsResponse> deleteGoalCheckIns($grpc.ServiceCall call, $2.DeleteGoalCheckInsRequest request);
 }

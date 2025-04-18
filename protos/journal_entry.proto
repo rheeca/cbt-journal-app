@@ -11,7 +11,7 @@ service JournalEntryService {
 }
 
 message ReadJournalEntriesRequest {
-  repeated string ids = 1;
+  string user_id = 1;
 }
 
 message ReadJournalEntriesResponse {
