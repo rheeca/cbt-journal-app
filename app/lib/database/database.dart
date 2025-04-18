@@ -63,6 +63,31 @@ extension GoalQuery on AppDatabase {
     }
   }
 
+  Future<List<md.Goal>> getGoals(List<String> ids) async {
+    List<md.Goal> resp = [];
+
+    final goalsFromDb =
+        await (select(goals)..where((t) => t.id.isIn(ids))).get();
+    for (GoalEntity g in goalsFromDb) {
+      final goalEntriesFromDb = await getGoalEntriesByGoal(g.id);
+      resp.add(md.Goal(
+        id: g.id,
+        userId: g.userId,
+        createdAt: g.createdAt,
+        title: g.title,
+        type: GoalActivity.getByName(g.type)!,
+        guideQuestions:
+            g.guideQuestions.map((e) => md.GuideQuestion.fromMap(e)).toList(),
+        notificationSchedule: g.notificationSchedule
+            .map((e) => md.DayOfWeek.values.byName(e))
+            .toList(),
+        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
+        isArchived: g.isArchived,
+      ));
+    }
+    return resp;
+  }
+
   Future<List<md.Goal>> getGoalsByUser(String userId) async {
     List<md.Goal> userGoals = [];
 
@@ -89,6 +114,8 @@ extension GoalQuery on AppDatabase {
   }
 
   Future<int> insertGoal(md.Goal item) {
+    insertSyncLog(md.SyncLog(item.id, DatabaseType.goal));
+
     for (final e in item.journalEntries) {
       into(goalEntries).insertOnConflictUpdate(GoalEntriesCompanion(
         journalEntryId: Value(e),
@@ -110,6 +137,8 @@ extension GoalQuery on AppDatabase {
   }
 
   Future<void> deleteGoal(String id) {
+    insertSyncLog(md.SyncLog(id, DatabaseType.goal));
+
     (delete(goalEntries)..where((t) => t.goalId.isValue(id))).go();
     return (delete(goals)..where((t) => t.id.isValue(id))).go();
   }
@@ -143,6 +172,21 @@ extension GoalQuery on AppDatabase {
         .toList();
   }
 
+  Future<List<md.GoalCheckIn>> getGoalCheckIns(
+      String userId, List<DateTime> dates) async {
+    final items = await (select(goalCheckIns)
+          ..where((t) => t.userId.equals(userId) & t.date.isIn(dates)))
+        .get();
+
+    return items
+        .map((e) => md.GoalCheckIn(
+              userId: e.userId,
+              date: e.date,
+              goals: e.goals,
+            ))
+        .toList();
+  }
+
   Future<md.GoalCheckIn?> getGoalCheckIn(String userId, DateTime date) async {
     final item = await (select(goalCheckIns)
           ..where((t) =>
@@ -161,6 +205,9 @@ extension GoalQuery on AppDatabase {
   }
 
   Future<int> insertGoalCheckIn(md.GoalCheckIn item) {
+    insertSyncLog(
+        md.SyncLog('${item.userId}+${item.date}', DatabaseType.goalCheckIn));
+
     return into(goalCheckIns).insertOnConflictUpdate(GoalCheckInsCompanion(
       userId: Value(item.userId),
       date: Value(dateOnlyUtc(item.date)),
@@ -299,6 +346,21 @@ extension JournalEntryQuery on AppDatabase {
         .toList();
   }
 
+  Future<List<JournalEntry>> getJournalEntries(List<String> ids) async {
+    final items =
+        await (select(journalEntries)..where((t) => t.id.isIn(ids))).get();
+    return items
+        .map((e) => JournalEntry(
+              id: e.id,
+              userId: e.userId,
+              createdAt: e.createdAt,
+              guidedJournal: e.guidedJournal,
+              title: e.title,
+              content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+            ))
+        .toList();
+  }
+
   Future<JournalEntry?> getJournalEntryById(String journalId) async {
     final item = await (select(journalEntries)
           ..where((t) => t.id.equals(journalId)))
@@ -318,6 +380,8 @@ extension JournalEntryQuery on AppDatabase {
   }
 
   Future<int> insertJournalEntry(md.JournalEntry item) {
+    insertSyncLog(md.SyncLog(item.id, DatabaseType.journalEntry));
+
     return into(journalEntries).insertOnConflictUpdate(JournalEntriesCompanion(
       id: Value(item.id),
       userId: Value(item.userId),
@@ -329,6 +393,8 @@ extension JournalEntryQuery on AppDatabase {
   }
 
   Future<void> deleteJournalEntry(String id) {
+    insertSyncLog(md.SyncLog(id, DatabaseType.journalEntry));
+
     return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
   }
 }

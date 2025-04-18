@@ -1,3 +1,6 @@
+import 'package:cbt_journal/generated/goal.pbgrpc.dart';
+import 'package:cbt_journal/generated/goal_checkin.pbgrpc.dart';
+import 'package:cbt_journal/generated/journal_entry.pbgrpc.dart';
 import 'package:cbt_journal/generated/user.pbgrpc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:grpc/grpc.dart';
@@ -9,6 +12,9 @@ class JournalService {
   }
 
   ClientChannel? _channel;
+  GoalCheckInServiceClient? goalCheckInClient;
+  GoalServiceClient? goalClient;
+  JournalEntryServiceClient? journalEntryClient;
   UserServiceClient? userClient;
 
   Future<void> initialize() async {
@@ -19,6 +25,9 @@ class JournalService {
       port: int.parse(dotenv.env['SERVICE_PORT'] ?? '443'),
       options: const ChannelOptions(credentials: ChannelCredentials.secure()),
     );
+    goalCheckInClient = GoalCheckInServiceClient(_channel!);
+    goalClient = GoalServiceClient(_channel!);
+    journalEntryClient = JournalEntryServiceClient(_channel!);
     userClient = UserServiceClient(_channel!);
   }
 
