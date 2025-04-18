@@ -7,3 +7,4 @@ targets:
             dialects:
               - sqlite
               - postgres
+          store_date_time_values_as_text: true
