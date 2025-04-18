@@ -3,7 +3,8 @@ import 'package:journal_service/database/database.dart';
 import 'package:journal_service/generated/user.pbgrpc.dart';
 
 class UserService extends UserServiceBase {
-  final database = AppDatabase();
+  UserService(this.database);
+  final AppDatabase database;
 
   @override
   Future<ReadUsersResponse> readUsers(

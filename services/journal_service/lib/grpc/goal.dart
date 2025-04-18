@@ -7,7 +7,8 @@ import 'package:logger/logger.dart';
 var logger = Logger(filter: NoFilter());
 
 class GoalService extends GoalServiceBase {
-  final database = AppDatabase();
+  GoalService(this.database);
+  final AppDatabase database;
 
   @override
   Future<ReadGoalsResponse> readGoals(

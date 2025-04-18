@@ -7,7 +7,8 @@ import 'package:logger/logger.dart';
 var logger = Logger(filter: NoFilter());
 
 class JournalEntryService extends JournalEntryServiceBase {
-  final database = AppDatabase();
+  JournalEntryService(this.database);
+  final AppDatabase database;
 
   @override
   Future<ReadJournalEntriesResponse> readJournalEntries(
