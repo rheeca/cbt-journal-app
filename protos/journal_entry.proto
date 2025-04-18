@@ -1,0 +1,46 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "goal.proto";
+
+package journal;
+
+service JournalEntryService {
+  rpc ReadJournalEntries (ReadJournalEntriesRequest) returns (ReadJournalEntriesResponse) {}
+  rpc WriteJournalEntries (WriteJournalEntriesRequest) returns (WriteJournalEntriesResponse) {}
+  rpc DeleteJournalEntries (DeleteJournalEntriesRequest) returns (DeleteJournalEntriesResponse) {}
+}
+
+message ReadJournalEntriesRequest {
+  repeated string ids = 1;
+}
+
+message ReadJournalEntriesResponse {
+  repeated JournalEntry journal_entries = 1;
+}
+
+message WriteJournalEntriesRequest {
+  repeated JournalEntry journal_entries = 1;
+}
+
+message WriteJournalEntriesResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message DeleteJournalEntriesRequest {
+  repeated string ids = 1;
+}
+
+message DeleteJournalEntriesResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message JournalEntry {
+  string id = 1;
+  string user_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  string guided_journal = 4;
+  string title = 5;
+  repeated GuideQuestion content = 6;
+}

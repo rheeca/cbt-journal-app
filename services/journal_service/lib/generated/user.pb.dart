@@ -13,7 +13,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'google/protobuf/timestamp.pb.dart' as $1;
+import 'google/protobuf/timestamp.pb.dart' as $4;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -325,7 +325,7 @@ class User extends $pb.GeneratedMessage {
   factory User({
     $core.String? id,
     $core.String? email,
-    $1.Timestamp? createdAt,
+    $4.Timestamp? createdAt,
     $core.String? displayName,
   }) {
     final $result = create();
@@ -350,7 +350,7 @@ class User extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'User', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'email')
-    ..aOM<$1.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
+    ..aOM<$4.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $4.Timestamp.create)
     ..aOS(4, _omitFieldNames ? '' : 'displayName')
     ..hasRequiredFields = false
   ;
@@ -395,15 +395,15 @@ class User extends $pb.GeneratedMessage {
   void clearEmail() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $1.Timestamp get createdAt => $_getN(2);
+  $4.Timestamp get createdAt => $_getN(2);
   @$pb.TagNumber(3)
-  set createdAt($1.Timestamp v) { $_setField(3, v); }
+  set createdAt($4.Timestamp v) { $_setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasCreatedAt() => $_has(2);
   @$pb.TagNumber(3)
   void clearCreatedAt() => $_clearField(3);
   @$pb.TagNumber(3)
-  $1.Timestamp ensureCreatedAt() => $_ensure(2);
+  $4.Timestamp ensureCreatedAt() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.String get displayName => $_getSZ(3);

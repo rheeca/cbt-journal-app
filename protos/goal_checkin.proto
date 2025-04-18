@@ -1,0 +1,42 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package journal;
+
+service GoalCheckInService {
+  rpc ReadGoalCheckIns (ReadGoalCheckInsRequest) returns (ReadGoalCheckInsResponse) {}
+  rpc WriteGoalCheckIns (WriteGoalCheckInsRequest) returns (WriteGoalCheckInsResponse) {}
+  rpc DeleteGoalCheckIns (DeleteGoalCheckInsRequest) returns (DeleteGoalCheckInsResponse) {}
+}
+
+message ReadGoalCheckInsRequest {
+  repeated string ids = 1;
+}
+
+message ReadGoalCheckInsResponse {
+  repeated GoalCheckIn goalCheckIns = 1;
+}
+
+message WriteGoalCheckInsRequest {
+  repeated GoalCheckIn goalCheckIns = 1;
+}
+
+message WriteGoalCheckInsResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message DeleteGoalCheckInsRequest {
+  repeated string ids = 1;
+}
+
+message DeleteGoalCheckInsResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message GoalCheckIn {
+  string user_id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  repeated string goals = 3;
+}
