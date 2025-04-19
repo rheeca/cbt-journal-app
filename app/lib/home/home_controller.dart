@@ -47,7 +47,13 @@ class HomeController extends ChangeNotifier {
 
     final dateToday = dateOnlyUtc(DateTime.now().toUtc());
     _goalCheckIns = await _database.getGoalCheckIn(userId, dateToday);
-    _goalCheckIns ??= GoalCheckIn(userId: userId, date: dateToday, goals: {});
+    _goalCheckIns ??= GoalCheckIn(
+      userId: userId,
+      date: dateToday,
+      goals: {},
+      updatedAt: DateTime.now(),
+      isDeleted: false,
+    );
 
     final guidedJournals = await _database.getAllGuidedJournals();
     _guidedJournals.clear();

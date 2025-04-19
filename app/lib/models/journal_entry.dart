@@ -9,6 +9,8 @@ class JournalEntry {
   String guidedJournal;
   String? title;
   List<GuideQuestion> content;
+  DateTime updatedAt;
+  bool isDeleted;
 
   JournalEntry({
     required this.id,
@@ -17,6 +19,8 @@ class JournalEntry {
     required this.guidedJournal,
     this.title,
     required this.content,
+    required this.updatedAt,
+    required this.isDeleted,
   });
   JournalEntry.createNew(
       {required this.userId,
@@ -24,7 +28,9 @@ class JournalEntry {
       this.title,
       required this.content})
       : id = const Uuid().v4(),
-        createdAt = DateTime.now();
+        createdAt = DateTime.now(),
+        updatedAt = DateTime.now(),
+        isDeleted = false;
 }
 
 class GuidedJournal {

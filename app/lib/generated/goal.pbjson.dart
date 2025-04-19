@@ -103,6 +103,8 @@ const Goal$json = {
     {'1': 'guide_questions', '3': 6, '4': 3, '5': 11, '6': '.journal.GuideQuestion', '10': 'guideQuestions'},
     {'1': 'notification_schedule', '3': 7, '4': 3, '5': 9, '10': 'notificationSchedule'},
     {'1': 'is_archived', '3': 8, '4': 1, '5': 8, '10': 'isArchived'},
+    {'1': 'updated_at', '3': 9, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {'1': 'is_deleted', '3': 10, '4': 1, '5': 8, '10': 'isDeleted'},
   ],
 };
 
@@ -113,7 +115,9 @@ final $typed_data.Uint8List goalDescriptor = $convert.base64Decode(
     'aXRsZRgEIAEoCVIFdGl0bGUSEgoEdHlwZRgFIAEoCVIEdHlwZRI/Cg9ndWlkZV9xdWVzdGlvbn'
     'MYBiADKAsyFi5qb3VybmFsLkd1aWRlUXVlc3Rpb25SDmd1aWRlUXVlc3Rpb25zEjMKFW5vdGlm'
     'aWNhdGlvbl9zY2hlZHVsZRgHIAMoCVIUbm90aWZpY2F0aW9uU2NoZWR1bGUSHwoLaXNfYXJjaG'
-    'l2ZWQYCCABKAhSCmlzQXJjaGl2ZWQ=');
+    'l2ZWQYCCABKAhSCmlzQXJjaGl2ZWQSOQoKdXBkYXRlZF9hdBgJIAEoCzIaLmdvb2dsZS5wcm90'
+    'b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdBIdCgppc19kZWxldGVkGAogASgIUglpc0RlbGV0ZW'
+    'Q=');
 
 @$core.Deprecated('Use guideQuestionDescriptor instead')
 const GuideQuestion$json = {

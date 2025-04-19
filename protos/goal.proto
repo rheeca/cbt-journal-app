@@ -44,6 +44,8 @@ message Goal {
   repeated GuideQuestion guide_questions = 6;
   repeated string notification_schedule = 7;
   bool is_archived = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  bool is_deleted = 10;
 }
 
 message GuideQuestion {

@@ -224,6 +224,8 @@ class GoalCheckIn extends $pb.GeneratedMessage {
     $core.String? userId,
     $4.Timestamp? date,
     $core.Iterable<$core.String>? goals,
+    $4.Timestamp? updatedAt,
+    $core.bool? isDeleted,
   }) {
     final $result = create();
     if (userId != null) {
@@ -235,6 +237,12 @@ class GoalCheckIn extends $pb.GeneratedMessage {
     if (goals != null) {
       $result.goals.addAll(goals);
     }
+    if (updatedAt != null) {
+      $result.updatedAt = updatedAt;
+    }
+    if (isDeleted != null) {
+      $result.isDeleted = isDeleted;
+    }
     return $result;
   }
   GoalCheckIn._() : super();
@@ -245,6 +253,8 @@ class GoalCheckIn extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOM<$4.Timestamp>(2, _omitFieldNames ? '' : 'date', subBuilder: $4.Timestamp.create)
     ..pPS(3, _omitFieldNames ? '' : 'goals')
+    ..aOM<$4.Timestamp>(4, _omitFieldNames ? '' : 'updatedAt', subBuilder: $4.Timestamp.create)
+    ..aOB(5, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
 
@@ -291,6 +301,26 @@ class GoalCheckIn extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $pb.PbList<$core.String> get goals => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $4.Timestamp get updatedAt => $_getN(3);
+  @$pb.TagNumber(4)
+  set updatedAt($4.Timestamp v) { $_setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasUpdatedAt() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUpdatedAt() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $4.Timestamp ensureUpdatedAt() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.bool get isDeleted => $_getBF(4);
+  @$pb.TagNumber(5)
+  set isDeleted($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasIsDeleted() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearIsDeleted() => $_clearField(5);
 }
 
 

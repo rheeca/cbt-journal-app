@@ -13,6 +13,8 @@ class Goal {
   List<DayOfWeek> notificationSchedule;
   List<String> journalEntries;
   bool isArchived;
+  DateTime updatedAt;
+  bool isDeleted;
 
   Goal({
     required this.id,
@@ -24,6 +26,8 @@ class Goal {
     required this.notificationSchedule,
     required this.journalEntries,
     required this.isArchived,
+    required this.updatedAt,
+    required this.isDeleted,
   });
 
   Goal.createNew({
@@ -35,7 +39,9 @@ class Goal {
     required this.journalEntries,
     this.isArchived = false,
   })  : id = const Uuid().v4(),
-        createdAt = DateTime.now();
+        createdAt = DateTime.now(),
+        updatedAt = DateTime.now(),
+        isDeleted = false;
 }
 
 class GoalCheckIn {
@@ -43,9 +49,13 @@ class GoalCheckIn {
     required this.userId,
     required date,
     required this.goals,
+    required this.updatedAt,
+    required this.isDeleted,
   }) : date = dateOnlyUtc(date);
 
   final String userId;
   final DateTime date;
   final Set<String> goals;
+  final DateTime updatedAt;
+  final bool isDeleted;
 }

@@ -327,6 +327,8 @@ class User extends $pb.GeneratedMessage {
     $core.String? email,
     $4.Timestamp? createdAt,
     $core.String? displayName,
+    $4.Timestamp? updatedAt,
+    $core.bool? isDeleted,
   }) {
     final $result = create();
     if (id != null) {
@@ -341,6 +343,12 @@ class User extends $pb.GeneratedMessage {
     if (displayName != null) {
       $result.displayName = displayName;
     }
+    if (updatedAt != null) {
+      $result.updatedAt = updatedAt;
+    }
+    if (isDeleted != null) {
+      $result.isDeleted = isDeleted;
+    }
     return $result;
   }
   User._() : super();
@@ -352,6 +360,8 @@ class User extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'email')
     ..aOM<$4.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $4.Timestamp.create)
     ..aOS(4, _omitFieldNames ? '' : 'displayName')
+    ..aOM<$4.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $4.Timestamp.create)
+    ..aOB(6, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
 
@@ -413,6 +423,26 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasDisplayName() => $_has(3);
   @$pb.TagNumber(4)
   void clearDisplayName() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $4.Timestamp get updatedAt => $_getN(4);
+  @$pb.TagNumber(5)
+  set updatedAt($4.Timestamp v) { $_setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasUpdatedAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUpdatedAt() => $_clearField(5);
+  @$pb.TagNumber(5)
+  $4.Timestamp ensureUpdatedAt() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.bool get isDeleted => $_getBF(5);
+  @$pb.TagNumber(6)
+  set isDeleted($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasIsDeleted() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearIsDeleted() => $_clearField(6);
 }
 
 

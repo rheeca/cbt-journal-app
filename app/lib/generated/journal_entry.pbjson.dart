@@ -101,6 +101,8 @@ const JournalEntry$json = {
     {'1': 'guided_journal', '3': 4, '4': 1, '5': 9, '10': 'guidedJournal'},
     {'1': 'title', '3': 5, '4': 1, '5': 9, '10': 'title'},
     {'1': 'content', '3': 6, '4': 3, '5': 11, '6': '.journal.GuideQuestion', '10': 'content'},
+    {'1': 'updated_at', '3': 7, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {'1': 'is_deleted', '3': 8, '4': 1, '5': 8, '10': 'isDeleted'},
   ],
 };
 
@@ -110,5 +112,6 @@ final $typed_data.Uint8List journalEntryDescriptor = $convert.base64Decode(
     'I5CgpjcmVhdGVkX2F0GAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRl'
     'ZEF0EiUKDmd1aWRlZF9qb3VybmFsGAQgASgJUg1ndWlkZWRKb3VybmFsEhQKBXRpdGxlGAUgAS'
     'gJUgV0aXRsZRIwCgdjb250ZW50GAYgAygLMhYuam91cm5hbC5HdWlkZVF1ZXN0aW9uUgdjb250'
-    'ZW50');
+    'ZW50EjkKCnVwZGF0ZWRfYXQYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgl1cG'
+    'RhdGVkQXQSHQoKaXNfZGVsZXRlZBgIIAEoCFIJaXNEZWxldGVk');
 

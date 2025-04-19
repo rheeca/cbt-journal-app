@@ -43,4 +43,6 @@ message JournalEntry {
   string guided_journal = 4;
   string title = 5;
   repeated GuideQuestion content = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  bool is_deleted = 8;
 }

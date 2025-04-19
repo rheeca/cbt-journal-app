@@ -337,6 +337,8 @@ class Goal extends $pb.GeneratedMessage {
     $core.Iterable<GuideQuestion>? guideQuestions,
     $core.Iterable<$core.String>? notificationSchedule,
     $core.bool? isArchived,
+    $4.Timestamp? updatedAt,
+    $core.bool? isDeleted,
   }) {
     final $result = create();
     if (id != null) {
@@ -363,6 +365,12 @@ class Goal extends $pb.GeneratedMessage {
     if (isArchived != null) {
       $result.isArchived = isArchived;
     }
+    if (updatedAt != null) {
+      $result.updatedAt = updatedAt;
+    }
+    if (isDeleted != null) {
+      $result.isDeleted = isDeleted;
+    }
     return $result;
   }
   Goal._() : super();
@@ -378,6 +386,8 @@ class Goal extends $pb.GeneratedMessage {
     ..pc<GuideQuestion>(6, _omitFieldNames ? '' : 'guideQuestions', $pb.PbFieldType.PM, subBuilder: GuideQuestion.create)
     ..pPS(7, _omitFieldNames ? '' : 'notificationSchedule')
     ..aOB(8, _omitFieldNames ? '' : 'isArchived')
+    ..aOM<$4.Timestamp>(9, _omitFieldNames ? '' : 'updatedAt', subBuilder: $4.Timestamp.create)
+    ..aOB(10, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
 
@@ -463,6 +473,26 @@ class Goal extends $pb.GeneratedMessage {
   $core.bool hasIsArchived() => $_has(7);
   @$pb.TagNumber(8)
   void clearIsArchived() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $4.Timestamp get updatedAt => $_getN(8);
+  @$pb.TagNumber(9)
+  set updatedAt($4.Timestamp v) { $_setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasUpdatedAt() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearUpdatedAt() => $_clearField(9);
+  @$pb.TagNumber(9)
+  $4.Timestamp ensureUpdatedAt() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $core.bool get isDeleted => $_getBF(9);
+  @$pb.TagNumber(10)
+  set isDeleted($core.bool v) { $_setBool(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasIsDeleted() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearIsDeleted() => $_clearField(10);
 }
 
 class GuideQuestion extends $pb.GeneratedMessage {

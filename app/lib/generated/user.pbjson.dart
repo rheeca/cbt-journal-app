@@ -99,6 +99,8 @@ const User$json = {
     {'1': 'email', '3': 2, '4': 1, '5': 9, '10': 'email'},
     {'1': 'created_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
     {'1': 'display_name', '3': 4, '4': 1, '5': 9, '10': 'displayName'},
+    {'1': 'updated_at', '3': 5, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {'1': 'is_deleted', '3': 6, '4': 1, '5': 8, '10': 'isDeleted'},
   ],
 };
 
@@ -106,5 +108,7 @@ const User$json = {
 final $typed_data.Uint8List userDescriptor = $convert.base64Decode(
     'CgRVc2VyEg4KAmlkGAEgASgJUgJpZBIUCgVlbWFpbBgCIAEoCVIFZW1haWwSOQoKY3JlYXRlZF'
     '9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWNyZWF0ZWRBdBIhCgxkaXNw'
-    'bGF5X25hbWUYBCABKAlSC2Rpc3BsYXlOYW1l');
+    'bGF5X25hbWUYBCABKAlSC2Rpc3BsYXlOYW1lEjkKCnVwZGF0ZWRfYXQYBSABKAsyGi5nb29nbG'
+    'UucHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQXQSHQoKaXNfZGVsZXRlZBgGIAEoCFIJaXNE'
+    'ZWxldGVk');
 

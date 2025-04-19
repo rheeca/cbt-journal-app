@@ -336,6 +336,8 @@ class JournalEntry extends $pb.GeneratedMessage {
     $core.String? guidedJournal,
     $core.String? title,
     $core.Iterable<$0.GuideQuestion>? content,
+    $4.Timestamp? updatedAt,
+    $core.bool? isDeleted,
   }) {
     final $result = create();
     if (id != null) {
@@ -356,6 +358,12 @@ class JournalEntry extends $pb.GeneratedMessage {
     if (content != null) {
       $result.content.addAll(content);
     }
+    if (updatedAt != null) {
+      $result.updatedAt = updatedAt;
+    }
+    if (isDeleted != null) {
+      $result.isDeleted = isDeleted;
+    }
     return $result;
   }
   JournalEntry._() : super();
@@ -369,6 +377,8 @@ class JournalEntry extends $pb.GeneratedMessage {
     ..aOS(4, _omitFieldNames ? '' : 'guidedJournal')
     ..aOS(5, _omitFieldNames ? '' : 'title')
     ..pc<$0.GuideQuestion>(6, _omitFieldNames ? '' : 'content', $pb.PbFieldType.PM, subBuilder: $0.GuideQuestion.create)
+    ..aOM<$4.Timestamp>(7, _omitFieldNames ? '' : 'updatedAt', subBuilder: $4.Timestamp.create)
+    ..aOB(8, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
 
@@ -442,6 +452,26 @@ class JournalEntry extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(6)
   $pb.PbList<$0.GuideQuestion> get content => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $4.Timestamp get updatedAt => $_getN(6);
+  @$pb.TagNumber(7)
+  set updatedAt($4.Timestamp v) { $_setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasUpdatedAt() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearUpdatedAt() => $_clearField(7);
+  @$pb.TagNumber(7)
+  $4.Timestamp ensureUpdatedAt() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $core.bool get isDeleted => $_getBF(7);
+  @$pb.TagNumber(8)
+  set isDeleted($core.bool v) { $_setBool(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasIsDeleted() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearIsDeleted() => $_clearField(8);
 }
 
 

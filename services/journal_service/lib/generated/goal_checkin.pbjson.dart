@@ -72,11 +72,15 @@ const GoalCheckIn$json = {
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'date', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'date'},
     {'1': 'goals', '3': 3, '4': 3, '5': 9, '10': 'goals'},
+    {'1': 'updated_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {'1': 'is_deleted', '3': 5, '4': 1, '5': 8, '10': 'isDeleted'},
   ],
 };
 
 /// Descriptor for `GoalCheckIn`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List goalCheckInDescriptor = $convert.base64Decode(
     'CgtHb2FsQ2hlY2tJbhIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSLgoEZGF0ZRgCIAEoCzIaLm'
-    'dvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSBGRhdGUSFAoFZ29hbHMYAyADKAlSBWdvYWxz');
+    'dvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSBGRhdGUSFAoFZ29hbHMYAyADKAlSBWdvYWxzEjkK'
+    'CnVwZGF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQX'
+    'QSHQoKaXNfZGVsZXRlZBgFIAEoCFIJaXNEZWxldGVk');
 

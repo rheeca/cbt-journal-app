@@ -29,4 +29,6 @@ message GoalCheckIn {
   string user_id = 1;
   google.protobuf.Timestamp date = 2;
   repeated string goals = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  bool is_deleted = 5;
 }

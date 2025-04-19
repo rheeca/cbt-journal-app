@@ -57,6 +57,8 @@ extension GoalQuery on AppDatabase {
             .toList(),
         journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
         isArchived: goal.isArchived,
+        updatedAt: goal.updatedAt,
+        isDeleted: goal.isDeleted,
       );
     } else {
       return null;
@@ -83,6 +85,8 @@ extension GoalQuery on AppDatabase {
             .toList(),
         journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
         isArchived: g.isArchived,
+        updatedAt: g.updatedAt,
+        isDeleted: g.isDeleted,
       ));
     }
     return resp;
@@ -108,6 +112,8 @@ extension GoalQuery on AppDatabase {
             .toList(),
         journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
         isArchived: g.isArchived,
+        updatedAt: g.updatedAt,
+        isDeleted: g.isDeleted,
       ));
     }
     return userGoals;
@@ -133,14 +139,20 @@ extension GoalQuery on AppDatabase {
       notificationSchedule:
           Value(item.notificationSchedule.map((e) => e.name).toList()),
       isArchived: Value(item.isArchived),
+      updatedAt: Value(item.updatedAt),
+      isDeleted: Value(item.isDeleted),
     ));
   }
 
   Future<void> deleteGoal(String id) {
     insertSyncLog(md.SyncLog(id, DatabaseType.goal));
 
-    (delete(goalEntries)..where((t) => t.goalId.isValue(id))).go();
-    return (delete(goals)..where((t) => t.id.isValue(id))).go();
+    return (update(goals)..where((t) => t.id.equals(id))).write(
+      GoalsCompanion(
+        updatedAt: Value(DateTime.now()),
+        isDeleted: const Value(true),
+      ),
+    );
   }
 
   Future<List<GoalEntryEntity>> getGoalEntriesByGoal(String goalId) {
@@ -168,6 +180,8 @@ extension GoalQuery on AppDatabase {
               userId: e.userId,
               date: e.date,
               goals: e.goals,
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
@@ -183,6 +197,8 @@ extension GoalQuery on AppDatabase {
               userId: e.userId,
               date: e.date,
               goals: e.goals,
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
@@ -198,6 +214,8 @@ extension GoalQuery on AppDatabase {
         userId: item.userId,
         date: item.date,
         goals: item.goals,
+        updatedAt: item.updatedAt,
+        isDeleted: item.isDeleted,
       );
     } else {
       return null;
@@ -212,6 +230,8 @@ extension GoalQuery on AppDatabase {
       userId: Value(item.userId),
       date: Value(dateOnlyUtc(item.date)),
       goals: Value(item.goals),
+      updatedAt: Value(item.updatedAt),
+      isDeleted: Value(item.isDeleted),
     ));
   }
 }
@@ -289,6 +309,8 @@ extension UserQuery on AppDatabase {
         email: user.email,
         displayName: user.displayName,
         createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        isDeleted: user.isDeleted,
       );
     } else {
       return null;
@@ -303,6 +325,8 @@ extension UserQuery on AppDatabase {
               email: e.email,
               createdAt: e.createdAt.toProtoTimestamp(),
               displayName: e.displayName,
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
@@ -315,13 +339,20 @@ extension UserQuery on AppDatabase {
       email: Value(user.email),
       displayName: Value(user.displayName),
       createdAt: Value(user.createdAt),
+      updatedAt: Value(user.updatedAt),
+      isDeleted: Value(user.isDeleted),
     ));
   }
 
   Future<void> deleteUser(String id) {
     insertSyncLog(md.SyncLog(id, DatabaseType.user));
 
-    return (delete(users)..where((t) => t.id.isValue(id))).go();
+    return (update(users)..where((t) => t.id.equals(id))).write(
+      UsersCompanion(
+        updatedAt: Value(DateTime.now()),
+        isDeleted: const Value(true),
+      ),
+    );
   }
 }
 
@@ -342,6 +373,8 @@ extension JournalEntryQuery on AppDatabase {
               guidedJournal: e.guidedJournal,
               title: e.title,
               content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
@@ -357,6 +390,8 @@ extension JournalEntryQuery on AppDatabase {
               guidedJournal: e.guidedJournal,
               title: e.title,
               content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
@@ -373,6 +408,8 @@ extension JournalEntryQuery on AppDatabase {
         guidedJournal: item.guidedJournal,
         title: item.title,
         content: item.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+        updatedAt: item.updatedAt,
+        isDeleted: item.isDeleted,
       );
     } else {
       return null;
@@ -389,13 +426,20 @@ extension JournalEntryQuery on AppDatabase {
       guidedJournal: Value(item.guidedJournal),
       title: Value(item.title),
       content: Value(item.content.map((e) => e.toMap()).toList()),
+      updatedAt: Value(item.updatedAt),
+      isDeleted: Value(item.isDeleted),
     ));
   }
 
   Future<void> deleteJournalEntry(String id) {
     insertSyncLog(md.SyncLog(id, DatabaseType.journalEntry));
 
-    return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
+    return (update(journalEntries)..where((t) => t.id.equals(id))).write(
+      JournalEntriesCompanion(
+        updatedAt: Value(DateTime.now()),
+        isDeleted: const Value(true),
+      ),
+    );
   }
 }
 

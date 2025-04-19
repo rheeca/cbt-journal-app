@@ -50,12 +50,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 onPressed: () {
                   final firebaseUser = FirebaseAuth.instance.currentUser;
                   if (firebaseUser != null) {
+                    final now = DateTime.now();
                     di<HomeController>().createProfile(
                       UserModel(
                         userId: firebaseUser.uid,
                         email: firebaseUser.email ?? '',
                         displayName: controller.text,
-                        createdAt: DateTime.now(),
+                        createdAt: now,
+                        updatedAt: now,
+                        isDeleted: false,
                       ),
                     );
                   }
