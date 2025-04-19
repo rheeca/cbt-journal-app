@@ -146,10 +146,11 @@ class _CalendarPageState extends State<_CalendarPage> {
       return const SizedBox();
     }
 
+    final createdAt = user.createdAt.toDateTime();
     final firstDay = DateTime(
-      user.createdAt.year,
-      user.createdAt.month,
-      user.createdAt.day,
+      createdAt.year,
+      createdAt.month,
+      createdAt.day,
     );
 
     final guidedJournals =

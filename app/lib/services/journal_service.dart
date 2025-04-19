@@ -61,7 +61,8 @@ class JournalService {
 
       final dates =
           checkInLogs.map((e) => DateTime.parse(e.id.split('+')[1])).toList();
-      final checkIns = await di<AppDatabase>().getGoalCheckIns(userId, dates);
+      final checkIns =
+          await di<AppDatabase>().getGoalCheckIns(userId: userId, dates: dates);
 
       if (checkIns.isNotEmpty) {
         await goalCheckInClient?.writeGoalCheckIns(WriteGoalCheckInsRequest(
@@ -77,7 +78,7 @@ class JournalService {
     final goalLogs = groupedLogs[md.DatabaseType.goal];
     if (goalLogs != null) {
       final ids = goalLogs.map((e) => e.id).toList();
-      final goals = await di<AppDatabase>().getGoals(ids);
+      final goals = await di<AppDatabase>().getGoals(ids: ids);
       final toDelete = ids.where((e) => !goals.map((e) => e.id).contains(e));
 
       if (goals.isNotEmpty) {
@@ -110,7 +111,7 @@ class JournalService {
     final journalLogs = groupedLogs[md.DatabaseType.journalEntry];
     if (journalLogs != null) {
       final ids = journalLogs.map((e) => e.id).toList();
-      final entries = await di<AppDatabase>().getJournalEntries(ids);
+      final entries = await di<AppDatabase>().getJournalEntries(ids: ids);
       final toDelete = ids.where((e) => !entries.map((e) => e.id).contains(e));
 
       if (entries.isNotEmpty) {

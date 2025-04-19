@@ -24,7 +24,8 @@ class EditJournalController extends ChangeNotifier {
     notifyListeners();
 
     if (journalId != null) {
-      _selectedJournalEntry = await _database.getJournalEntryById(journalId);
+      _selectedJournalEntry =
+          (await _database.getJournalEntries(ids: [journalId])).firstOrNull;
       if (_selectedJournalEntry != null) {
         _selectedGuidedJournal = await _database
             .getGuidedJournal(_selectedJournalEntry!.guidedJournal);
@@ -39,7 +40,7 @@ class EditJournalController extends ChangeNotifier {
   }
 
   Future<void> insertJournalEntry(JournalEntry entry) async {
-    await _database.insertJournalEntry(entry);
+    await _database.insertJournalEntries([entry]);
   }
 }
 

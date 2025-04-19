@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/models/model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,8 @@ class JournalController extends ChangeNotifier {
   final List<GoalCheckIn> _goalCheckIns = [];
   List<GoalCheckIn> get goalCheckIns => _goalCheckIns;
 
-  UserModel? _currentUser;
-  UserModel? get currentUser => _currentUser;
+  pb_user.User? _currentUser;
+  pb_user.User? get currentUser => _currentUser;
 
   Future<void> load() async {
     _isLoading = true;
@@ -52,9 +53,9 @@ class JournalController extends ChangeNotifier {
       return;
     }
 
-    _currentUser = await _database.getUser(userId);
+    _currentUser = (await _database.getUsers([userId])).firstOrNull;
 
-    final journalEntries = await _database.getJournalEntriesByUser(userId);
+    final journalEntries = await _database.getJournalEntries(userId: userId);
     _journalEntries.clear();
     _journalEntries.addAll(journalEntries);
 
@@ -81,11 +82,11 @@ class JournalController extends ChangeNotifier {
     _guidedJournals.clear();
     _guidedJournals.addAll(guidedJournals);
 
-    final goals = await _database.getGoalsByUser(userId);
+    final goals = await _database.getGoals(userId: userId);
     _goals.clear();
     _goals.addAll(goals);
 
-    final checkIns = await _database.getGoalCheckInsByUser(userId);
+    final checkIns = await _database.getGoalCheckIns(userId: userId);
     _goalCheckIns.clear();
     _goalCheckIns.addAll(checkIns);
 

@@ -46,11 +46,11 @@ class GoalsController extends ChangeNotifier {
       return;
     }
 
-    final goals = await _database.getGoalsByUser(userId);
+    final goals = await _database.getGoals(userId: userId);
     _goals.clear();
     _goals.addAll(goals);
 
-    final journalEntries = await _database.getJournalEntriesByUser(userId);
+    final journalEntries = await _database.getJournalEntries(userId: userId);
     _allJournalEntries.clear();
     _allJournalEntries.addAll(journalEntries);
 

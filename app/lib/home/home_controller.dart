@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,8 +13,8 @@ class HomeController extends ChangeNotifier {
   bool _loading = false;
   bool get loading => _loading;
 
-  UserModel? _currentUser;
-  UserModel? get currentUser => _currentUser;
+  pb_user.User? _currentUser;
+  pb_user.User? get currentUser => _currentUser;
 
   bool _profileCreated = true;
   bool get profileCreated => _profileCreated;
@@ -38,15 +39,17 @@ class HomeController extends ChangeNotifier {
       return;
     }
 
-    _currentUser = await _database.getUser(userId);
+    _currentUser = (await _database.getUsers([userId])).firstOrNull;
     if (_currentUser == null) _profileCreated = false;
 
-    final goals = await _database.getGoalsByUser(userId);
+    final goals = await _database.getGoals(userId: userId);
     _goals.clear();
     _goals.addAll(goals);
 
     final dateToday = dateOnlyUtc(DateTime.now().toUtc());
-    _goalCheckIns = await _database.getGoalCheckIn(userId, dateToday);
+    _goalCheckIns =
+        (await _database.getGoalCheckIns(userId: userId, dates: [dateToday]))
+            .firstOrNull;
     _goalCheckIns ??= GoalCheckIn(
       userId: userId,
       date: dateToday,
@@ -63,11 +66,11 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createProfile(UserModel user) async {
+  Future<void> createProfile(pb_user.User user) async {
     _loading = true;
     notifyListeners();
 
-    await _database.insertUser(user);
+    await _database.insertUsers([user]);
     _currentUser = user;
     _profileCreated = true;
 

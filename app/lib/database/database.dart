@@ -37,39 +37,17 @@ class AppDatabase extends _$AppDatabase {
 }
 
 extension GoalQuery on AppDatabase {
-  Future<md.Goal?> getGoalById(String goalId) async {
-    final goal = await (select(goals)..where((t) => t.id.equals(goalId)))
-        .getSingleOrNull();
+  Future<List<md.Goal>> getGoals({String? userId, List<String>? ids}) async {
+    final List<md.Goal> resp = [];
 
-    if (goal != null) {
-      final goalEntriesFromDb = await getGoalEntriesByGoal(goal.id);
-      return md.Goal(
-        id: goal.id,
-        userId: goal.userId,
-        createdAt: goal.createdAt,
-        title: goal.title,
-        type: GoalActivity.getByName(goal.type)!,
-        guideQuestions: goal.guideQuestions
-            .map((e) => md.GuideQuestion.fromMap(e))
-            .toList(),
-        notificationSchedule: goal.notificationSchedule
-            .map((e) => md.DayOfWeek.values.byName(e))
-            .toList(),
-        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
-        isArchived: goal.isArchived,
-        updatedAt: goal.updatedAt,
-        isDeleted: goal.isDeleted,
-      );
-    } else {
-      return null;
+    SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals);
+    if (userId != null) {
+      stmt.where((t) => t.userId.equals(userId));
+    } else if (ids != null) {
+      stmt.where((t) => t.id.isIn(ids));
     }
-  }
 
-  Future<List<md.Goal>> getGoals(List<String> ids) async {
-    List<md.Goal> resp = [];
-
-    final goalsFromDb =
-        await (select(goals)..where((t) => t.id.isIn(ids))).get();
+    final goalsFromDb = await stmt.get();
     for (GoalEntity g in goalsFromDb) {
       final goalEntriesFromDb = await getGoalEntriesByGoal(g.id);
       resp.add(md.Goal(
@@ -92,56 +70,44 @@ extension GoalQuery on AppDatabase {
     return resp;
   }
 
-  Future<List<md.Goal>> getGoalsByUser(String userId) async {
-    List<md.Goal> userGoals = [];
-
-    final goalsFromDb =
-        await (select(goals)..where((t) => t.userId.equals(userId))).get();
-    for (GoalEntity g in goalsFromDb) {
-      final goalEntriesFromDb = await getGoalEntriesByGoal(g.id);
-      userGoals.add(md.Goal(
-        id: g.id,
-        userId: g.userId,
-        createdAt: g.createdAt,
-        title: g.title,
-        type: GoalActivity.getByName(g.type)!,
-        guideQuestions:
-            g.guideQuestions.map((e) => md.GuideQuestion.fromMap(e)).toList(),
-        notificationSchedule: g.notificationSchedule
-            .map((e) => md.DayOfWeek.values.byName(e))
-            .toList(),
-        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
-        isArchived: g.isArchived,
-        updatedAt: g.updatedAt,
-        isDeleted: g.isDeleted,
-      ));
-    }
-    return userGoals;
-  }
-
-  Future<int> insertGoal(md.Goal item) {
-    insertSyncLog(md.SyncLog(item.id, DatabaseType.goal));
-
-    for (final e in item.journalEntries) {
-      into(goalEntries).insertOnConflictUpdate(GoalEntriesCompanion(
-        journalEntryId: Value(e),
-        goalId: Value(item.id),
-      ));
+  Future<void> insertGoals(List<md.Goal> items) {
+    for (final i in items) {
+      insertSyncLog(md.SyncLog(i.id, DatabaseType.goal));
     }
 
-    return into(goals).insertOnConflictUpdate(GoalsCompanion(
-      id: Value(item.id),
-      userId: Value(item.userId),
-      createdAt: Value(item.createdAt),
-      title: Value(item.title),
-      type: Value(item.type.name),
-      guideQuestions: Value(item.guideQuestions.map((e) => e.toMap()).toList()),
-      notificationSchedule:
-          Value(item.notificationSchedule.map((e) => e.name).toList()),
-      isArchived: Value(item.isArchived),
-      updatedAt: Value(item.updatedAt),
-      isDeleted: Value(item.isDeleted),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          goals,
+          items.map((e) => GoalsCompanion(
+                id: Value(e.id),
+                userId: Value(e.userId),
+                createdAt: Value(e.createdAt),
+                title: Value(e.title),
+                type: Value(e.type.name),
+                guideQuestions:
+                    Value(e.guideQuestions.map((e) => e.toMap()).toList()),
+                notificationSchedule:
+                    Value(e.notificationSchedule.map((e) => e.name).toList()),
+                isArchived: Value(e.isArchived),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<Goals, GoalEntity>.withExcluded(
+              (old, excluded) => GoalsCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    title: excluded.title,
+                    type: excluded.type,
+                    guideQuestions: excluded.guideQuestions,
+                    notificationSchedule: excluded.notificationSchedule,
+                    isArchived: excluded.isArchived,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteGoal(String id) {
@@ -170,56 +136,26 @@ extension GoalQuery on AppDatabase {
         .go();
   }
 
-  Future<List<md.GoalCheckIn>> getGoalCheckInsByUser(String userId) async {
-    final items = await (select(goalCheckIns)
-          ..where((t) => t.userId.equals(userId)))
-        .get();
-
-    return items
-        .map((e) => md.GoalCheckIn(
-              userId: e.userId,
-              date: e.date,
-              goals: e.goals,
-              updatedAt: e.updatedAt,
-              isDeleted: e.isDeleted,
-            ))
-        .toList();
-  }
-
-  Future<List<md.GoalCheckIn>> getGoalCheckIns(
-      String userId, List<DateTime> dates) async {
-    final items = await (select(goalCheckIns)
-          ..where((t) => t.userId.equals(userId) & t.date.isIn(dates)))
-        .get();
-
-    return items
-        .map((e) => md.GoalCheckIn(
-              userId: e.userId,
-              date: e.date,
-              goals: e.goals,
-              updatedAt: e.updatedAt,
-              isDeleted: e.isDeleted,
-            ))
-        .toList();
-  }
-
-  Future<md.GoalCheckIn?> getGoalCheckIn(String userId, DateTime date) async {
-    final item = await (select(goalCheckIns)
-          ..where((t) =>
-              t.userId.equals(userId) & t.date.equals(dateOnlyUtc(date))))
-        .getSingleOrNull();
-
-    if (item != null) {
-      return md.GoalCheckIn(
-        userId: item.userId,
-        date: item.date,
-        goals: item.goals,
-        updatedAt: item.updatedAt,
-        isDeleted: item.isDeleted,
-      );
-    } else {
-      return null;
+  Future<List<md.GoalCheckIn>> getGoalCheckIns({
+    required String userId,
+    List<DateTime>? dates,
+  }) async {
+    SimpleSelectStatement<GoalCheckIns, GoalCheckInEntity> stmt =
+        select(goalCheckIns)..where((t) => t.userId.equals(userId));
+    if (dates != null) {
+      stmt.where((t) => t.date.isIn(dates));
     }
+
+    final items = await stmt.get();
+    return items
+        .map((e) => md.GoalCheckIn(
+              userId: e.userId,
+              date: e.date,
+              goals: e.goals,
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
+            ))
+        .toList();
   }
 
   Future<int> insertGoalCheckIn(md.GoalCheckIn item) {
@@ -300,23 +236,6 @@ extension GuidedJournalQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<md.UserModel?> getUser(String userId) async {
-    final user = await (select(users)..where((t) => t.id.equals(userId)))
-        .getSingleOrNull();
-    if (user != null) {
-      return md.UserModel(
-        userId: user.id,
-        email: user.email,
-        displayName: user.displayName,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        isDeleted: user.isDeleted,
-      );
-    } else {
-      return null;
-    }
-  }
-
   Future<List<User>> getUsers(List<String> ids) async {
     final items = await (select(users)..where((t) => t.id.isIn(ids))).get();
     return items
@@ -331,17 +250,36 @@ extension UserQuery on AppDatabase {
         .toList();
   }
 
-  Future<int> insertUser(md.UserModel user) {
-    insertSyncLog(md.SyncLog(user.userId, DatabaseType.user));
+  Future<void> insertUsers(List<User> items) async {
+    for (final i in items) {
+      insertSyncLog(md.SyncLog(i.id, DatabaseType.user));
+    }
 
-    return into(users).insertOnConflictUpdate(UsersCompanion(
-      id: Value(user.userId),
-      email: Value(user.email),
-      displayName: Value(user.displayName),
-      createdAt: Value(user.createdAt),
-      updatedAt: Value(user.updatedAt),
-      isDeleted: Value(user.isDeleted),
-    ));
+    await batch((batch) {
+      batch.insertAll(
+          users,
+          items.map(
+            (e) => UsersCompanion(
+              id: Value(e.id),
+              email: Value(e.email),
+              createdAt: Value(e.createdAt.toDateTime()),
+              displayName: Value(e.displayName),
+              updatedAt: Value(e.updatedAt.toDateTime()),
+              isDeleted: Value(e.isDeleted),
+            ),
+          ),
+          onConflict: DoUpdate<Users, UserEntity>.withExcluded(
+              (old, excluded) => UsersCompanion.custom(
+                    id: excluded.id,
+                    email: excluded.email,
+                    createdAt: excluded.createdAt,
+                    displayName: excluded.displayName,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteUser(String id) {
@@ -357,78 +295,67 @@ extension UserQuery on AppDatabase {
 }
 
 extension JournalEntryQuery on AppDatabase {
-  Future<List<JournalEntry>> getJournalEntriesByUser(String userId) async {
-    final items = await (select(journalEntries)
-          ..where((t) => t.userId.equals(userId))
-          ..orderBy([
-            (u) =>
-                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
-          ]))
-        .get();
-    return items
-        .map((e) => JournalEntry(
-              id: e.id,
-              userId: e.userId,
-              createdAt: e.createdAt,
-              guidedJournal: e.guidedJournal,
-              title: e.title,
-              content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
-              updatedAt: e.updatedAt,
-              isDeleted: e.isDeleted,
-            ))
-        .toList();
-  }
-
-  Future<List<JournalEntry>> getJournalEntries(List<String> ids) async {
-    final items =
-        await (select(journalEntries)..where((t) => t.id.isIn(ids))).get();
-    return items
-        .map((e) => JournalEntry(
-              id: e.id,
-              userId: e.userId,
-              createdAt: e.createdAt,
-              guidedJournal: e.guidedJournal,
-              title: e.title,
-              content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
-              updatedAt: e.updatedAt,
-              isDeleted: e.isDeleted,
-            ))
-        .toList();
-  }
-
-  Future<JournalEntry?> getJournalEntryById(String journalId) async {
-    final item = await (select(journalEntries)
-          ..where((t) => t.id.equals(journalId)))
-        .getSingleOrNull();
-    if (item != null) {
-      return JournalEntry(
-        id: item.id,
-        userId: item.userId,
-        createdAt: item.createdAt,
-        guidedJournal: item.guidedJournal,
-        title: item.title,
-        content: item.content.map((e) => GuideQuestion.fromMap(e)).toList(),
-        updatedAt: item.updatedAt,
-        isDeleted: item.isDeleted,
-      );
-    } else {
-      return null;
+  Future<List<JournalEntry>> getJournalEntries(
+      {String? userId, List<String>? ids}) async {
+    SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
+        select(journalEntries);
+    if (userId != null) {
+      stmt
+        ..where((t) => t.userId.equals(userId))
+        ..orderBy([
+          (u) => OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
+        ]);
+    } else if (ids != null) {
+      stmt.where((t) => t.id.isIn(ids));
     }
+
+    final items = await stmt.get();
+    return items
+        .map((e) => JournalEntry(
+              id: e.id,
+              userId: e.userId,
+              createdAt: e.createdAt,
+              guidedJournal: e.guidedJournal,
+              title: e.title,
+              content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
+            ))
+        .toList();
   }
 
-  Future<int> insertJournalEntry(md.JournalEntry item) {
-    insertSyncLog(md.SyncLog(item.id, DatabaseType.journalEntry));
+  Future<void> insertJournalEntries(List<md.JournalEntry> items) {
+    for (final i in items) {
+      insertSyncLog(md.SyncLog(i.id, DatabaseType.journalEntry));
+    }
 
-    return into(journalEntries).insertOnConflictUpdate(JournalEntriesCompanion(
-      id: Value(item.id),
-      userId: Value(item.userId),
-      createdAt: Value(item.createdAt),
-      guidedJournal: Value(item.guidedJournal),
-      title: Value(item.title),
-      content: Value(item.content.map((e) => e.toMap()).toList()),
-      updatedAt: Value(item.updatedAt),
-      isDeleted: Value(item.isDeleted),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          journalEntries,
+          items.map((e) => JournalEntriesCompanion(
+                id: Value(e.id),
+                userId: Value(e.userId),
+                createdAt: Value(e.createdAt),
+                guidedJournal: Value(e.guidedJournal),
+                title: Value(e.title),
+                content: Value(e.content.map((e) => e.toMap()).toList()),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<JournalEntries, JournalEntryEntity>.withExcluded(
+              (old, excluded) => JournalEntriesCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    guidedJournal: excluded.guidedJournal,
+                    title: excluded.title,
+                    content: excluded.content,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteJournalEntry(String id) {
