@@ -37,7 +37,11 @@ class AppDatabase extends _$AppDatabase {
 }
 
 extension GoalQuery on AppDatabase {
-  Future<List<md.Goal>> getGoals({String? userId, List<String>? ids}) async {
+  Future<List<md.Goal>> getGoals({
+    String? userId,
+    List<String>? ids,
+    bool includeDeleted = false,
+  }) async {
     final List<md.Goal> resp = [];
 
     SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals);
@@ -45,6 +49,10 @@ extension GoalQuery on AppDatabase {
       stmt.where((t) => t.userId.equals(userId));
     } else if (ids != null) {
       stmt.where((t) => t.id.isIn(ids));
+    }
+
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
     }
 
     final goalsFromDb = await stmt.get();
@@ -139,11 +147,16 @@ extension GoalQuery on AppDatabase {
   Future<List<md.GoalCheckIn>> getGoalCheckIns({
     required String userId,
     List<DateTime>? dates,
+    bool includeDeleted = false,
   }) async {
     SimpleSelectStatement<GoalCheckIns, GoalCheckInEntity> stmt =
         select(goalCheckIns)..where((t) => t.userId.equals(userId));
     if (dates != null) {
       stmt.where((t) => t.date.isIn(dates));
+    }
+
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
     }
 
     final items = await stmt.get();
@@ -236,8 +249,17 @@ extension GuidedJournalQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<List<User>> getUsers(List<String> ids) async {
-    final items = await (select(users)..where((t) => t.id.isIn(ids))).get();
+  Future<List<User>> getUsers(
+    List<String> ids, {
+    bool includeDeleted = false,
+  }) async {
+    SimpleSelectStatement<Users, UserEntity> stmt = select(users)
+      ..where((t) => t.id.isIn(ids));
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
+    }
+
+    final items = await stmt.get();
     return items
         .map((e) => User(
               id: e.id,
@@ -295,8 +317,11 @@ extension UserQuery on AppDatabase {
 }
 
 extension JournalEntryQuery on AppDatabase {
-  Future<List<JournalEntry>> getJournalEntries(
-      {String? userId, List<String>? ids}) async {
+  Future<List<JournalEntry>> getJournalEntries({
+    String? userId,
+    List<String>? ids,
+    bool includeDeleted = false,
+  }) async {
     SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
         select(journalEntries);
     if (userId != null) {
@@ -307,6 +332,10 @@ extension JournalEntryQuery on AppDatabase {
         ]);
     } else if (ids != null) {
       stmt.where((t) => t.id.isIn(ids));
+    }
+
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
     }
 
     final items = await stmt.get();

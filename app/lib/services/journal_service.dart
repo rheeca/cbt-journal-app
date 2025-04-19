@@ -61,8 +61,8 @@ class JournalService {
 
       final dates =
           checkInLogs.map((e) => DateTime.parse(e.id.split('+')[1])).toList();
-      final checkIns =
-          await di<AppDatabase>().getGoalCheckIns(userId: userId, dates: dates);
+      final checkIns = await di<AppDatabase>()
+          .getGoalCheckIns(userId: userId, dates: dates, includeDeleted: true);
 
       if (checkIns.isNotEmpty) {
         await goalCheckInClient?.writeGoalCheckIns(WriteGoalCheckInsRequest(
@@ -78,7 +78,8 @@ class JournalService {
     final goalLogs = groupedLogs[md.DatabaseType.goal];
     if (goalLogs != null) {
       final ids = goalLogs.map((e) => e.id).toList();
-      final goals = await di<AppDatabase>().getGoals(ids: ids);
+      final goals =
+          await di<AppDatabase>().getGoals(ids: ids, includeDeleted: true);
       final toDelete = ids.where((e) => !goals.map((e) => e.id).contains(e));
 
       if (goals.isNotEmpty) {
@@ -111,7 +112,8 @@ class JournalService {
     final journalLogs = groupedLogs[md.DatabaseType.journalEntry];
     if (journalLogs != null) {
       final ids = journalLogs.map((e) => e.id).toList();
-      final entries = await di<AppDatabase>().getJournalEntries(ids: ids);
+      final entries = await di<AppDatabase>()
+          .getJournalEntries(ids: ids, includeDeleted: true);
       final toDelete = ids.where((e) => !entries.map((e) => e.id).contains(e));
 
       if (entries.isNotEmpty) {
@@ -143,7 +145,8 @@ class JournalService {
     final userLogs = groupedLogs[md.DatabaseType.user];
     if (userLogs != null) {
       final userIds = userLogs.map((e) => e.id).toList();
-      final users = await di<AppDatabase>().getUsers(userIds);
+      final users =
+          await di<AppDatabase>().getUsers(userIds, includeDeleted: true);
       final toDelete =
           userIds.where((e) => !users.map((e) => e.id).contains(e));
 
