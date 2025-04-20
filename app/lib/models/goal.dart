@@ -1,5 +1,6 @@
+import 'package:cbt_journal/generated/goal.pb.dart' as pb;
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
-import 'package:cbt_journal/models/common.dart';
+import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:uuid/uuid.dart';
 
@@ -42,6 +43,22 @@ class Goal {
         createdAt = DateTime.now().toUtc(),
         updatedAt = DateTime.now().toUtc(),
         isDeleted = false;
+
+  Goal.fromPb(pb.Goal g)
+      : id = g.id,
+        userId = g.userId,
+        createdAt = g.createdAt.toDateTime(),
+        title = g.title,
+        type = GoalActivity.getByName(g.type)!,
+        guideQuestions =
+            g.guideQuestions.map((e) => GuideQuestion.fromPb(e)).toList(),
+        notificationSchedule = g.notificationSchedule
+            .map((e) => DayOfWeek.values.byName(e))
+            .toList(),
+        journalEntries = [],
+        isArchived = g.isArchived,
+        updatedAt = g.updatedAt.toDateTime(),
+        isDeleted = g.isDeleted;
 }
 
 class GoalCheckIn {

@@ -21,10 +21,14 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
   factory ReadJournalEntriesRequest({
     $core.String? userId,
+    $4.Timestamp? lastSynced,
   }) {
     final $result = create();
     if (userId != null) {
       $result.userId = userId;
+    }
+    if (lastSynced != null) {
+      $result.lastSynced = lastSynced;
     }
     return $result;
   }
@@ -34,6 +38,7 @@ class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReadJournalEntriesRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOM<$4.Timestamp>(2, _omitFieldNames ? '' : 'lastSynced', subBuilder: $4.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -66,6 +71,17 @@ class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
   void clearUserId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $4.Timestamp get lastSynced => $_getN(1);
+  @$pb.TagNumber(2)
+  set lastSynced($4.Timestamp v) { $_setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLastSynced() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLastSynced() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $4.Timestamp ensureLastSynced() => $_ensure(1);
 }
 
 class ReadJournalEntriesResponse extends $pb.GeneratedMessage {

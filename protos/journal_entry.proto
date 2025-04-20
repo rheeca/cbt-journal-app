@@ -12,6 +12,7 @@ service JournalEntryService {
 
 message ReadJournalEntriesRequest {
   string user_id = 1;
+  google.protobuf.Timestamp last_synced = 2;
 }
 
 message ReadJournalEntriesResponse {

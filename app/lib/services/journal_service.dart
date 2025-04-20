@@ -3,11 +3,13 @@ import 'package:cbt_journal/generated/goal.pbgrpc.dart';
 import 'package:cbt_journal/generated/goal_checkin.pbgrpc.dart';
 import 'package:cbt_journal/generated/journal_entry.pbgrpc.dart';
 import 'package:cbt_journal/generated/user.pbgrpc.dart';
-import 'package:cbt_journal/models/common.dart' as md;
+import 'package:cbt_journal/models/model.dart' as md;
 import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:grpc/grpc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watch_it/watch_it.dart';
 
 class JournalService {
@@ -48,7 +50,73 @@ class JournalService {
     await _channel?.shutdown();
   }
 
-  Future<void> _syncDown() async {}
+  Future<void> _syncDown() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastSynced = prefs.getString('lastSynced') != null
+        ? DateTime.parse(prefs.getString('lastSynced')!).toProtoTimestamp()
+        : null;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      logger.d('failed to sync down from cloud: no logged in user');
+      return;
+    }
+
+    final goalCheckIns =
+        (await goalCheckInClient?.readGoalCheckIns(ReadGoalCheckInsRequest(
+      userId: userId,
+      lastSynced: lastSynced,
+    )))
+            ?.goalCheckIns;
+    if (goalCheckIns != null && goalCheckIns.isNotEmpty) {
+      await di<AppDatabase>().insertGoalCheckIns(
+          goalCheckIns
+              .map((e) => md.GoalCheckIn(
+                    userId: e.userId,
+                    date: e.date,
+                    goals: e.goals.toSet(),
+                    updatedAt: e.updatedAt.toDateTime(),
+                    isDeleted: e.isDeleted,
+                  ))
+              .toList(),
+          toSync: false);
+    }
+
+    final goals = (await goalClient?.readGoals(ReadGoalsRequest(
+      userId: userId,
+      lastSynced: lastSynced,
+    )))
+        ?.goals;
+    if (goals != null && goals.isNotEmpty) {
+      await di<AppDatabase>().insertGoals(
+          goals.map((e) => md.Goal.fromPb(e)).toList(),
+          toSync: false);
+    }
+
+    final journalEntries =
+        (await journalEntryClient?.readJournalEntries(ReadJournalEntriesRequest(
+      userId: userId,
+      lastSynced: lastSynced,
+    )))
+            ?.journalEntries;
+    if (journalEntries != null && journalEntries.isNotEmpty) {
+      await di<AppDatabase>().insertJournalEntries(
+          journalEntries.map((e) => md.JournalEntry.fromPb(e)).toList(),
+          toSync: false);
+    }
+
+    final user = (await userClient?.readUsers(ReadUsersRequest(
+      ids: [userId],
+      lastSynced: lastSynced,
+    )))
+        ?.users
+        .firstOrNull;
+    if (user != null) {
+      await di<AppDatabase>().insertUsers([user], toSync: false);
+    }
+
+    await prefs.setString(
+        'lastSynced', DateTime.now().toUtc().toIso8601String());
+  }
 
   Future<void> _syncUp() async {
     final logs = await di<AppDatabase>().getSyncLogs();

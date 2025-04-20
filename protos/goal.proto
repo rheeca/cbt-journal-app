@@ -11,6 +11,7 @@ service GoalService {
 
 message ReadGoalsRequest {
   string user_id = 1;
+  google.protobuf.Timestamp last_synced = 2;
 }
 
 message ReadGoalsResponse {

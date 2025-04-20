@@ -88,7 +88,7 @@ class HomeController extends ChangeNotifier {
     );
 
     _goalCheckIns = updatedCheckIn;
-    await _database.insertGoalCheckIn(updatedCheckIn);
+    await _database.insertGoalCheckIns([updatedCheckIn]);
     notifyListeners();
   }
 }

@@ -78,9 +78,14 @@ extension GoalQuery on AppDatabase {
     return resp;
   }
 
-  Future<void> insertGoals(List<md.Goal> items) {
-    for (final i in items) {
-      insertSyncLog(md.SyncLog(i.id, DatabaseType.goal));
+  Future<void> insertGoals(
+    List<md.Goal> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.goal));
+      }
     }
 
     return batch((batch) {
@@ -171,17 +176,38 @@ extension GoalQuery on AppDatabase {
         .toList();
   }
 
-  Future<int> insertGoalCheckIn(md.GoalCheckIn item) {
-    insertSyncLog(
-        md.SyncLog('${item.userId}+${item.date}', DatabaseType.goalCheckIn));
+  Future<void> insertGoalCheckIns(
+    List<md.GoalCheckIn> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(
+            md.SyncLog('${i.userId}+${i.date}', DatabaseType.goalCheckIn));
+      }
+    }
 
-    return into(goalCheckIns).insertOnConflictUpdate(GoalCheckInsCompanion(
-      userId: Value(item.userId),
-      date: Value(dateOnlyUtc(item.date)),
-      goals: Value(item.goals),
-      updatedAt: Value(item.updatedAt),
-      isDeleted: Value(item.isDeleted),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          goalCheckIns,
+          items.map((e) => GoalCheckInsCompanion(
+                userId: Value(e.userId),
+                date: Value(e.date),
+                goals: Value(e.goals),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<GoalCheckIns, GoalCheckInEntity>.withExcluded(
+              (old, excluded) => GoalCheckInsCompanion.custom(
+                    userId: excluded.userId,
+                    date: excluded.date,
+                    goals: excluded.goals,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 }
 
@@ -272,9 +298,14 @@ extension UserQuery on AppDatabase {
         .toList();
   }
 
-  Future<void> insertUsers(List<User> items) async {
-    for (final i in items) {
-      insertSyncLog(md.SyncLog(i.id, DatabaseType.user));
+  Future<void> insertUsers(
+    List<User> items, {
+    bool toSync = true,
+  }) async {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.user));
+      }
     }
 
     await batch((batch) {
@@ -353,9 +384,14 @@ extension JournalEntryQuery on AppDatabase {
         .toList();
   }
 
-  Future<void> insertJournalEntries(List<md.JournalEntry> items) {
-    for (final i in items) {
-      insertSyncLog(md.SyncLog(i.id, DatabaseType.journalEntry));
+  Future<void> insertJournalEntries(
+    List<md.JournalEntry> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.journalEntry));
+      }
     }
 
     return batch((batch) {

@@ -18,12 +18,14 @@ const ReadUsersRequest$json = {
   '1': 'ReadUsersRequest',
   '2': [
     {'1': 'ids', '3': 1, '4': 3, '5': 9, '10': 'ids'},
+    {'1': 'last_synced', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'lastSynced'},
   ],
 };
 
 /// Descriptor for `ReadUsersRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readUsersRequestDescriptor = $convert.base64Decode(
-    'ChBSZWFkVXNlcnNSZXF1ZXN0EhAKA2lkcxgBIAMoCVIDaWRz');
+    'ChBSZWFkVXNlcnNSZXF1ZXN0EhAKA2lkcxgBIAMoCVIDaWRzEjsKC2xhc3Rfc3luY2VkGAIgAS'
+    'gLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIKbGFzdFN5bmNlZA==');
 
 @$core.Deprecated('Use readUsersResponseDescriptor instead')
 const ReadUsersResponse$json = {

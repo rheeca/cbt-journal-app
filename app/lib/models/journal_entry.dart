@@ -1,3 +1,4 @@
+import 'package:cbt_journal/generated/journal_entry.pb.dart' as pb;
 import 'package:cbt_journal/models/model.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
@@ -31,6 +32,16 @@ class JournalEntry {
         createdAt = DateTime.now().toUtc(),
         updatedAt = DateTime.now().toUtc(),
         isDeleted = false;
+
+  JournalEntry.fromPb(pb.JournalEntry e)
+      : id = e.id,
+        userId = e.userId,
+        createdAt = e.createdAt.toDateTime(),
+        guidedJournal = e.guidedJournal,
+        title = e.title,
+        content = e.content.map((e) => GuideQuestion.fromPb(e)).toList(),
+        updatedAt = e.updatedAt.toDateTime(),
+        isDeleted = e.isDeleted;
 }
 
 class GuidedJournal {

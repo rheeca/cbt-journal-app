@@ -18,12 +18,14 @@ const ReadGoalsRequest$json = {
   '1': 'ReadGoalsRequest',
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    {'1': 'last_synced', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'lastSynced'},
   ],
 };
 
 /// Descriptor for `ReadGoalsRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readGoalsRequestDescriptor = $convert.base64Decode(
-    'ChBSZWFkR29hbHNSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZA==');
+    'ChBSZWFkR29hbHNSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBI7CgtsYXN0X3N5bm'
+    'NlZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCmxhc3RTeW5jZWQ=');
 
 @$core.Deprecated('Use readGoalsResponseDescriptor instead')
 const ReadGoalsResponse$json = {
