@@ -97,7 +97,7 @@ class EditGoalController extends ChangeNotifier {
       _selectedGoal!.type = _selectedGoalActivity!;
       _selectedGoal!.notificationSchedule = _selectedDays.toList();
       _selectedGoal!.guideQuestions = guideQuestions;
-      _selectedGoal!.updatedAt = DateTime.now();
+      _selectedGoal!.updatedAt = DateTime.now().toUtc();
     }
     await _database.insertGoals([_selectedGoal!]);
   }

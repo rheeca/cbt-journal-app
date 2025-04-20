@@ -123,7 +123,7 @@ extension GoalQuery on AppDatabase {
 
     return (update(goals)..where((t) => t.id.equals(id))).write(
       GoalsCompanion(
-        updatedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now().toUtc()),
         isDeleted: const Value(true),
       ),
     );
@@ -309,7 +309,7 @@ extension UserQuery on AppDatabase {
 
     return (update(users)..where((t) => t.id.equals(id))).write(
       UsersCompanion(
-        updatedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now().toUtc()),
         isDeleted: const Value(true),
       ),
     );
@@ -392,7 +392,7 @@ extension JournalEntryQuery on AppDatabase {
 
     return (update(journalEntries)..where((t) => t.id.equals(id))).write(
       JournalEntriesCompanion(
-        updatedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now().toUtc()),
         isDeleted: const Value(true),
       ),
     );

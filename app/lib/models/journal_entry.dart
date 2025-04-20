@@ -28,8 +28,8 @@ class JournalEntry {
       this.title,
       required this.content})
       : id = const Uuid().v4(),
-        createdAt = DateTime.now(),
-        updatedAt = DateTime.now(),
+        createdAt = DateTime.now().toUtc(),
+        updatedAt = DateTime.now().toUtc(),
         isDeleted = false;
 }
 

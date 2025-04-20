@@ -101,7 +101,7 @@ class _JournalPageState extends State<_JournalPage> {
                               ),
                               Text(
                                 DateFormat('MMM-dd-yyyy kk:mm')
-                                    .format(e.createdAt),
+                                    .format(e.createdAt.toLocal()),
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],

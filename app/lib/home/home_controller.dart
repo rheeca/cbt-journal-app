@@ -54,7 +54,7 @@ class HomeController extends ChangeNotifier {
       userId: userId,
       date: dateToday,
       goals: {},
-      updatedAt: DateTime.now(),
+      updatedAt: DateTime.now().toUtc(),
       isDeleted: false,
     );
 
@@ -79,8 +79,16 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> updateGoalCheckIns(GoalCheckIn checkIn) async {
-    _goalCheckIns = checkIn;
-    await _database.insertGoalCheckIn(checkIn);
+    final updatedCheckIn = GoalCheckIn(
+      userId: checkIn.userId,
+      date: checkIn.date,
+      goals: checkIn.goals,
+      updatedAt: DateTime.now().toUtc(),
+      isDeleted: checkIn.isDeleted,
+    );
+
+    _goalCheckIns = updatedCheckIn;
+    await _database.insertGoalCheckIn(updatedCheckIn);
     notifyListeners();
   }
 }

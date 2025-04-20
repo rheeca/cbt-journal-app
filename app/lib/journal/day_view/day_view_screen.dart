@@ -45,7 +45,7 @@ class DayViewScreen extends StatelessWidget with WatchItMixin {
                                     ),
                                     Text(
                                       DateFormat('MMM-dd-yyyy kk:mm')
-                                          .format(e.createdAt),
+                                          .format(e.createdAt.toLocal()),
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelSmall,

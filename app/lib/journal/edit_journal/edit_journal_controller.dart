@@ -40,7 +40,16 @@ class EditJournalController extends ChangeNotifier {
   }
 
   Future<void> insertJournalEntry(JournalEntry entry) async {
-    await _database.insertJournalEntries([entry]);
+    final updatedEntry = JournalEntry(
+      id: entry.id,
+      userId: entry.userId,
+      createdAt: entry.createdAt,
+      guidedJournal: entry.guidedJournal,
+      content: entry.content,
+      updatedAt: DateTime.now().toUtc(),
+      isDeleted: entry.isDeleted,
+    );
+    await _database.insertJournalEntries([updatedEntry]);
   }
 }
 

@@ -62,7 +62,7 @@ class JournalController extends ChangeNotifier {
     _moodEntriesByDate.clear();
     _journalEntriesByDate.clear();
     for (final e in _journalEntries) {
-      final date = DateFormat('yyyy-MM-d').format(e.createdAt);
+      final date = DateFormat('yyyy-MM-d').format(e.createdAt.toLocal());
       // TODO: make guided journals types an enum.
       if (e.guidedJournal == 'dailyCheckIn') {
         if ((_moodEntriesByDate[date]?.createdAt)?.isBefore(e.createdAt) ??
@@ -106,8 +106,11 @@ class JournalController extends ChangeNotifier {
   }
 
   void selectDate(DateTime date) {
+    // DateTime date: only has year, month and day. It represents a day on the calendar,
+    //  so compare it with createdAt.toLocal() so entries will display according to the
+    //  user's timezone.
     _selectedDateEntries.clear();
-    _selectedDateEntries
-        .addAll(_journalEntries.where((e) => isSameDay(e.createdAt, date)));
+    _selectedDateEntries.addAll(
+        _journalEntries.where((e) => isSameDay(e.createdAt.toLocal(), date)));
   }
 }
