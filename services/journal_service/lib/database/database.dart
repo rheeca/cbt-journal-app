@@ -55,13 +55,15 @@ extension GoalQuery on AppDatabase {
                   e.guideQuestions.map((e) => guideQuestionFromMap(e)).toList(),
               notificationSchedule: e.notificationSchedule,
               isArchived: e.isArchived,
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
   Future<void> insertGoals(List<Goal> items) {
     return batch((batch) {
-      batch.insertAllOnConflictUpdate(
+      batch.insertAll(
           goals,
           items.map((e) => GoalsCompanion(
                 id: Value(e.id),
@@ -73,7 +75,24 @@ extension GoalQuery on AppDatabase {
                     Value(e.guideQuestions.map((e) => e.toMap()).toList()),
                 notificationSchedule: Value(e.notificationSchedule),
                 isArchived: Value(e.isArchived),
-              )));
+                updatedAt: Value(e.updatedAt.toDateTime()),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<Goals, GoalEntity>.withExcluded(
+              (old, excluded) => GoalsCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    title: excluded.title,
+                    type: excluded.type,
+                    guideQuestions: excluded.guideQuestions,
+                    notificationSchedule: excluded.notificationSchedule,
+                    isArchived: excluded.isArchived,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
     });
   }
 
@@ -91,19 +110,33 @@ extension GoalQuery on AppDatabase {
               userId: e.userId,
               date: e.date.toProtoTimestamp(),
               goals: e.goals,
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
   Future<void> insertGoalCheckIns(List<GoalCheckIn> items) async {
     await batch((batch) {
-      batch.insertAllOnConflictUpdate(
+      batch.insertAll(
           goalCheckIns,
           items.map((e) => GoalCheckInsCompanion(
                 userId: Value(e.userId),
                 date: Value(e.date.toDateTime()),
                 goals: Value(e.goals.toSet()),
-              )));
+                updatedAt: Value(e.updatedAt.toDateTime()),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<GoalCheckIns, GoalCheckInEntity>.withExcluded(
+              (old, excluded) => GoalCheckInsCompanion.custom(
+                    userId: excluded.userId,
+                    date: excluded.date,
+                    goals: excluded.goals,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
     });
   }
 }
@@ -125,13 +158,15 @@ extension JournalEntryQuery on AppDatabase {
               guidedJournal: e.guidedJournal,
               title: e.title,
               content: e.content.map((e) => guideQuestionFromMap(e)).toList(),
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
   Future<void> insertJournalEntries(List<JournalEntry> items) {
     return batch((batch) {
-      batch.insertAllOnConflictUpdate(
+      batch.insertAll(
           journalEntries,
           items.map((e) => JournalEntriesCompanion(
                 id: Value(e.id),
@@ -140,7 +175,22 @@ extension JournalEntryQuery on AppDatabase {
                 guidedJournal: Value(e.guidedJournal),
                 title: Value(e.title),
                 content: Value(e.content.map((e) => e.toMap()).toList()),
-              )));
+                updatedAt: Value(e.updatedAt.toDateTime()),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<JournalEntries, JournalEntryEntity>.withExcluded(
+              (old, excluded) => JournalEntriesCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    guidedJournal: excluded.guidedJournal,
+                    title: excluded.title,
+                    content: excluded.content,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
     });
   }
 
@@ -158,34 +208,38 @@ extension UserQuery on AppDatabase {
               email: e.email,
               createdAt: e.createdAt.toProtoTimestamp(),
               displayName: e.displayName,
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
-  Future<int> insertUser(User user) {
-    return into(users).insertOnConflictUpdate(UsersCompanion(
-      id: Value(user.id),
-      email: Value(user.email),
-      createdAt: Value(user.createdAt.toDateTime()),
-      displayName: Value(user.displayName),
-    ));
-  }
-
   Future<void> insertUsers(List<User> items) async {
     await batch((batch) {
-      batch.insertAllOnConflictUpdate(
+      batch.insertAll(
           users,
-          items.map((e) => UsersCompanion(
-                id: Value(e.id),
-                email: Value(e.email),
-                createdAt: Value(e.createdAt.toDateTime()),
-                displayName: Value(e.displayName),
-              )));
+          items.map(
+            (e) => UsersCompanion(
+              id: Value(e.id),
+              email: Value(e.email),
+              createdAt: Value(e.createdAt.toDateTime()),
+              displayName: Value(e.displayName),
+              updatedAt: Value(e.updatedAt.toDateTime()),
+              isDeleted: Value(e.isDeleted),
+            ),
+          ),
+          onConflict: DoUpdate<Users, UserEntity>.withExcluded(
+              (old, excluded) => UsersCompanion.custom(
+                    id: excluded.id,
+                    email: excluded.email,
+                    createdAt: excluded.createdAt,
+                    displayName: excluded.displayName,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
     });
-  }
-
-  Future<void> deleteUser(String id) {
-    return (delete(users)..where((t) => t.id.isValue(id))).go();
   }
 
   Future<void> deleteUsers(List<String> ids) {

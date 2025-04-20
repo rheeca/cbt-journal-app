@@ -148,7 +148,6 @@ class JournalService {
       final ids = goalLogs.map((e) => e.id).toList();
       final goals =
           await di<AppDatabase>().getGoals(ids: ids, includeDeleted: true);
-      final toDelete = ids.where((e) => !goals.map((e) => e.id).contains(e));
 
       if (goals.isNotEmpty) {
         await goalClient?.writeGoals(WriteGoalsRequest(
@@ -172,9 +171,6 @@ class JournalService {
               )),
         ));
       }
-      if (toDelete.isNotEmpty) {
-        await goalClient?.deleteGoals(DeleteGoalsRequest(ids: toDelete));
-      }
     }
 
     final journalLogs = groupedLogs[md.DatabaseType.journalEntry];
@@ -182,7 +178,6 @@ class JournalService {
       final ids = journalLogs.map((e) => e.id).toList();
       final entries = await di<AppDatabase>()
           .getJournalEntries(ids: ids, includeDeleted: true);
-      final toDelete = ids.where((e) => !entries.map((e) => e.id).contains(e));
 
       if (entries.isNotEmpty) {
         await journalEntryClient
@@ -204,10 +199,6 @@ class JournalService {
               )),
         ));
       }
-      if (toDelete.isNotEmpty) {
-        await journalEntryClient
-            ?.deleteJournalEntries(DeleteJournalEntriesRequest(ids: toDelete));
-      }
     }
 
     final userLogs = groupedLogs[md.DatabaseType.user];
@@ -215,16 +206,11 @@ class JournalService {
       final userIds = userLogs.map((e) => e.id).toList();
       final users =
           await di<AppDatabase>().getUsers(userIds, includeDeleted: true);
-      final toDelete =
-          userIds.where((e) => !users.map((e) => e.id).contains(e));
 
       if (users.isNotEmpty) {
         await userClient?.writeUsers(WriteUsersRequest(
           users: users,
         ));
-      }
-      if (toDelete.isNotEmpty) {
-        await userClient?.deleteUsers(DeleteUsersRequest(ids: toDelete));
       }
     }
 
