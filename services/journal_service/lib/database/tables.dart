@@ -29,7 +29,7 @@ class Goals extends Table {
       )();
   Column<PgDateTime> get createdAt =>
       customType(PgTypes.timestampWithTimezone)();
-  TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get title => text()();
   TextColumn get type => text()();
   TextColumn get guideQuestions => text().map(const QuestionListConverter())();
   TextColumn get notificationSchedule =>
@@ -54,7 +54,7 @@ class JournalEntries extends Table {
   Column<PgDateTime> get createdAt =>
       customType(PgTypes.timestampWithTimezone)();
   TextColumn get guidedJournal => text()();
-  TextColumn get title => text().withLength(min: 1, max: 200).nullable()();
+  TextColumn get title => text()();
   TextColumn get content => text().map(const QuestionListConverter())();
   Column<PgDateTime> get updatedAt =>
       customType(PgTypes.timestampWithTimezone)();

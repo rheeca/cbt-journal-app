@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
+import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,7 @@ class SettingsController extends ChangeNotifier {
   }
 
   void insertUserIntoDb(pb_user.User user) {
+    user.updatedAt = DateTime.now().toUtc().toProtoTimestamp();
     _currentUser = user;
     _database.insertUsers([user]);
   }
