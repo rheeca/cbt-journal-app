@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
+import 'package:drift_postgres/drift_postgres.dart';
 
 @DataClassName("GoalCheckInEntity")
 class GoalCheckIns extends Table {
@@ -8,9 +9,10 @@ class GoalCheckIns extends Table {
         #id,
         onDelete: KeyAction.cascade,
       )();
-  DateTimeColumn get date => dateTime()();
+  Column<PgDateTime> get date => customType(PgTypes.timestampWithTimezone)();
   TextColumn get goals => text().map(const StringSetConverter())();
-  DateTimeColumn get updatedAt => dateTime()();
+  Column<PgDateTime> get updatedAt =>
+      customType(PgTypes.timestampWithTimezone)();
   BoolColumn get isDeleted => boolean()();
 
   @override
@@ -25,15 +27,16 @@ class Goals extends Table {
         #id,
         onDelete: KeyAction.cascade,
       )();
-  DateTimeColumn get createdAt =>
-      dateTime().clientDefault(() => DateTime.now())();
+  Column<PgDateTime> get createdAt =>
+      customType(PgTypes.timestampWithTimezone)();
   TextColumn get title => text().withLength(min: 1, max: 200)();
   TextColumn get type => text()();
   TextColumn get guideQuestions => text().map(const QuestionListConverter())();
   TextColumn get notificationSchedule =>
       text().map(const StringListConverter())();
   BoolColumn get isArchived => boolean().clientDefault(() => false)();
-  DateTimeColumn get updatedAt => dateTime()();
+  Column<PgDateTime> get updatedAt =>
+      customType(PgTypes.timestampWithTimezone)();
   BoolColumn get isDeleted => boolean()();
 
   @override
@@ -48,12 +51,13 @@ class JournalEntries extends Table {
         #id,
         onDelete: KeyAction.cascade,
       )();
-  DateTimeColumn get createdAt =>
-      dateTime().clientDefault(() => DateTime.now())();
+  Column<PgDateTime> get createdAt =>
+      customType(PgTypes.timestampWithTimezone)();
   TextColumn get guidedJournal => text()();
   TextColumn get title => text().withLength(min: 1, max: 200).nullable()();
   TextColumn get content => text().map(const QuestionListConverter())();
-  DateTimeColumn get updatedAt => dateTime()();
+  Column<PgDateTime> get updatedAt =>
+      customType(PgTypes.timestampWithTimezone)();
   BoolColumn get isDeleted => boolean()();
 
   @override
@@ -64,10 +68,11 @@ class JournalEntries extends Table {
 class Users extends Table {
   TextColumn get id => text()();
   TextColumn get email => text().unique()();
-  DateTimeColumn get createdAt =>
-      dateTime().clientDefault(() => DateTime.now())();
+  Column<PgDateTime> get createdAt =>
+      customType(PgTypes.timestampWithTimezone)();
   TextColumn get displayName => text()();
-  DateTimeColumn get updatedAt => dateTime()();
+  Column<PgDateTime> get updatedAt =>
+      customType(PgTypes.timestampWithTimezone)();
   BoolColumn get isDeleted => boolean()();
 
   @override

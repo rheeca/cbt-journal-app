@@ -23,11 +23,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now());
+  late final GeneratedColumn<PgDateTime> createdAt =
+      GeneratedColumn<PgDateTime>('created_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _displayNameMeta =
       const VerificationMeta('displayName');
   @override
@@ -37,9 +35,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  late final GeneratedColumn<PgDateTime> updatedAt =
+      GeneratedColumn<PgDateTime>('updated_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _isDeletedMeta =
       const VerificationMeta('isDeleted');
   @override
@@ -78,6 +76,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('display_name')) {
       context.handle(
@@ -112,12 +112,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       email: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}email'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      createdAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}created_at'])!,
       displayName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      updatedAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}updated_at'])!,
       isDeleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
     );
@@ -132,9 +132,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
 class UserEntity extends DataClass implements Insertable<UserEntity> {
   final String id;
   final String email;
-  final DateTime createdAt;
+  final PgDateTime createdAt;
   final String displayName;
-  final DateTime updatedAt;
+  final PgDateTime updatedAt;
   final bool isDeleted;
   const UserEntity(
       {required this.id,
@@ -148,9 +148,11 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['email'] = Variable<String>(email);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_at'] =
+        Variable<PgDateTime>(createdAt, PgTypes.timestampWithTimezone);
     map['display_name'] = Variable<String>(displayName);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_at'] =
+        Variable<PgDateTime>(updatedAt, PgTypes.timestampWithTimezone);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -172,9 +174,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return UserEntity(
       id: serializer.fromJson<String>(json['id']),
       email: serializer.fromJson<String>(json['email']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdAt: serializer.fromJson<PgDateTime>(json['createdAt']),
       displayName: serializer.fromJson<String>(json['displayName']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedAt: serializer.fromJson<PgDateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -184,9 +186,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'email': serializer.toJson<String>(email),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdAt': serializer.toJson<PgDateTime>(createdAt),
       'displayName': serializer.toJson<String>(displayName),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedAt': serializer.toJson<PgDateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
@@ -194,9 +196,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity copyWith(
           {String? id,
           String? email,
-          DateTime? createdAt,
+          PgDateTime? createdAt,
           String? displayName,
-          DateTime? updatedAt,
+          PgDateTime? updatedAt,
           bool? isDeleted}) =>
       UserEntity(
         id: id ?? this.id,
@@ -249,9 +251,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String> id;
   final Value<String> email;
-  final Value<DateTime> createdAt;
+  final Value<PgDateTime> createdAt;
   final Value<String> displayName;
-  final Value<DateTime> updatedAt;
+  final Value<PgDateTime> updatedAt;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const UsersCompanion({
@@ -266,22 +268,23 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion.insert({
     required String id,
     required String email,
-    this.createdAt = const Value.absent(),
+    required PgDateTime createdAt,
     required String displayName,
-    required DateTime updatedAt,
+    required PgDateTime updatedAt,
     required bool isDeleted,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         email = Value(email),
+        createdAt = Value(createdAt),
         displayName = Value(displayName),
         updatedAt = Value(updatedAt),
         isDeleted = Value(isDeleted);
   static Insertable<UserEntity> custom({
     Expression<String>? id,
     Expression<String>? email,
-    Expression<DateTime>? createdAt,
+    Expression<PgDateTime>? createdAt,
     Expression<String>? displayName,
-    Expression<DateTime>? updatedAt,
+    Expression<PgDateTime>? updatedAt,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -299,9 +302,9 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion copyWith(
       {Value<String>? id,
       Value<String>? email,
-      Value<DateTime>? createdAt,
+      Value<PgDateTime>? createdAt,
       Value<String>? displayName,
-      Value<DateTime>? updatedAt,
+      Value<PgDateTime>? updatedAt,
       Value<bool>? isDeleted,
       Value<int>? rowid}) {
     return UsersCompanion(
@@ -325,13 +328,15 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       map['email'] = Variable<String>(email.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] =
+          Variable<PgDateTime>(createdAt.value, PgTypes.timestampWithTimezone);
     }
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      map['updated_at'] =
+          Variable<PgDateTime>(updatedAt.value, PgTypes.timestampWithTimezone);
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
@@ -373,9 +378,9 @@ class $GoalCheckInsTable extends GoalCheckIns
           'REFERENCES users (id) ON DELETE CASCADE'));
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<PgDateTime> date = GeneratedColumn<PgDateTime>(
       'date', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+      type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   @override
   late final GeneratedColumnWithTypeConverter<Set<String>, String> goals =
       GeneratedColumn<String>('goals', aliasedName, false,
@@ -384,9 +389,9 @@ class $GoalCheckInsTable extends GoalCheckIns
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  late final GeneratedColumn<PgDateTime> updatedAt =
+      GeneratedColumn<PgDateTime>('updated_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _isDeletedMeta =
       const VerificationMeta('isDeleted');
   @override
@@ -447,12 +452,12 @@ class $GoalCheckInsTable extends GoalCheckIns
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
       date: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+          .read(PgTypes.timestampWithTimezone, data['${effectivePrefix}date'])!,
       goals: $GoalCheckInsTable.$convertergoals.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}goals'])!),
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      updatedAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}updated_at'])!,
       isDeleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
     );
@@ -470,9 +475,9 @@ class $GoalCheckInsTable extends GoalCheckIns
 class GoalCheckInEntity extends DataClass
     implements Insertable<GoalCheckInEntity> {
   final String userId;
-  final DateTime date;
+  final PgDateTime date;
   final Set<String> goals;
-  final DateTime updatedAt;
+  final PgDateTime updatedAt;
   final bool isDeleted;
   const GoalCheckInEntity(
       {required this.userId,
@@ -484,12 +489,13 @@ class GoalCheckInEntity extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['user_id'] = Variable<String>(userId);
-    map['date'] = Variable<DateTime>(date);
+    map['date'] = Variable<PgDateTime>(date, PgTypes.timestampWithTimezone);
     {
       map['goals'] =
           Variable<String>($GoalCheckInsTable.$convertergoals.toSql(goals));
     }
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_at'] =
+        Variable<PgDateTime>(updatedAt, PgTypes.timestampWithTimezone);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -509,9 +515,9 @@ class GoalCheckInEntity extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GoalCheckInEntity(
       userId: serializer.fromJson<String>(json['userId']),
-      date: serializer.fromJson<DateTime>(json['date']),
+      date: serializer.fromJson<PgDateTime>(json['date']),
       goals: serializer.fromJson<Set<String>>(json['goals']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedAt: serializer.fromJson<PgDateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -520,18 +526,18 @@ class GoalCheckInEntity extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'userId': serializer.toJson<String>(userId),
-      'date': serializer.toJson<DateTime>(date),
+      'date': serializer.toJson<PgDateTime>(date),
       'goals': serializer.toJson<Set<String>>(goals),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedAt': serializer.toJson<PgDateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
 
   GoalCheckInEntity copyWith(
           {String? userId,
-          DateTime? date,
+          PgDateTime? date,
           Set<String>? goals,
-          DateTime? updatedAt,
+          PgDateTime? updatedAt,
           bool? isDeleted}) =>
       GoalCheckInEntity(
         userId: userId ?? this.userId,
@@ -577,9 +583,9 @@ class GoalCheckInEntity extends DataClass
 
 class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
   final Value<String> userId;
-  final Value<DateTime> date;
+  final Value<PgDateTime> date;
   final Value<Set<String>> goals;
-  final Value<DateTime> updatedAt;
+  final Value<PgDateTime> updatedAt;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const GoalCheckInsCompanion({
@@ -592,9 +598,9 @@ class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
   });
   GoalCheckInsCompanion.insert({
     required String userId,
-    required DateTime date,
+    required PgDateTime date,
     required Set<String> goals,
-    required DateTime updatedAt,
+    required PgDateTime updatedAt,
     required bool isDeleted,
     this.rowid = const Value.absent(),
   })  : userId = Value(userId),
@@ -604,9 +610,9 @@ class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
         isDeleted = Value(isDeleted);
   static Insertable<GoalCheckInEntity> custom({
     Expression<String>? userId,
-    Expression<DateTime>? date,
+    Expression<PgDateTime>? date,
     Expression<String>? goals,
-    Expression<DateTime>? updatedAt,
+    Expression<PgDateTime>? updatedAt,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -622,9 +628,9 @@ class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
 
   GoalCheckInsCompanion copyWith(
       {Value<String>? userId,
-      Value<DateTime>? date,
+      Value<PgDateTime>? date,
       Value<Set<String>>? goals,
-      Value<DateTime>? updatedAt,
+      Value<PgDateTime>? updatedAt,
       Value<bool>? isDeleted,
       Value<int>? rowid}) {
     return GoalCheckInsCompanion(
@@ -644,14 +650,16 @@ class GoalCheckInsCompanion extends UpdateCompanion<GoalCheckInEntity> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (date.present) {
-      map['date'] = Variable<DateTime>(date.value);
+      map['date'] =
+          Variable<PgDateTime>(date.value, PgTypes.timestampWithTimezone);
     }
     if (goals.present) {
       map['goals'] = Variable<String>(
           $GoalCheckInsTable.$convertergoals.toSql(goals.value));
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      map['updated_at'] =
+          Variable<PgDateTime>(updatedAt.value, PgTypes.timestampWithTimezone);
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
@@ -697,11 +705,9 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now());
+  late final GeneratedColumn<PgDateTime> createdAt =
+      GeneratedColumn<PgDateTime>('created_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -744,9 +750,9 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  late final GeneratedColumn<PgDateTime> updatedAt =
+      GeneratedColumn<PgDateTime>('updated_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _isDeletedMeta =
       const VerificationMeta('isDeleted');
   @override
@@ -795,6 +801,8 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -839,8 +847,8 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      createdAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}created_at'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       type: attachedDatabase.typeMapping
@@ -853,8 +861,8 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
               data['${effectivePrefix}notification_schedule'])!),
       isArchived: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      updatedAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}updated_at'])!,
       isDeleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
     );
@@ -874,13 +882,13 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
 class GoalEntity extends DataClass implements Insertable<GoalEntity> {
   final String id;
   final String userId;
-  final DateTime createdAt;
+  final PgDateTime createdAt;
   final String title;
   final String type;
   final List<Map<String, String>> guideQuestions;
   final List<String> notificationSchedule;
   final bool isArchived;
-  final DateTime updatedAt;
+  final PgDateTime updatedAt;
   final bool isDeleted;
   const GoalEntity(
       {required this.id,
@@ -898,7 +906,8 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['user_id'] = Variable<String>(userId);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_at'] =
+        Variable<PgDateTime>(createdAt, PgTypes.timestampWithTimezone);
     map['title'] = Variable<String>(title);
     map['type'] = Variable<String>(type);
     {
@@ -911,7 +920,8 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
           .toSql(notificationSchedule));
     }
     map['is_archived'] = Variable<bool>(isArchived);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_at'] =
+        Variable<PgDateTime>(updatedAt, PgTypes.timestampWithTimezone);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -937,7 +947,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
     return GoalEntity(
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdAt: serializer.fromJson<PgDateTime>(json['createdAt']),
       title: serializer.fromJson<String>(json['title']),
       type: serializer.fromJson<String>(json['type']),
       guideQuestions: serializer
@@ -945,7 +955,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       notificationSchedule:
           serializer.fromJson<List<String>>(json['notificationSchedule']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedAt: serializer.fromJson<PgDateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -955,7 +965,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdAt': serializer.toJson<PgDateTime>(createdAt),
       'title': serializer.toJson<String>(title),
       'type': serializer.toJson<String>(type),
       'guideQuestions':
@@ -963,7 +973,7 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
       'notificationSchedule':
           serializer.toJson<List<String>>(notificationSchedule),
       'isArchived': serializer.toJson<bool>(isArchived),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedAt': serializer.toJson<PgDateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
@@ -971,13 +981,13 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
   GoalEntity copyWith(
           {String? id,
           String? userId,
-          DateTime? createdAt,
+          PgDateTime? createdAt,
           String? title,
           String? type,
           List<Map<String, String>>? guideQuestions,
           List<String>? notificationSchedule,
           bool? isArchived,
-          DateTime? updatedAt,
+          PgDateTime? updatedAt,
           bool? isDeleted}) =>
       GoalEntity(
         id: id ?? this.id,
@@ -1050,13 +1060,13 @@ class GoalEntity extends DataClass implements Insertable<GoalEntity> {
 class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   final Value<String> id;
   final Value<String> userId;
-  final Value<DateTime> createdAt;
+  final Value<PgDateTime> createdAt;
   final Value<String> title;
   final Value<String> type;
   final Value<List<Map<String, String>>> guideQuestions;
   final Value<List<String>> notificationSchedule;
   final Value<bool> isArchived;
-  final Value<DateTime> updatedAt;
+  final Value<PgDateTime> updatedAt;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const GoalsCompanion({
@@ -1075,17 +1085,18 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   GoalsCompanion.insert({
     required String id,
     required String userId,
-    this.createdAt = const Value.absent(),
+    required PgDateTime createdAt,
     required String title,
     required String type,
     required List<Map<String, String>> guideQuestions,
     required List<String> notificationSchedule,
     this.isArchived = const Value.absent(),
-    required DateTime updatedAt,
+    required PgDateTime updatedAt,
     required bool isDeleted,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         userId = Value(userId),
+        createdAt = Value(createdAt),
         title = Value(title),
         type = Value(type),
         guideQuestions = Value(guideQuestions),
@@ -1095,13 +1106,13 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   static Insertable<GoalEntity> custom({
     Expression<String>? id,
     Expression<String>? userId,
-    Expression<DateTime>? createdAt,
+    Expression<PgDateTime>? createdAt,
     Expression<String>? title,
     Expression<String>? type,
     Expression<String>? guideQuestions,
     Expression<String>? notificationSchedule,
     Expression<bool>? isArchived,
-    Expression<DateTime>? updatedAt,
+    Expression<PgDateTime>? updatedAt,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -1124,13 +1135,13 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   GoalsCompanion copyWith(
       {Value<String>? id,
       Value<String>? userId,
-      Value<DateTime>? createdAt,
+      Value<PgDateTime>? createdAt,
       Value<String>? title,
       Value<String>? type,
       Value<List<Map<String, String>>>? guideQuestions,
       Value<List<String>>? notificationSchedule,
       Value<bool>? isArchived,
-      Value<DateTime>? updatedAt,
+      Value<PgDateTime>? updatedAt,
       Value<bool>? isDeleted,
       Value<int>? rowid}) {
     return GoalsCompanion(
@@ -1158,7 +1169,8 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] =
+          Variable<PgDateTime>(createdAt.value, PgTypes.timestampWithTimezone);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -1179,7 +1191,8 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
       map['is_archived'] = Variable<bool>(isArchived.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      map['updated_at'] =
+          Variable<PgDateTime>(updatedAt.value, PgTypes.timestampWithTimezone);
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
@@ -1231,11 +1244,9 @@ class $JournalEntriesTable extends JournalEntries
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now());
+  late final GeneratedColumn<PgDateTime> createdAt =
+      GeneratedColumn<PgDateTime>('created_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _guidedJournalMeta =
       const VerificationMeta('guidedJournal');
   @override
@@ -1259,9 +1270,9 @@ class $JournalEntriesTable extends JournalEntries
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  late final GeneratedColumn<PgDateTime> updatedAt =
+      GeneratedColumn<PgDateTime>('updated_at', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
   static const VerificationMeta _isDeletedMeta =
       const VerificationMeta('isDeleted');
   @override
@@ -1308,6 +1319,8 @@ class $JournalEntriesTable extends JournalEntries
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('guided_journal')) {
       context.handle(
@@ -1346,8 +1359,8 @@ class $JournalEntriesTable extends JournalEntries
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      createdAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}created_at'])!,
       guidedJournal: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}guided_journal'])!,
       title: attachedDatabase.typeMapping
@@ -1355,8 +1368,8 @@ class $JournalEntriesTable extends JournalEntries
       content: $JournalEntriesTable.$convertercontent.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!),
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      updatedAt: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone, data['${effectivePrefix}updated_at'])!,
       isDeleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
     );
@@ -1375,11 +1388,11 @@ class JournalEntryEntity extends DataClass
     implements Insertable<JournalEntryEntity> {
   final String id;
   final String userId;
-  final DateTime createdAt;
+  final PgDateTime createdAt;
   final String guidedJournal;
   final String? title;
   final List<Map<String, String>> content;
-  final DateTime updatedAt;
+  final PgDateTime updatedAt;
   final bool isDeleted;
   const JournalEntryEntity(
       {required this.id,
@@ -1395,7 +1408,8 @@ class JournalEntryEntity extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['user_id'] = Variable<String>(userId);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_at'] =
+        Variable<PgDateTime>(createdAt, PgTypes.timestampWithTimezone);
     map['guided_journal'] = Variable<String>(guidedJournal);
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
@@ -1404,7 +1418,8 @@ class JournalEntryEntity extends DataClass
       map['content'] = Variable<String>(
           $JournalEntriesTable.$convertercontent.toSql(content));
     }
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_at'] =
+        Variable<PgDateTime>(updatedAt, PgTypes.timestampWithTimezone);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -1429,11 +1444,11 @@ class JournalEntryEntity extends DataClass
     return JournalEntryEntity(
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdAt: serializer.fromJson<PgDateTime>(json['createdAt']),
       guidedJournal: serializer.fromJson<String>(json['guidedJournal']),
       title: serializer.fromJson<String?>(json['title']),
       content: serializer.fromJson<List<Map<String, String>>>(json['content']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedAt: serializer.fromJson<PgDateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -1443,11 +1458,11 @@ class JournalEntryEntity extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdAt': serializer.toJson<PgDateTime>(createdAt),
       'guidedJournal': serializer.toJson<String>(guidedJournal),
       'title': serializer.toJson<String?>(title),
       'content': serializer.toJson<List<Map<String, String>>>(content),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedAt': serializer.toJson<PgDateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
@@ -1455,11 +1470,11 @@ class JournalEntryEntity extends DataClass
   JournalEntryEntity copyWith(
           {String? id,
           String? userId,
-          DateTime? createdAt,
+          PgDateTime? createdAt,
           String? guidedJournal,
           Value<String?> title = const Value.absent(),
           List<Map<String, String>>? content,
-          DateTime? updatedAt,
+          PgDateTime? updatedAt,
           bool? isDeleted}) =>
       JournalEntryEntity(
         id: id ?? this.id,
@@ -1521,11 +1536,11 @@ class JournalEntryEntity extends DataClass
 class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   final Value<String> id;
   final Value<String> userId;
-  final Value<DateTime> createdAt;
+  final Value<PgDateTime> createdAt;
   final Value<String> guidedJournal;
   final Value<String?> title;
   final Value<List<Map<String, String>>> content;
-  final Value<DateTime> updatedAt;
+  final Value<PgDateTime> updatedAt;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const JournalEntriesCompanion({
@@ -1542,15 +1557,16 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   JournalEntriesCompanion.insert({
     required String id,
     required String userId,
-    this.createdAt = const Value.absent(),
+    required PgDateTime createdAt,
     required String guidedJournal,
     this.title = const Value.absent(),
     required List<Map<String, String>> content,
-    required DateTime updatedAt,
+    required PgDateTime updatedAt,
     required bool isDeleted,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         userId = Value(userId),
+        createdAt = Value(createdAt),
         guidedJournal = Value(guidedJournal),
         content = Value(content),
         updatedAt = Value(updatedAt),
@@ -1558,11 +1574,11 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   static Insertable<JournalEntryEntity> custom({
     Expression<String>? id,
     Expression<String>? userId,
-    Expression<DateTime>? createdAt,
+    Expression<PgDateTime>? createdAt,
     Expression<String>? guidedJournal,
     Expression<String>? title,
     Expression<String>? content,
-    Expression<DateTime>? updatedAt,
+    Expression<PgDateTime>? updatedAt,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -1582,11 +1598,11 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   JournalEntriesCompanion copyWith(
       {Value<String>? id,
       Value<String>? userId,
-      Value<DateTime>? createdAt,
+      Value<PgDateTime>? createdAt,
       Value<String>? guidedJournal,
       Value<String?>? title,
       Value<List<Map<String, String>>>? content,
-      Value<DateTime>? updatedAt,
+      Value<PgDateTime>? updatedAt,
       Value<bool>? isDeleted,
       Value<int>? rowid}) {
     return JournalEntriesCompanion(
@@ -1612,7 +1628,8 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] =
+          Variable<PgDateTime>(createdAt.value, PgTypes.timestampWithTimezone);
     }
     if (guidedJournal.present) {
       map['guided_journal'] = Variable<String>(guidedJournal.value);
@@ -1625,7 +1642,8 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
           $JournalEntriesTable.$convertercontent.toSql(content.value));
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      map['updated_at'] =
+          Variable<PgDateTime>(updatedAt.value, PgTypes.timestampWithTimezone);
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
@@ -1700,18 +1718,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required String id,
   required String email,
-  Value<DateTime> createdAt,
+  required PgDateTime createdAt,
   required String displayName,
-  required DateTime updatedAt,
+  required PgDateTime updatedAt,
   required bool isDeleted,
   Value<int> rowid,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> id,
   Value<String> email,
-  Value<DateTime> createdAt,
+  Value<PgDateTime> createdAt,
   Value<String> displayName,
-  Value<DateTime> updatedAt,
+  Value<PgDateTime> updatedAt,
   Value<bool> isDeleted,
   Value<int> rowid,
 });
@@ -1778,13 +1796,13 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
   ColumnFilters<String> get email => $composableBuilder(
       column: $table.email, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
@@ -1869,13 +1887,13 @@ class $$UsersTableOrderingComposer
   ColumnOrderings<String> get email => $composableBuilder(
       column: $table.email, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
@@ -1897,13 +1915,13 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
+  GeneratedColumn<PgDateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
+  GeneratedColumn<PgDateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
@@ -1999,9 +2017,9 @@ class $$UsersTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> email = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
+            Value<PgDateTime> createdAt = const Value.absent(),
             Value<String> displayName = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            Value<PgDateTime> updatedAt = const Value.absent(),
             Value<bool> isDeleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2017,9 +2035,9 @@ class $$UsersTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String email,
-            Value<DateTime> createdAt = const Value.absent(),
+            required PgDateTime createdAt,
             required String displayName,
-            required DateTime updatedAt,
+            required PgDateTime updatedAt,
             required bool isDeleted,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2111,18 +2129,18 @@ typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
 typedef $$GoalCheckInsTableCreateCompanionBuilder = GoalCheckInsCompanion
     Function({
   required String userId,
-  required DateTime date,
+  required PgDateTime date,
   required Set<String> goals,
-  required DateTime updatedAt,
+  required PgDateTime updatedAt,
   required bool isDeleted,
   Value<int> rowid,
 });
 typedef $$GoalCheckInsTableUpdateCompanionBuilder = GoalCheckInsCompanion
     Function({
   Value<String> userId,
-  Value<DateTime> date,
+  Value<PgDateTime> date,
   Value<Set<String>> goals,
-  Value<DateTime> updatedAt,
+  Value<PgDateTime> updatedAt,
   Value<bool> isDeleted,
   Value<int> rowid,
 });
@@ -2155,7 +2173,7 @@ class $$GoalCheckInsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<DateTime> get date => $composableBuilder(
+  ColumnFilters<PgDateTime> get date => $composableBuilder(
       column: $table.date, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<Set<String>, Set<String>, String> get goals =>
@@ -2163,7 +2181,7 @@ class $$GoalCheckInsTableFilterComposer
           column: $table.goals,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
@@ -2199,13 +2217,13 @@ class $$GoalCheckInsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<DateTime> get date => $composableBuilder(
+  ColumnOrderings<PgDateTime> get date => $composableBuilder(
       column: $table.date, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get goals => $composableBuilder(
       column: $table.goals, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
@@ -2241,13 +2259,13 @@ class $$GoalCheckInsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<DateTime> get date =>
+  GeneratedColumn<PgDateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Set<String>, String> get goals =>
       $composableBuilder(column: $table.goals, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
+  GeneratedColumn<PgDateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
@@ -2298,9 +2316,9 @@ class $$GoalCheckInsTableTableManager extends RootTableManager<
               $$GoalCheckInsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> userId = const Value.absent(),
-            Value<DateTime> date = const Value.absent(),
+            Value<PgDateTime> date = const Value.absent(),
             Value<Set<String>> goals = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            Value<PgDateTime> updatedAt = const Value.absent(),
             Value<bool> isDeleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2314,9 +2332,9 @@ class $$GoalCheckInsTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String userId,
-            required DateTime date,
+            required PgDateTime date,
             required Set<String> goals,
-            required DateTime updatedAt,
+            required PgDateTime updatedAt,
             required bool isDeleted,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2387,26 +2405,26 @@ typedef $$GoalCheckInsTableProcessedTableManager = ProcessedTableManager<
 typedef $$GoalsTableCreateCompanionBuilder = GoalsCompanion Function({
   required String id,
   required String userId,
-  Value<DateTime> createdAt,
+  required PgDateTime createdAt,
   required String title,
   required String type,
   required List<Map<String, String>> guideQuestions,
   required List<String> notificationSchedule,
   Value<bool> isArchived,
-  required DateTime updatedAt,
+  required PgDateTime updatedAt,
   required bool isDeleted,
   Value<int> rowid,
 });
 typedef $$GoalsTableUpdateCompanionBuilder = GoalsCompanion Function({
   Value<String> id,
   Value<String> userId,
-  Value<DateTime> createdAt,
+  Value<PgDateTime> createdAt,
   Value<String> title,
   Value<String> type,
   Value<List<Map<String, String>>> guideQuestions,
   Value<List<String>> notificationSchedule,
   Value<bool> isArchived,
-  Value<DateTime> updatedAt,
+  Value<PgDateTime> updatedAt,
   Value<bool> isDeleted,
   Value<int> rowid,
 });
@@ -2441,7 +2459,7 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get title => $composableBuilder(
@@ -2464,7 +2482,7 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
   ColumnFilters<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
@@ -2503,7 +2521,7 @@ class $$GoalsTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get title => $composableBuilder(
@@ -2523,7 +2541,7 @@ class $$GoalsTableOrderingComposer
   ColumnOrderings<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
@@ -2562,7 +2580,7 @@ class $$GoalsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
+  GeneratedColumn<PgDateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
@@ -2582,7 +2600,7 @@ class $$GoalsTableAnnotationComposer
   GeneratedColumn<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
+  GeneratedColumn<PgDateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
@@ -2634,14 +2652,14 @@ class $$GoalsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> userId = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
+            Value<PgDateTime> createdAt = const Value.absent(),
             Value<String> title = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<List<Map<String, String>>> guideQuestions =
                 const Value.absent(),
             Value<List<String>> notificationSchedule = const Value.absent(),
             Value<bool> isArchived = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            Value<PgDateTime> updatedAt = const Value.absent(),
             Value<bool> isDeleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2661,13 +2679,13 @@ class $$GoalsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String userId,
-            Value<DateTime> createdAt = const Value.absent(),
+            required PgDateTime createdAt,
             required String title,
             required String type,
             required List<Map<String, String>> guideQuestions,
             required List<String> notificationSchedule,
             Value<bool> isArchived = const Value.absent(),
-            required DateTime updatedAt,
+            required PgDateTime updatedAt,
             required bool isDeleted,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2741,11 +2759,11 @@ typedef $$JournalEntriesTableCreateCompanionBuilder = JournalEntriesCompanion
     Function({
   required String id,
   required String userId,
-  Value<DateTime> createdAt,
+  required PgDateTime createdAt,
   required String guidedJournal,
   Value<String?> title,
   required List<Map<String, String>> content,
-  required DateTime updatedAt,
+  required PgDateTime updatedAt,
   required bool isDeleted,
   Value<int> rowid,
 });
@@ -2753,11 +2771,11 @@ typedef $$JournalEntriesTableUpdateCompanionBuilder = JournalEntriesCompanion
     Function({
   Value<String> id,
   Value<String> userId,
-  Value<DateTime> createdAt,
+  Value<PgDateTime> createdAt,
   Value<String> guidedJournal,
   Value<String?> title,
   Value<List<Map<String, String>>> content,
-  Value<DateTime> updatedAt,
+  Value<PgDateTime> updatedAt,
   Value<bool> isDeleted,
   Value<int> rowid,
 });
@@ -2794,7 +2812,7 @@ class $$JournalEntriesTableFilterComposer
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get guidedJournal => $composableBuilder(
@@ -2809,7 +2827,7 @@ class $$JournalEntriesTableFilterComposer
           column: $table.content,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+  ColumnFilters<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
@@ -2848,7 +2866,7 @@ class $$JournalEntriesTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get guidedJournal => $composableBuilder(
@@ -2861,7 +2879,7 @@ class $$JournalEntriesTableOrderingComposer
   ColumnOrderings<String> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+  ColumnOrderings<PgDateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
@@ -2900,7 +2918,7 @@ class $$JournalEntriesTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
+  GeneratedColumn<PgDateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<String> get guidedJournal => $composableBuilder(
@@ -2913,7 +2931,7 @@ class $$JournalEntriesTableAnnotationComposer
       get content => $composableBuilder(
           column: $table.content, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
+  GeneratedColumn<PgDateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
@@ -2966,11 +2984,11 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> userId = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
+            Value<PgDateTime> createdAt = const Value.absent(),
             Value<String> guidedJournal = const Value.absent(),
             Value<String?> title = const Value.absent(),
             Value<List<Map<String, String>>> content = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            Value<PgDateTime> updatedAt = const Value.absent(),
             Value<bool> isDeleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -2988,11 +3006,11 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String userId,
-            Value<DateTime> createdAt = const Value.absent(),
+            required PgDateTime createdAt,
             required String guidedJournal,
             Value<String?> title = const Value.absent(),
             required List<Map<String, String>> content,
-            required DateTime updatedAt,
+            required PgDateTime updatedAt,
             required bool isDeleted,
             Value<int> rowid = const Value.absent(),
           }) =>

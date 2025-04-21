@@ -45,7 +45,7 @@ extension GoalQuery on AppDatabase {
     SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals)
       ..where((t) => t.userId.equals(userId));
     if (lastSynced != null) {
-      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
 
     final items = await stmt.get();
@@ -53,14 +53,14 @@ extension GoalQuery on AppDatabase {
         .map((e) => Goal(
               id: e.id,
               userId: e.userId,
-              createdAt: e.createdAt.toProtoTimestamp(),
+              createdAt: e.createdAt.toDateTime().toProtoTimestamp(),
               title: e.title,
               type: e.type,
               guideQuestions:
                   e.guideQuestions.map((e) => guideQuestionFromMap(e)).toList(),
               notificationSchedule: e.notificationSchedule,
               isArchived: e.isArchived,
-              updatedAt: e.updatedAt.toProtoTimestamp(),
+              updatedAt: e.updatedAt.toDateTime().toProtoTimestamp(),
               isDeleted: e.isDeleted,
             ))
         .toList();
@@ -73,14 +73,14 @@ extension GoalQuery on AppDatabase {
           items.map((e) => GoalsCompanion(
                 id: Value(e.id),
                 userId: Value(e.userId),
-                createdAt: Value(e.createdAt.toDateTime()),
+                createdAt: Value(PgDateTime(e.createdAt.toDateTime())),
                 title: Value(e.title),
                 type: Value(e.type),
                 guideQuestions:
                     Value(e.guideQuestions.map((e) => e.toMap()).toList()),
                 notificationSchedule: Value(e.notificationSchedule),
                 isArchived: Value(e.isArchived),
-                updatedAt: Value(e.updatedAt.toDateTime()),
+                updatedAt: Value(PgDateTime(e.updatedAt.toDateTime())),
                 isDeleted: Value(e.isDeleted),
               )),
           onConflict: DoUpdate<Goals, GoalEntity>.withExcluded(
@@ -110,16 +110,16 @@ extension GoalQuery on AppDatabase {
     SimpleSelectStatement<GoalCheckIns, GoalCheckInEntity> stmt =
         select(goalCheckIns)..where((t) => t.userId.equals(userId));
     if (lastSynced != null) {
-      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
 
     final items = await stmt.get();
     return items
         .map((e) => GoalCheckIn(
               userId: e.userId,
-              date: e.date.toProtoTimestamp(),
+              date: e.date.toDateTime().toProtoTimestamp(),
               goals: e.goals,
-              updatedAt: e.updatedAt.toProtoTimestamp(),
+              updatedAt: e.updatedAt.toDateTime().toProtoTimestamp(),
               isDeleted: e.isDeleted,
             ))
         .toList();
@@ -131,9 +131,9 @@ extension GoalQuery on AppDatabase {
           goalCheckIns,
           items.map((e) => GoalCheckInsCompanion(
                 userId: Value(e.userId),
-                date: Value(e.date.toDateTime()),
+                date: Value(PgDateTime(e.date.toDateTime())),
                 goals: Value(e.goals.toSet()),
-                updatedAt: Value(e.updatedAt.toDateTime()),
+                updatedAt: Value(PgDateTime(e.updatedAt.toDateTime())),
                 isDeleted: Value(e.isDeleted),
               )),
           onConflict: DoUpdate<GoalCheckIns, GoalCheckInEntity>.withExcluded(
@@ -156,7 +156,7 @@ extension JournalEntryQuery on AppDatabase {
     SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
         select(journalEntries)..where((t) => t.userId.equals(userId));
     if (lastSynced != null) {
-      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
 
     final items = await stmt.get();
@@ -164,11 +164,11 @@ extension JournalEntryQuery on AppDatabase {
         .map((e) => JournalEntry(
               id: e.id,
               userId: e.userId,
-              createdAt: e.createdAt.toProtoTimestamp(),
+              createdAt: e.createdAt.toDateTime().toProtoTimestamp(),
               guidedJournal: e.guidedJournal,
               title: e.title,
               content: e.content.map((e) => guideQuestionFromMap(e)).toList(),
-              updatedAt: e.updatedAt.toProtoTimestamp(),
+              updatedAt: e.updatedAt.toDateTime().toProtoTimestamp(),
               isDeleted: e.isDeleted,
             ))
         .toList();
@@ -181,11 +181,11 @@ extension JournalEntryQuery on AppDatabase {
           items.map((e) => JournalEntriesCompanion(
                 id: Value(e.id),
                 userId: Value(e.userId),
-                createdAt: Value(e.createdAt.toDateTime()),
+                createdAt: Value(PgDateTime(e.createdAt.toDateTime())),
                 guidedJournal: Value(e.guidedJournal),
                 title: Value(e.title),
                 content: Value(e.content.map((e) => e.toMap()).toList()),
-                updatedAt: Value(e.updatedAt.toDateTime()),
+                updatedAt: Value(PgDateTime(e.updatedAt.toDateTime())),
                 isDeleted: Value(e.isDeleted),
               )),
           onConflict: DoUpdate<JournalEntries, JournalEntryEntity>.withExcluded(
@@ -214,7 +214,7 @@ extension UserQuery on AppDatabase {
     SimpleSelectStatement<Users, UserEntity> stmt = select(users)
       ..where((t) => t.id.isIn(ids));
     if (lastSynced != null) {
-      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
 
     final items = await stmt.get();
@@ -222,9 +222,9 @@ extension UserQuery on AppDatabase {
         .map((e) => User(
               id: e.id,
               email: e.email,
-              createdAt: e.createdAt.toProtoTimestamp(),
+              createdAt: e.createdAt.toDateTime().toProtoTimestamp(),
               displayName: e.displayName,
-              updatedAt: e.updatedAt.toProtoTimestamp(),
+              updatedAt: e.updatedAt.toDateTime().toProtoTimestamp(),
               isDeleted: e.isDeleted,
             ))
         .toList();
@@ -238,9 +238,9 @@ extension UserQuery on AppDatabase {
             (e) => UsersCompanion(
               id: Value(e.id),
               email: Value(e.email),
-              createdAt: Value(e.createdAt.toDateTime()),
+              createdAt: Value(PgDateTime(e.createdAt.toDateTime())),
               displayName: Value(e.displayName),
-              updatedAt: Value(e.updatedAt.toDateTime()),
+              updatedAt: Value(PgDateTime(e.updatedAt.toDateTime())),
               isDeleted: Value(e.isDeleted),
             ),
           ),
