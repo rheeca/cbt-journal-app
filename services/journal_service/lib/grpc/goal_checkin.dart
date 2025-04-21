@@ -15,7 +15,8 @@ class GoalCheckInService extends GoalCheckInServiceBase {
       ServiceCall call, ReadGoalCheckInsRequest request) async {
     final List<GoalCheckIn> goalCheckIns = [];
     try {
-      final res = await database.getGoalCheckInsByUser(request.userId);
+      final res = await database.getGoalCheckIns(request.userId,
+          lastSynced: request.lastSynced.toDateTime());
       goalCheckIns.addAll(res);
     } catch (e) {
       logger.e('failed to read goal check-ins from database', error: e);

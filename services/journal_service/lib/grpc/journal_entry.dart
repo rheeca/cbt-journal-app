@@ -15,7 +15,8 @@ class JournalEntryService extends JournalEntryServiceBase {
       ServiceCall call, ReadJournalEntriesRequest request) async {
     final List<JournalEntry> journalEntries = [];
     try {
-      final res = await database.getJournalEntriesByUser(request.userId);
+      final res = await database.getJournalEntriesByUser(request.userId,
+          lastSynced: request.lastSynced.toDateTime());
       journalEntries.addAll(res);
     } catch (e) {
       logger.e('failed to read journal entries from database', error: e);

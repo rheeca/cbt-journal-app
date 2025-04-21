@@ -40,10 +40,15 @@ class AppDatabase extends _$AppDatabase {
 }
 
 extension GoalQuery on AppDatabase {
-  Future<List<Goal>> getGoalsByUser(String userId) async {
-    final items =
-        await (select(goals)..where((t) => t.id.equals(userId))).get();
+  Future<List<Goal>> getGoalsByUser(String userId,
+      {DateTime? lastSynced}) async {
+    SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals)
+      ..where((t) => t.userId.equals(userId));
+    if (lastSynced != null) {
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+    }
 
+    final items = await stmt.get();
     return items
         .map((e) => Goal(
               id: e.id,
@@ -100,11 +105,15 @@ extension GoalQuery on AppDatabase {
     return (delete(goals)..where((t) => t.id.isIn(ids))).go();
   }
 
-  Future<List<GoalCheckIn>> getGoalCheckInsByUser(String userId) async {
-    final items = await (select(goalCheckIns)
-          ..where((t) => t.userId.equals(userId)))
-        .get();
+  Future<List<GoalCheckIn>> getGoalCheckIns(String userId,
+      {DateTime? lastSynced}) async {
+    SimpleSelectStatement<GoalCheckIns, GoalCheckInEntity> stmt =
+        select(goalCheckIns)..where((t) => t.userId.equals(userId));
+    if (lastSynced != null) {
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+    }
 
+    final items = await stmt.get();
     return items
         .map((e) => GoalCheckIn(
               userId: e.userId,
@@ -142,14 +151,15 @@ extension GoalQuery on AppDatabase {
 }
 
 extension JournalEntryQuery on AppDatabase {
-  Future<List<JournalEntry>> getJournalEntriesByUser(String userId) async {
-    final items = await (select(journalEntries)
-          ..where((t) => t.userId.equals(userId))
-          ..orderBy([
-            (u) =>
-                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
-          ]))
-        .get();
+  Future<List<JournalEntry>> getJournalEntriesByUser(String userId,
+      {DateTime? lastSynced}) async {
+    SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
+        select(journalEntries)..where((t) => t.userId.equals(userId));
+    if (lastSynced != null) {
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+    }
+
+    final items = await stmt.get();
     return items
         .map((e) => JournalEntry(
               id: e.id,
@@ -200,8 +210,14 @@ extension JournalEntryQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<List<User>> getUsers(List<String> ids) async {
-    final items = await (select(users)..where((t) => t.id.isIn(ids))).get();
+  Future<List<User>> getUsers(List<String> ids, {DateTime? lastSynced}) async {
+    SimpleSelectStatement<Users, UserEntity> stmt = select(users)
+      ..where((t) => t.id.isIn(ids));
+    if (lastSynced != null) {
+      stmt.where((t) => t.updatedAt.isBiggerThanValue(lastSynced));
+    }
+
+    final items = await stmt.get();
     return items
         .map((e) => User(
               id: e.id,

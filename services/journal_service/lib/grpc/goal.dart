@@ -15,7 +15,8 @@ class GoalService extends GoalServiceBase {
       ServiceCall call, ReadGoalsRequest request) async {
     final List<Goal> goals = [];
     try {
-      final res = await database.getGoalsByUser(request.userId);
+      final res = await database.getGoalsByUser(request.userId,
+          lastSynced: request.lastSynced.toDateTime());
       goals.addAll(res);
     } catch (e) {
       logger.e('failed to read goals from database', error: e);

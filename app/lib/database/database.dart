@@ -345,6 +345,10 @@ extension UserQuery on AppDatabase {
       ),
     );
   }
+
+  Future<void> removeUser(String id) {
+    return (delete(users)..where((t) => t.id.isValue(id))).go();
+  }
 }
 
 extension JournalEntryQuery on AppDatabase {
