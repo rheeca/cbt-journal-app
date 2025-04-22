@@ -24,8 +24,10 @@ class JournalEntries extends Table {
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get guidedJournal => text().references(GuidedJournals, #id)();
-  TextColumn get title => text().withLength(min: 1, max: 200).nullable()();
+  TextColumn get title => text()();
   TextColumn get content => text().map(const QuestionListConverter())();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isDeleted => boolean()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -38,6 +40,8 @@ class Users extends Table {
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
   TextColumn get displayName => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isDeleted => boolean()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -53,12 +57,14 @@ class Goals extends Table {
       )();
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now())();
-  TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get title => text()();
   TextColumn get type => text()();
   TextColumn get guideQuestions => text().map(const QuestionListConverter())();
   TextColumn get notificationSchedule =>
       text().map(const StringListConverter())();
   BoolColumn get isArchived => boolean().clientDefault(() => false)();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isDeleted => boolean()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -90,9 +96,20 @@ class GoalCheckIns extends Table {
       )();
   DateTimeColumn get date => dateTime()();
   TextColumn get goals => text().map(const StringSetConverter())();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isDeleted => boolean()();
 
   @override
   Set<Column> get primaryKey => {userId, date};
+}
+
+@DataClassName("SyncLogEntity")
+class SyncLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get type => text()();
+
+  @override
+  Set<Column> get primaryKey => {id, type};
 }
 
 class StringListConverter extends TypeConverter<List<String>, String> {

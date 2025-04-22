@@ -1,5 +1,6 @@
+import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/home/home_controller.dart';
-import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -50,12 +51,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 onPressed: () {
                   final firebaseUser = FirebaseAuth.instance.currentUser;
                   if (firebaseUser != null) {
+                    final now = DateTime.now().toUtc();
                     di<HomeController>().createProfile(
-                      UserModel(
-                        userId: firebaseUser.uid,
+                      pb_user.User(
+                        id: firebaseUser.uid,
                         email: firebaseUser.email ?? '',
                         displayName: controller.text,
-                        createdAt: DateTime.now(),
+                        createdAt: now.toProtoTimestamp(),
+                        updatedAt: now.toProtoTimestamp(),
+                        isDeleted: false,
                       ),
                     );
                   }

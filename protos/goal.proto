@@ -1,0 +1,59 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package journal;
+
+service GoalService {
+  rpc ReadGoals (ReadGoalsRequest) returns (ReadGoalsResponse) {}
+  rpc WriteGoals (WriteGoalsRequest) returns (WriteGoalsResponse) {}
+  rpc DeleteGoals (DeleteGoalsRequest) returns (DeleteGoalsResponse) {}
+}
+
+message ReadGoalsRequest {
+  string user_id = 1;
+  google.protobuf.Timestamp last_synced = 2;
+}
+
+message ReadGoalsResponse {
+  repeated Goal goals = 1;
+}
+
+message WriteGoalsRequest {
+  repeated Goal goals = 1;
+}
+
+message WriteGoalsResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message DeleteGoalsRequest {
+  repeated string ids = 1;
+}
+
+message DeleteGoalsResponse {
+  int32 status = 1;
+  string error_message = 2;
+}
+
+message Goal {
+  string id = 1;
+  string user_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  string title = 4;
+  string type = 5;
+  repeated GuideQuestion guide_questions = 6;
+  repeated string notification_schedule = 7;
+  bool is_archived = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  bool is_deleted = 10;
+}
+
+message GuideQuestion {
+  string question = 1;
+  string answer = 2;
+  string type = 3;
+  string answer_type = 4;
+  string answer_canvas_elements = 5;
+  bytes answer_canvas_image = 6;
+}

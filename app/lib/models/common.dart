@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cbt_journal/generated/goal.pb.dart' as pb;
 import 'package:cbt_journal/models/journal_entry.dart';
 
 class GuideQuestion {
@@ -19,6 +20,25 @@ class GuideQuestion {
     this.answerCanvasElements = '[]',
     this.answerCanvasImage,
   });
+
+  GuideQuestion.fromPb(pb.GuideQuestion g)
+      : question = g.question,
+        answer = g.answer,
+        type = JournalType.getByName(g.type)!,
+        answerType = AnswerType.getByName(g.answerType)!,
+        answerCanvasElements = g.answerCanvasElements,
+        answerCanvasImage = Uint8List.fromList(g.answerCanvasImage);
+
+  pb.GuideQuestion toPb() {
+    return pb.GuideQuestion(
+      question: question,
+      answer: answer,
+      type: type.name,
+      answerType: answerType.name,
+      answerCanvasElements: answerCanvasElements,
+      answerCanvasImage: answerCanvasImage,
+    );
+  }
 
   Map<String, String> toMap() {
     return <String, String>{
@@ -43,6 +63,15 @@ class GuideQuestion {
             ? base64Decode(map['answerCanvasImage']!)
             : null;
 }
+
+class SyncLog {
+  SyncLog(this.id, this.type);
+
+  final String id;
+  final DatabaseType type;
+}
+
+enum DatabaseType { goalCheckIn, goal, journalEntry, user }
 
 enum DayOfWeek {
   monday(singleLetter: 'M'),

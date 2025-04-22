@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/settings/settings_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    UserModel? user =
+    pb_user.User? user =
         watchPropertyValue((SettingsController c) => c.currentUser);
 
     if (user == null) {

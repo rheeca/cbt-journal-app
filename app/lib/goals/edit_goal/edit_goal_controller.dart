@@ -53,7 +53,7 @@ class EditGoalController extends ChangeNotifier {
         await _database.getGuidedJournalByTitle('Set a Goal');
 
     if (goalId != null) {
-      _selectedGoal = await _database.getGoalById(goalId);
+      _selectedGoal = (await _database.getGoals(ids: [goalId])).firstOrNull;
       for (int i = 0; i < _selectedGoal!.guideQuestions.length; i++) {
         _textControllers.add(TextEditingController(
             text: _selectedGoal!.guideQuestions[i].answer));
@@ -97,7 +97,8 @@ class EditGoalController extends ChangeNotifier {
       _selectedGoal!.type = _selectedGoalActivity!;
       _selectedGoal!.notificationSchedule = _selectedDays.toList();
       _selectedGoal!.guideQuestions = guideQuestions;
+      _selectedGoal!.updatedAt = DateTime.now().toUtc();
     }
-    await _database.insertGoal(_selectedGoal!);
+    await _database.insertGoals([_selectedGoal!]);
   }
 }

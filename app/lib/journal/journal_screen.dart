@@ -96,12 +96,12 @@ class _JournalPageState extends State<_JournalPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                e.title ?? 'Untitled',
+                                e.title,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
                                 DateFormat('MMM-dd-yyyy kk:mm')
-                                    .format(e.createdAt),
+                                    .format(e.createdAt.toLocal()),
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],
@@ -146,10 +146,11 @@ class _CalendarPageState extends State<_CalendarPage> {
       return const SizedBox();
     }
 
+    final createdAt = user.createdAt.toDateTime();
     final firstDay = DateTime(
-      user.createdAt.year,
-      user.createdAt.month,
-      user.createdAt.day,
+      createdAt.year,
+      createdAt.month,
+      createdAt.day,
     );
 
     final guidedJournals =

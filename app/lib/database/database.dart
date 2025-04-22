@@ -1,3 +1,4 @@
+import 'package:cbt_journal/generated/user.pb.dart';
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
@@ -18,6 +19,7 @@ var logger = Logger();
   Goals,
   GuidedJournals,
   JournalEntries,
+  SyncLogs,
   Users,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -35,40 +37,28 @@ class AppDatabase extends _$AppDatabase {
 }
 
 extension GoalQuery on AppDatabase {
-  Future<md.Goal?> getGoalById(String goalId) async {
-    final goal = await (select(goals)..where((t) => t.id.equals(goalId)))
-        .getSingleOrNull();
+  Future<List<md.Goal>> getGoals({
+    String? userId,
+    List<String>? ids,
+    bool includeDeleted = false,
+  }) async {
+    final List<md.Goal> resp = [];
 
-    if (goal != null) {
-      final goalEntriesFromDb = await getGoalEntriesByGoal(goal.id);
-      return md.Goal(
-        id: goal.id,
-        userId: goal.userId,
-        createdAt: goal.createdAt,
-        title: goal.title,
-        type: GoalActivity.getByName(goal.type)!,
-        guideQuestions: goal.guideQuestions
-            .map((e) => md.GuideQuestion.fromMap(e))
-            .toList(),
-        notificationSchedule: goal.notificationSchedule
-            .map((e) => md.DayOfWeek.values.byName(e))
-            .toList(),
-        journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
-        isArchived: goal.isArchived,
-      );
-    } else {
-      return null;
+    SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals);
+    if (userId != null) {
+      stmt.where((t) => t.userId.equals(userId));
+    } else if (ids != null) {
+      stmt.where((t) => t.id.isIn(ids));
     }
-  }
 
-  Future<List<md.Goal>> getGoalsByUser(String userId) async {
-    List<md.Goal> userGoals = [];
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
+    }
 
-    final goalsFromDb =
-        await (select(goals)..where((t) => t.userId.equals(userId))).get();
+    final goalsFromDb = await stmt.get();
     for (GoalEntity g in goalsFromDb) {
       final goalEntriesFromDb = await getGoalEntriesByGoal(g.id);
-      userGoals.add(md.Goal(
+      resp.add(md.Goal(
         id: g.id,
         userId: g.userId,
         createdAt: g.createdAt,
@@ -81,35 +71,67 @@ extension GoalQuery on AppDatabase {
             .toList(),
         journalEntries: goalEntriesFromDb.map((e) => e.journalEntryId).toList(),
         isArchived: g.isArchived,
+        updatedAt: g.updatedAt,
+        isDeleted: g.isDeleted,
       ));
     }
-    return userGoals;
+    return resp;
   }
 
-  Future<int> insertGoal(md.Goal item) {
-    for (final e in item.journalEntries) {
-      into(goalEntries).insertOnConflictUpdate(GoalEntriesCompanion(
-        journalEntryId: Value(e),
-        goalId: Value(item.id),
-      ));
+  Future<void> insertGoals(
+    List<md.Goal> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.goal));
+      }
     }
 
-    return into(goals).insertOnConflictUpdate(GoalsCompanion(
-      id: Value(item.id),
-      userId: Value(item.userId),
-      createdAt: Value(item.createdAt),
-      title: Value(item.title),
-      type: Value(item.type.name),
-      guideQuestions: Value(item.guideQuestions.map((e) => e.toMap()).toList()),
-      notificationSchedule:
-          Value(item.notificationSchedule.map((e) => e.name).toList()),
-      isArchived: Value(item.isArchived),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          goals,
+          items.map((e) => GoalsCompanion(
+                id: Value(e.id),
+                userId: Value(e.userId),
+                createdAt: Value(e.createdAt),
+                title: Value(e.title),
+                type: Value(e.type.name),
+                guideQuestions:
+                    Value(e.guideQuestions.map((e) => e.toMap()).toList()),
+                notificationSchedule:
+                    Value(e.notificationSchedule.map((e) => e.name).toList()),
+                isArchived: Value(e.isArchived),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<Goals, GoalEntity>.withExcluded(
+              (old, excluded) => GoalsCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    title: excluded.title,
+                    type: excluded.type,
+                    guideQuestions: excluded.guideQuestions,
+                    notificationSchedule: excluded.notificationSchedule,
+                    isArchived: excluded.isArchived,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteGoal(String id) {
-    (delete(goalEntries)..where((t) => t.goalId.isValue(id))).go();
-    return (delete(goals)..where((t) => t.id.isValue(id))).go();
+    insertSyncLog(md.SyncLog(id, DatabaseType.goal));
+
+    return (update(goals)..where((t) => t.id.equals(id))).write(
+      GoalsCompanion(
+        updatedAt: Value(DateTime.now().toUtc()),
+        isDeleted: const Value(true),
+      ),
+    );
   }
 
   Future<List<GoalEntryEntity>> getGoalEntriesByGoal(String goalId) {
@@ -127,43 +149,65 @@ extension GoalQuery on AppDatabase {
         .go();
   }
 
-  Future<List<md.GoalCheckIn>> getGoalCheckInsByUser(String userId) async {
-    final items = await (select(goalCheckIns)
-          ..where((t) => t.userId.equals(userId)))
-        .get();
+  Future<List<md.GoalCheckIn>> getGoalCheckIns({
+    required String userId,
+    List<DateTime>? dates,
+    bool includeDeleted = false,
+  }) async {
+    SimpleSelectStatement<GoalCheckIns, GoalCheckInEntity> stmt =
+        select(goalCheckIns)..where((t) => t.userId.equals(userId));
+    if (dates != null) {
+      stmt.where((t) => t.date.isIn(dates));
+    }
 
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
+    }
+
+    final items = await stmt.get();
     return items
         .map((e) => md.GoalCheckIn(
               userId: e.userId,
               date: e.date,
               goals: e.goals,
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
-  Future<md.GoalCheckIn?> getGoalCheckIn(String userId, DateTime date) async {
-    final item = await (select(goalCheckIns)
-          ..where((t) =>
-              t.userId.equals(userId) & t.date.equals(dateOnlyUtc(date))))
-        .getSingleOrNull();
-
-    if (item != null) {
-      return md.GoalCheckIn(
-        userId: item.userId,
-        date: item.date,
-        goals: item.goals,
-      );
-    } else {
-      return null;
+  Future<void> insertGoalCheckIns(
+    List<md.GoalCheckIn> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(
+            md.SyncLog('${i.userId}+${i.date}', DatabaseType.goalCheckIn));
+      }
     }
-  }
 
-  Future<int> insertGoalCheckIn(md.GoalCheckIn item) {
-    return into(goalCheckIns).insertOnConflictUpdate(GoalCheckInsCompanion(
-      userId: Value(item.userId),
-      date: Value(dateOnlyUtc(item.date)),
-      goals: Value(item.goals),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          goalCheckIns,
+          items.map((e) => GoalCheckInsCompanion(
+                userId: Value(e.userId),
+                date: Value(e.date),
+                goals: Value(e.goals),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<GoalCheckIns, GoalCheckInEntity>.withExcluded(
+              (old, excluded) => GoalCheckInsCompanion.custom(
+                    userId: excluded.userId,
+                    date: excluded.date,
+                    goals: excluded.goals,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 }
 
@@ -231,44 +275,105 @@ extension GuidedJournalQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<md.UserModel?> getUser(String userId) async {
-    final user = await (select(users)..where((t) => t.id.equals(userId)))
-        .getSingleOrNull();
-    if (user != null) {
-      return md.UserModel(
-        userId: user.id,
-        email: user.email,
-        displayName: user.displayName,
-        createdAt: user.createdAt,
-      );
-    } else {
-      return null;
+  Future<List<User>> getUsers(
+    List<String> ids, {
+    bool includeDeleted = false,
+  }) async {
+    SimpleSelectStatement<Users, UserEntity> stmt = select(users)
+      ..where((t) => t.id.isIn(ids));
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
     }
+
+    final items = await stmt.get();
+    return items
+        .map((e) => User(
+              id: e.id,
+              email: e.email,
+              createdAt: e.createdAt.toProtoTimestamp(),
+              displayName: e.displayName,
+              updatedAt: e.updatedAt.toProtoTimestamp(),
+              isDeleted: e.isDeleted,
+            ))
+        .toList();
   }
 
-  Future<int> insertUser(md.UserModel user) {
-    return into(users).insertOnConflictUpdate(UsersCompanion(
-      id: Value(user.userId),
-      email: Value(user.email),
-      displayName: Value(user.displayName),
-      createdAt: Value(user.createdAt),
-    ));
+  Future<void> insertUsers(
+    List<User> items, {
+    bool toSync = true,
+  }) async {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.user));
+      }
+    }
+
+    await batch((batch) {
+      batch.insertAll(
+          users,
+          items.map(
+            (e) => UsersCompanion(
+              id: Value(e.id),
+              email: Value(e.email),
+              createdAt: Value(e.createdAt.toDateTime()),
+              displayName: Value(e.displayName),
+              updatedAt: Value(e.updatedAt.toDateTime()),
+              isDeleted: Value(e.isDeleted),
+            ),
+          ),
+          onConflict: DoUpdate<Users, UserEntity>.withExcluded(
+              (old, excluded) => UsersCompanion.custom(
+                    id: excluded.id,
+                    email: excluded.email,
+                    createdAt: excluded.createdAt,
+                    displayName: excluded.displayName,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteUser(String id) {
+    insertSyncLog(md.SyncLog(id, DatabaseType.user));
+
+    return (update(users)..where((t) => t.id.equals(id))).write(
+      UsersCompanion(
+        updatedAt: Value(DateTime.now().toUtc()),
+        isDeleted: const Value(true),
+      ),
+    );
+  }
+
+  Future<void> removeUser(String id) {
     return (delete(users)..where((t) => t.id.isValue(id))).go();
   }
 }
 
 extension JournalEntryQuery on AppDatabase {
-  Future<List<JournalEntry>> getJournalEntriesByUser(String userId) async {
-    final items = await (select(journalEntries)
-          ..where((t) => t.userId.equals(userId))
-          ..orderBy([
-            (u) =>
-                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
-          ]))
-        .get();
+  Future<List<JournalEntry>> getJournalEntries({
+    String? userId,
+    List<String>? ids,
+    bool includeDeleted = false,
+  }) async {
+    SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
+        select(journalEntries);
+    if (userId != null) {
+      stmt
+        ..where((t) => t.userId.equals(userId))
+        ..orderBy([
+          (u) => OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
+        ]);
+    } else if (ids != null) {
+      stmt.where((t) => t.id.isIn(ids));
+    }
+
+    if (!includeDeleted) {
+      stmt.where((t) => t.isDeleted.equals(false));
+    }
+
+    final items = await stmt.get();
     return items
         .map((e) => JournalEntry(
               id: e.id,
@@ -277,40 +382,79 @@ extension JournalEntryQuery on AppDatabase {
               guidedJournal: e.guidedJournal,
               title: e.title,
               content: e.content.map((e) => GuideQuestion.fromMap(e)).toList(),
+              updatedAt: e.updatedAt,
+              isDeleted: e.isDeleted,
             ))
         .toList();
   }
 
-  Future<JournalEntry?> getJournalEntryById(String journalId) async {
-    final item = await (select(journalEntries)
-          ..where((t) => t.id.equals(journalId)))
-        .getSingleOrNull();
-    if (item != null) {
-      return JournalEntry(
-        id: item.id,
-        userId: item.userId,
-        createdAt: item.createdAt,
-        guidedJournal: item.guidedJournal,
-        title: item.title,
-        content: item.content.map((e) => GuideQuestion.fromMap(e)).toList(),
-      );
-    } else {
-      return null;
+  Future<void> insertJournalEntries(
+    List<md.JournalEntry> items, {
+    bool toSync = true,
+  }) {
+    if (toSync) {
+      for (final i in items) {
+        insertSyncLog(md.SyncLog(i.id, DatabaseType.journalEntry));
+      }
     }
-  }
 
-  Future<int> insertJournalEntry(md.JournalEntry item) {
-    return into(journalEntries).insertOnConflictUpdate(JournalEntriesCompanion(
-      id: Value(item.id),
-      userId: Value(item.userId),
-      createdAt: Value(item.createdAt),
-      guidedJournal: Value(item.guidedJournal),
-      title: Value(item.title),
-      content: Value(item.content.map((e) => e.toMap()).toList()),
-    ));
+    return batch((batch) {
+      batch.insertAll(
+          journalEntries,
+          items.map((e) => JournalEntriesCompanion(
+                id: Value(e.id),
+                userId: Value(e.userId),
+                createdAt: Value(e.createdAt),
+                guidedJournal: Value(e.guidedJournal),
+                title: Value(e.title),
+                content: Value(e.content.map((e) => e.toMap()).toList()),
+                updatedAt: Value(e.updatedAt),
+                isDeleted: Value(e.isDeleted),
+              )),
+          onConflict: DoUpdate<JournalEntries, JournalEntryEntity>.withExcluded(
+              (old, excluded) => JournalEntriesCompanion.custom(
+                    id: excluded.id,
+                    userId: excluded.userId,
+                    createdAt: excluded.createdAt,
+                    guidedJournal: excluded.guidedJournal,
+                    title: excluded.title,
+                    content: excluded.content,
+                    updatedAt: excluded.updatedAt,
+                    isDeleted: excluded.isDeleted,
+                  ),
+              where: (old, excluded) =>
+                  old.updatedAt.isSmallerThan(excluded.updatedAt)));
+    });
   }
 
   Future<void> deleteJournalEntry(String id) {
-    return (delete(journalEntries)..where((t) => t.id.isValue(id))).go();
+    insertSyncLog(md.SyncLog(id, DatabaseType.journalEntry));
+
+    return (update(journalEntries)..where((t) => t.id.equals(id))).write(
+      JournalEntriesCompanion(
+        updatedAt: Value(DateTime.now().toUtc()),
+        isDeleted: const Value(true),
+      ),
+    );
+  }
+}
+
+extension SyncLogQuery on AppDatabase {
+  Future<List<md.SyncLog>> getSyncLogs() async {
+    final logs = await (select(syncLogs)).get();
+    return logs
+        .map((e) => md.SyncLog(e.id, DatabaseType.values.byName(e.type)))
+        .toList();
+  }
+
+  Future<int> insertSyncLog(md.SyncLog log) {
+    return into(syncLogs).insertOnConflictUpdate(SyncLogsCompanion(
+      id: Value(log.id),
+      type: Value(log.type.name),
+    ));
+  }
+
+  Future<void> clearSyncLogs() {
+    return (delete(syncLogs)).go();
   }
 }

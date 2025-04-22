@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
-import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
+import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +12,8 @@ class SettingsController extends ChangeNotifier {
   bool _loading = false;
   bool get loading => _loading;
 
-  UserModel? _currentUser;
-  UserModel? get currentUser => _currentUser;
+  pb_user.User? _currentUser;
+  pb_user.User? get currentUser => _currentUser;
 
   Future<void> load() async {
     _loading = true;
@@ -20,7 +21,7 @@ class SettingsController extends ChangeNotifier {
 
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
-      _currentUser = await _database.getUser(userId);
+      _currentUser = (await _database.getUsers([userId])).firstOrNull;
     } else {
       _currentUser = null;
     }
@@ -29,8 +30,9 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void insertUserIntoDb(UserModel user) {
+  void insertUserIntoDb(pb_user.User user) {
+    user.updatedAt = DateTime.now().toUtc().toProtoTimestamp();
     _currentUser = user;
-    _database.insertUser(user);
+    _database.insertUsers([user]);
   }
 }
