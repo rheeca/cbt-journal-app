@@ -1043,11 +1043,8 @@ class $JournalEntriesTable extends JournalEntries
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, true,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 200),
-      type: DriftSqlType.string,
-      requiredDuringInsert: false);
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -1118,6 +1115,8 @@ class $JournalEntriesTable extends JournalEntries
     if (data.containsKey('title')) {
       context.handle(
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
     }
     context.handle(_contentMeta, const VerificationResult.success());
     if (data.containsKey('updated_at')) {
@@ -1150,7 +1149,7 @@ class $JournalEntriesTable extends JournalEntries
       guidedJournal: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}guided_journal'])!,
       title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       content: $JournalEntriesTable.$convertercontent.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!),
@@ -1176,7 +1175,7 @@ class JournalEntryEntity extends DataClass
   final String userId;
   final DateTime createdAt;
   final String guidedJournal;
-  final String? title;
+  final String title;
   final List<Map<String, String>> content;
   final DateTime updatedAt;
   final bool isDeleted;
@@ -1185,7 +1184,7 @@ class JournalEntryEntity extends DataClass
       required this.userId,
       required this.createdAt,
       required this.guidedJournal,
-      this.title,
+      required this.title,
       required this.content,
       required this.updatedAt,
       required this.isDeleted});
@@ -1196,9 +1195,7 @@ class JournalEntryEntity extends DataClass
     map['user_id'] = Variable<String>(userId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['guided_journal'] = Variable<String>(guidedJournal);
-    if (!nullToAbsent || title != null) {
-      map['title'] = Variable<String>(title);
-    }
+    map['title'] = Variable<String>(title);
     {
       map['content'] = Variable<String>(
           $JournalEntriesTable.$convertercontent.toSql(content));
@@ -1214,8 +1211,7 @@ class JournalEntryEntity extends DataClass
       userId: Value(userId),
       createdAt: Value(createdAt),
       guidedJournal: Value(guidedJournal),
-      title:
-          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      title: Value(title),
       content: Value(content),
       updatedAt: Value(updatedAt),
       isDeleted: Value(isDeleted),
@@ -1230,7 +1226,7 @@ class JournalEntryEntity extends DataClass
       userId: serializer.fromJson<String>(json['userId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       guidedJournal: serializer.fromJson<String>(json['guidedJournal']),
-      title: serializer.fromJson<String?>(json['title']),
+      title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<List<Map<String, String>>>(json['content']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -1244,7 +1240,7 @@ class JournalEntryEntity extends DataClass
       'userId': serializer.toJson<String>(userId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'guidedJournal': serializer.toJson<String>(guidedJournal),
-      'title': serializer.toJson<String?>(title),
+      'title': serializer.toJson<String>(title),
       'content': serializer.toJson<List<Map<String, String>>>(content),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -1256,7 +1252,7 @@ class JournalEntryEntity extends DataClass
           String? userId,
           DateTime? createdAt,
           String? guidedJournal,
-          Value<String?> title = const Value.absent(),
+          String? title,
           List<Map<String, String>>? content,
           DateTime? updatedAt,
           bool? isDeleted}) =>
@@ -1265,7 +1261,7 @@ class JournalEntryEntity extends DataClass
         userId: userId ?? this.userId,
         createdAt: createdAt ?? this.createdAt,
         guidedJournal: guidedJournal ?? this.guidedJournal,
-        title: title.present ? title.value : this.title,
+        title: title ?? this.title,
         content: content ?? this.content,
         updatedAt: updatedAt ?? this.updatedAt,
         isDeleted: isDeleted ?? this.isDeleted,
@@ -1322,7 +1318,7 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   final Value<String> userId;
   final Value<DateTime> createdAt;
   final Value<String> guidedJournal;
-  final Value<String?> title;
+  final Value<String> title;
   final Value<List<Map<String, String>>> content;
   final Value<DateTime> updatedAt;
   final Value<bool> isDeleted;
@@ -1343,7 +1339,7 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
     required String userId,
     this.createdAt = const Value.absent(),
     required String guidedJournal,
-    this.title = const Value.absent(),
+    required String title,
     required List<Map<String, String>> content,
     required DateTime updatedAt,
     required bool isDeleted,
@@ -1351,6 +1347,7 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
   })  : id = Value(id),
         userId = Value(userId),
         guidedJournal = Value(guidedJournal),
+        title = Value(title),
         content = Value(content),
         updatedAt = Value(updatedAt),
         isDeleted = Value(isDeleted);
@@ -1383,7 +1380,7 @@ class JournalEntriesCompanion extends UpdateCompanion<JournalEntryEntity> {
       Value<String>? userId,
       Value<DateTime>? createdAt,
       Value<String>? guidedJournal,
-      Value<String?>? title,
+      Value<String>? title,
       Value<List<Map<String, String>>>? content,
       Value<DateTime>? updatedAt,
       Value<bool>? isDeleted,
@@ -1482,10 +1479,7 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalEntity> {
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
       'title', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 200),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -3402,7 +3396,7 @@ typedef $$JournalEntriesTableCreateCompanionBuilder = JournalEntriesCompanion
   required String userId,
   Value<DateTime> createdAt,
   required String guidedJournal,
-  Value<String?> title,
+  required String title,
   required List<Map<String, String>> content,
   required DateTime updatedAt,
   required bool isDeleted,
@@ -3414,7 +3408,7 @@ typedef $$JournalEntriesTableUpdateCompanionBuilder = JournalEntriesCompanion
   Value<String> userId,
   Value<DateTime> createdAt,
   Value<String> guidedJournal,
-  Value<String?> title,
+  Value<String> title,
   Value<List<Map<String, String>>> content,
   Value<DateTime> updatedAt,
   Value<bool> isDeleted,
@@ -3746,7 +3740,7 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<String> guidedJournal = const Value.absent(),
-            Value<String?> title = const Value.absent(),
+            Value<String> title = const Value.absent(),
             Value<List<Map<String, String>>> content = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<bool> isDeleted = const Value.absent(),
@@ -3768,7 +3762,7 @@ class $$JournalEntriesTableTableManager extends RootTableManager<
             required String userId,
             Value<DateTime> createdAt = const Value.absent(),
             required String guidedJournal,
-            Value<String?> title = const Value.absent(),
+            required String title,
             required List<Map<String, String>> content,
             required DateTime updatedAt,
             required bool isDeleted,

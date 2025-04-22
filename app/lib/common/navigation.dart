@@ -23,13 +23,13 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             title: const Text('Sync Data'),
             onTap: () async {
-              await JournalService().onSync();
+              await di<JournalService>().onSync();
             },
           ),
           ListTile(
             title: const Text('Logout'),
             onTap: () async {
-              await JournalService().onSync();
+              await di<JournalService>().onSync();
 
               await _clearLocalData();
               FirebaseAuth.instance.signOut();

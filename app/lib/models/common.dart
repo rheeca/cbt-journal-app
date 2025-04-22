@@ -29,6 +29,17 @@ class GuideQuestion {
         answerCanvasElements = g.answerCanvasElements,
         answerCanvasImage = Uint8List.fromList(g.answerCanvasImage);
 
+  pb.GuideQuestion toPb() {
+    return pb.GuideQuestion(
+      question: question,
+      answer: answer,
+      type: type.name,
+      answerType: answerType.name,
+      answerCanvasElements: answerCanvasElements,
+      answerCanvasImage: answerCanvasImage,
+    );
+  }
+
   Map<String, String> toMap() {
     return <String, String>{
       'question': question,

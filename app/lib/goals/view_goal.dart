@@ -146,7 +146,7 @@ class _JournalListView extends StatelessWidget with WatchItMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  e.title ?? 'Untitled',
+                                  e.title,
                                   style:
                                       Theme.of(context).textTheme.titleMedium,
                                 ),

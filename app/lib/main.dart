@@ -6,8 +6,10 @@ import 'package:cbt_journal/home/home_controller.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/route_generator.dart';
+import 'package:cbt_journal/services/journal_service.dart';
 import 'package:cbt_journal/settings/settings_controller.dart';
 import 'package:cbt_journal/theme.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -32,7 +34,12 @@ void main() async {
     ..registerLazySingleton<JournalController>(
         () => JournalController(database: di<AppDatabase>()))
     ..registerLazySingleton<SettingsController>(
-        () => SettingsController(database: di<AppDatabase>()));
+        () => SettingsController(database: di<AppDatabase>()))
+    ..registerLazySingleton<JournalService>(
+        () => JournalService(database: di<AppDatabase>()))
+    ..registerLazySingleton<UserController>(() => UserController());
+
+  await di<JournalService>().load();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

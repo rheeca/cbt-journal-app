@@ -96,7 +96,7 @@ class _JournalPageState extends State<_JournalPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                e.title ?? 'Untitled',
+                                e.title,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(

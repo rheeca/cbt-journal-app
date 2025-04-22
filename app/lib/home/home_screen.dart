@@ -1,7 +1,9 @@
 import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/home/home_controller.dart';
+import 'package:cbt_journal/services/journal_service.dart';
 import 'package:cbt_journal/theme.dart';
 import 'package:cbt_journal/user/create_profile.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +58,9 @@ class _HomePageState extends State<_HomePage> {
   @override
   Widget build(BuildContext context) {
     final loading = watchPropertyValue((HomeController c) => c.loading);
-    if (loading) {
+    final registered = watchPropertyValue((UserController c) => c.registered);
+    final syncing = watchPropertyValue((JournalService c) => c.syncing);
+    if (loading || syncing || registered == null) {
       return Center(
         child: LoadingAnimationWidget.waveDots(
           color: Colors.blueGrey.shade200,
@@ -66,8 +70,8 @@ class _HomePageState extends State<_HomePage> {
     }
 
     final profileCreated =
-        watchPropertyValue((HomeController m) => m.profileCreated);
-    if (!profileCreated) {
+        watchPropertyValue((UserController m) => m.registered);
+    if (profileCreated == false) {
       return const CreateProfileScreen();
     }
 

@@ -1,5 +1,6 @@
 import 'package:cbt_journal/generated/journal_entry.pb.dart' as pb;
 import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,7 +9,7 @@ class JournalEntry {
   String userId;
   DateTime createdAt;
   String guidedJournal;
-  String? title;
+  String title;
   List<GuideQuestion> content;
   DateTime updatedAt;
   bool isDeleted;
@@ -18,7 +19,7 @@ class JournalEntry {
     required this.userId,
     required this.createdAt,
     required this.guidedJournal,
-    this.title,
+    required this.title,
     required this.content,
     required this.updatedAt,
     required this.isDeleted,
@@ -26,7 +27,7 @@ class JournalEntry {
   JournalEntry.createNew(
       {required this.userId,
       required this.guidedJournal,
-      this.title,
+      required this.title,
       required this.content})
       : id = const Uuid().v4(),
         createdAt = DateTime.now().toUtc(),
@@ -42,6 +43,19 @@ class JournalEntry {
         content = e.content.map((e) => GuideQuestion.fromPb(e)).toList(),
         updatedAt = e.updatedAt.toDateTime(),
         isDeleted = e.isDeleted;
+
+  pb.JournalEntry toPb() {
+    return pb.JournalEntry(
+      id: id,
+      userId: userId,
+      createdAt: createdAt.toProtoTimestamp(),
+      guidedJournal: guidedJournal,
+      title: title,
+      content: content.map((e) => e.toPb()),
+      updatedAt: updatedAt.toProtoTimestamp(),
+      isDeleted: isDeleted,
+    );
+  }
 }
 
 class GuidedJournal {

@@ -1,9 +1,11 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/models/model.dart';
+import 'package:cbt_journal/user/user_controller.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
 class HomeController extends ChangeNotifier {
   HomeController({required AppDatabase database}) : _database = database;
@@ -15,9 +17,6 @@ class HomeController extends ChangeNotifier {
 
   pb_user.User? _currentUser;
   pb_user.User? get currentUser => _currentUser;
-
-  bool _profileCreated = true;
-  bool get profileCreated => _profileCreated;
 
   final List<Goal> _goals = [];
   List<Goal> get goals => _goals;
@@ -40,7 +39,9 @@ class HomeController extends ChangeNotifier {
     }
 
     _currentUser = (await _database.getUsers([userId])).firstOrNull;
-    if (_currentUser == null) _profileCreated = false;
+    if (_currentUser != null) {
+      di<UserController>().registered = true;
+    }
 
     final goals = await _database.getGoals(userId: userId);
     _goals.clear();
@@ -72,7 +73,7 @@ class HomeController extends ChangeNotifier {
 
     await _database.insertUsers([user]);
     _currentUser = user;
-    _profileCreated = true;
+    di<UserController>().registered = true;
 
     _loading = false;
     notifyListeners();
