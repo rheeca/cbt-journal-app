@@ -103,6 +103,7 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
                     journalType: guidedJournal.journalType[e],
                     content: journal.content[e].answer,
                   ),
+                  const SizedBox(height: 8.0),
                   if (journal.content[e].answerCanvasImage?.isNotEmpty == true)
                     Image.memory(
                       journal.content[e].answerCanvasImage!,

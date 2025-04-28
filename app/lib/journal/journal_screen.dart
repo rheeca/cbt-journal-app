@@ -4,6 +4,7 @@ import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/theme.dart';
+import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -80,39 +81,113 @@ class _JournalPageState extends State<_JournalPage> {
 
     final journalEntries =
         watchPropertyValue((JournalController c) => c.journalEntries);
+    final groupedJournals =
+        groupBy(journalEntries, (e) => dateOnlyUtc(e.createdAt).toLocal());
+    final sortedByKeyMap = Map.fromEntries(groupedJournals.entries.toList()
+      ..sort((a, b) => b.key.compareTo(a.key)));
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: journalEntries
-              .map((e) => Card(
-                    child: InkWell(
-                      child: Row(children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12.0, horizontal: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                e.title,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                DateFormat('MMM-dd-yyyy kk:mm')
-                                    .format(e.createdAt.toLocal()),
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ]),
-                      onTap: () {
-                        context.push('/journal/view/${e.id}');
-                      },
+          children: sortedByKeyMap.entries
+              .map(
+                (e) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                          DateFormat('MMMM dd, yyyy').format(e.key.toLocal()),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge!
+                              .copyWith(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              )),
                     ),
-                  ))
+                    Column(
+                      children: [
+                        ...e.value.map((e) {
+                          Widget? icon;
+                          String text = '';
+                          final journalType =
+                              GuidedJournalType.values.byName(e.guidedJournal);
+                          if (journalType == GuidedJournalType.dailyCheckIn) {
+                            icon = Sentiment.getSentimentByValue(
+                                        e.content[0].answer)
+                                    ?.icon ??
+                                Sentiment.neutral.icon;
+                            text = e.content[1].answer;
+                          } else {
+                            icon = Icon(journalType.icon);
+                            if (journalType ==
+                                GuidedJournalType.challengeThought) {
+                              text = e.content[2].answer;
+                            } else {
+                              text = e.content[0].answer;
+                            }
+                          }
+
+                          return Card(
+                            elevation: 0,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            child: InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    icon,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                e.title,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium,
+                                              ),
+                                              Text(
+                                                DateFormat('kk:mm').format(
+                                                    e.createdAt.toLocal()),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall,
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            text,
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onTap: () {
+                                context.push('/journal/view/${e.id}');
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              )
               .toList(),
         ),
       ),
@@ -328,7 +403,7 @@ class _CalendarPageState extends State<_CalendarPage> {
 
     Icon? icon;
 
-    if (_dropdownSelect == GuidedJournalType.dailyCheckin.title) {
+    if (_dropdownSelect == GuidedJournalType.dailyCheckIn.title) {
       final mood = moodEntriesByDate[DateFormat('yyyy-MM-d').format(day)]
           ?.content
           .first
@@ -364,7 +439,7 @@ class _CalendarPageState extends State<_CalendarPage> {
 }
 
 enum GuidedJournalType {
-  dailyCheckin('Daily Check-in', Icons.note_alt),
+  dailyCheckIn('Daily Check-in', Icons.note_alt),
   gratitude('Gratitude', Icons.volunteer_activism),
   setAGoal('Set a Goal', Icons.emoji_events),
   challengeThought('Challenge Thought', Icons.emoji_objects),
