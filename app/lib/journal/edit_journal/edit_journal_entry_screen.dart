@@ -167,19 +167,11 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
                 context.go('/discover');
               }
             } else {
-              final elements = boardController.getAllData();
-              Uint8List? image;
-              if (elements.isNotEmpty) {
-                image = await toImageController.capture();
-              }
+              await _saveCurrentAnswer();
 
               setState(() {
-                guideQuestions[currentQuestion].answer = contentController.text;
                 contentController.text =
                     guideQuestions[previousQuestion].answer;
-                guideQuestions[currentQuestion].answerCanvasElements =
-                    jsonEncode(elements);
-                guideQuestions[currentQuestion].answerCanvasImage = image;
                 loadBoard(
                     guideQuestions[previousQuestion].answerCanvasElements);
                 currentQuestion = previousQuestion;
@@ -188,17 +180,19 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
           },
         ),
         actions: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  if (answerType == AnswerType.text) {
-                    answerType = AnswerType.canvas;
-                  } else {
-                    answerType = AnswerType.text;
-                  }
-                });
-              },
-              icon: const Icon(Icons.draw))
+          if (guideQuestions[currentQuestion].type == JournalType.text)
+            IconButton(
+                onPressed: () async {
+                  await _saveCurrentAnswer();
+                  setState(() {
+                    if (answerType == AnswerType.text) {
+                      answerType = AnswerType.canvas;
+                    } else {
+                      answerType = AnswerType.text;
+                    }
+                  });
+                },
+                icon: const Icon(Icons.draw))
         ],
       ),
       body: Container(
@@ -213,15 +207,9 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final nextQuestion = currentQuestion + 1;
+          await _saveCurrentAnswer();
           if (nextQuestion >= guideQuestions.length) {
             // Journal is completed
-            guideQuestions[currentQuestion].answer = contentController.text;
-            guideQuestions[currentQuestion].answerCanvasElements =
-                jsonEncode(boardController.getAllData());
-            if (boardController.getAllData().isNotEmpty) {
-              guideQuestions[currentQuestion].answerCanvasImage =
-                  await toImageController.capture();
-            }
             if (journalEntry != null) {
               journalEntry!.content = guideQuestions;
               await di<EditJournalController>()
@@ -236,18 +224,8 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
               if (context.mounted) context.pop(true);
             }
           } else {
-            final elements = boardController.getAllData();
-            Uint8List? image;
-            if (elements.isNotEmpty) {
-              image = await toImageController.capture();
-            }
-
             setState(() {
-              guideQuestions[currentQuestion].answer = contentController.text;
               contentController.text = guideQuestions[nextQuestion].answer;
-              guideQuestions[currentQuestion].answerCanvasElements =
-                  jsonEncode(elements);
-              guideQuestions[currentQuestion].answerCanvasImage = image;
               loadBoard(guideQuestions[nextQuestion].answerCanvasElements);
               currentQuestion = nextQuestion;
             });
@@ -257,6 +235,21 @@ class _EditJournalEntryScreenState extends State<EditJournalEntryScreen> {
         child: nextButton,
       ),
     );
+  }
+
+  Future<void> _saveCurrentAnswer() async {
+    if (answerType == AnswerType.canvas) {
+      final elements = boardController.getAllData();
+      Uint8List? image;
+      if (elements.isNotEmpty) {
+        image = await toImageController.capture();
+      }
+      guideQuestions[currentQuestion].answerCanvasElements =
+          jsonEncode(elements);
+      guideQuestions[currentQuestion].answerCanvasImage = image;
+    } else {
+      guideQuestions[currentQuestion].answer = contentController.text;
+    }
   }
 }
 
