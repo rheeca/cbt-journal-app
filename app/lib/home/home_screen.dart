@@ -120,7 +120,7 @@ class _HomePageState extends State<_HomePage> {
               vertical: 8.0,
               horizontal: 20.0,
             ),
-            color: AppColor.white.color.withValues(alpha: 0.9),
+            color: AppColor.lightYellow.color.withValues(alpha: 0.9),
             elevation: 8.0,
             child: Container(
               alignment: Alignment.center,
@@ -159,48 +159,59 @@ class _HomePageState extends State<_HomePage> {
               ),
             ],
           ),
-          todaysGoals.isNotEmpty
-              ? Expanded(
-                  child: SizedBox(
-                    child: Card(
-                      color: AppColor.white.color.withValues(alpha: 0.9),
-                      margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
-                      child: ListView.separated(
-                        itemCount: todaysGoals.length,
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const Divider(),
-                        itemBuilder: (BuildContext context, int index) {
-                          final item = todaysGoals.toList()[index];
-                          return Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 28.0, vertical: 4.0),
-                            child: Row(
-                              children: [
-                                Text(item.type.label),
-                                const Expanded(child: SizedBox()),
-                                Checkbox(
-                                  value: goalCheckIns.goals
-                                      .contains(item.type.name),
-                                  onChanged: (bool? value) {
-                                    if (value == true) {
-                                      goalCheckIns.goals.add(item.type.name);
-                                    } else {
-                                      goalCheckIns.goals.remove(item.type.name);
-                                    }
-                                    di<HomeController>()
-                                        .updateGoalCheckIns(goalCheckIns);
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                )
-              : const Text('No goals for today'),
+          Expanded(
+            child: SizedBox(
+              child: Card(
+                color: AppColor.lightYellow.color.withValues(alpha: 0.9),
+                margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: todaysGoals.isNotEmpty
+                      ? ListView.separated(
+                          itemCount: todaysGoals.length,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const Divider(),
+                          itemBuilder: (BuildContext context, int index) {
+                            final item = todaysGoals.toList()[index];
+                            return Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 28.0, vertical: 4.0),
+                              child: Row(
+                                children: [
+                                  Text(item.type.label),
+                                  const Expanded(child: SizedBox()),
+                                  Checkbox(
+                                    value: goalCheckIns.goals
+                                        .contains(item.type.name),
+                                    onChanged: (bool? value) {
+                                      if (value == true) {
+                                        goalCheckIns.goals.add(item.type.name);
+                                      } else {
+                                        goalCheckIns.goals
+                                            .remove(item.type.name);
+                                      }
+                                      di<HomeController>()
+                                          .updateGoalCheckIns(goalCheckIns);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        )
+                      : const SizedBox.expand(
+                          child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'No goals for today',
+                            textAlign: TextAlign.center,
+                          ),
+                        )),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

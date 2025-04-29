@@ -15,7 +15,7 @@ class DiscoverScreen extends StatelessWidget {
       children: [
         Positioned.fill(
           child: Container(
-            color: AppColor.white.color,
+            color: AppColor.lightYellow.color,
           ),
         ),
         Scaffold(

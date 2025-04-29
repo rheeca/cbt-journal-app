@@ -6,7 +6,7 @@ final theme = ThemeData(
     seedColor: const Color(0xFF588C7E),
   ),
   navigationBarTheme: NavigationBarThemeData(
-    backgroundColor: AppColor.white.color,
+    backgroundColor: AppColor.lightYellow.color,
     elevation: 8.0,
     labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
   ),
@@ -42,7 +42,8 @@ final theme = ThemeData(
 );
 
 enum AppColor {
-  white(Color.fromARGB(255, 240, 236, 223));
+  lightYellow(Color.fromARGB(255, 240, 236, 223)),
+  white(Color.fromARGB(255, 246, 243, 233));
 
   const AppColor(this.color);
   final Color color;

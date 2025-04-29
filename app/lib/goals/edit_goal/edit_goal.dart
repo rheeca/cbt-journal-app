@@ -96,43 +96,46 @@ class _SelectGoalState extends State<_SelectGoal> {
         const Text('Select a Goal'),
         const SizedBox(height: 12),
         Expanded(
-          child: GridView(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-            ),
-            children: GoalActivity.values
-                .map((e) => Card(
-                      child: InkWell(
-                        onTap: () {
-                          if (selectedGoalActivity != e) {
-                            di<EditGoalController>().selectedGoalActivity = e;
-                          }
-                        },
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: selectedGoalActivity == e
-                                ? Theme.of(context)
-                                    .primaryColor
-                                    .withValues(alpha: 0.3)
-                                : null,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                e.icon,
-                                size: 48.0,
-                              ),
-                              Text(e.label),
-                            ],
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              children: GoalActivity.values
+                  .map((e) => Card(
+                        child: InkWell(
+                          onTap: () {
+                            if (selectedGoalActivity != e) {
+                              di<EditGoalController>().selectedGoalActivity = e;
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: selectedGoalActivity == e
+                                  ? Theme.of(context)
+                                      .primaryColor
+                                      .withValues(alpha: 0.3)
+                                  : null,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  e.icon,
+                                  size: 48.0,
+                                ),
+                                Text(e.label),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ))
-                .toList(),
+                      ))
+                  .toList(),
+            ),
           ),
         ),
       ],

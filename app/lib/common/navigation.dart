@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/services/journal_service.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: AppColor.white.color,
       child: ListView(
         children: [
           ListTile(

@@ -3,6 +3,7 @@ import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/journal/day_view/day_view_screen.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
+import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:cbt_journal/theme.dart';
 import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
@@ -24,7 +25,7 @@ class JournalScreen extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Container(
-              color: AppColor.white.color,
+              color: AppColor.lightYellow.color,
             ),
           ),
           Scaffold(
@@ -108,81 +109,9 @@ class _JournalPageState extends State<_JournalPage> {
                               )),
                     ),
                     Column(
-                      children: [
-                        ...e.value.map((e) {
-                          Widget? icon;
-                          String text = '';
-                          final journalType =
-                              GuidedJournalType.values.byName(e.guidedJournal);
-                          if (journalType == GuidedJournalType.dailyCheckIn) {
-                            icon = Sentiment.getSentimentByValue(
-                                        e.content[0].answer)
-                                    ?.icon ??
-                                Sentiment.neutral.icon;
-                            text = e.content[1].answer;
-                          } else {
-                            icon = Icon(journalType.icon);
-                            if (journalType ==
-                                GuidedJournalType.challengeThought) {
-                              text = e.content[2].answer;
-                            } else {
-                              text = e.content[0].answer;
-                            }
-                          }
-
-                          return Card(
-                            elevation: 0,
-                            color: Colors.white.withValues(alpha: 0.3),
-                            child: InkWell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    icon,
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                e.title,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleMedium,
-                                              ),
-                                              Text(
-                                                DateFormat('kk:mm').format(
-                                                    e.createdAt.toLocal()),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelSmall,
-                                              ),
-                                            ],
-                                          ),
-                                          Text(
-                                            text,
-                                            maxLines: 5,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                context.push('/journal/view/${e.id}');
-                              },
-                            ),
-                          );
-                        }),
-                      ],
+                      children: e.value
+                          .map((e) => JournalEntryCard(entry: e))
+                          .toList(),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -190,6 +119,75 @@ class _JournalPageState extends State<_JournalPage> {
               )
               .toList(),
         ),
+      ),
+    );
+  }
+}
+
+class JournalEntryCard extends StatelessWidget {
+  const JournalEntryCard({super.key, required this.entry});
+  final JournalEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget? icon;
+    String text = '';
+    final journalType = GuidedJournalType.values.byName(entry.guidedJournal);
+    if (journalType == GuidedJournalType.dailyCheckIn) {
+      icon = Sentiment.getSentimentByValue(entry.content[0].answer)?.icon ??
+          Sentiment.neutral.icon;
+      text = entry.content[1].answer;
+    } else {
+      icon = Icon(journalType.icon);
+      if (journalType == GuidedJournalType.challengeThought) {
+        text = entry.content[2].answer;
+      } else {
+        text = entry.content[0].answer;
+      }
+    }
+
+    return Card(
+      elevation: 0,
+      color: AppColor.white.color,
+      child: InkWell(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              icon,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          entry.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          DateFormat('kk:mm').format(entry.createdAt.toLocal()),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
+                    Text(
+                      text,
+                      maxLines: 5,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        onTap: () {
+          context.push('/journal/view/${entry.id}');
+        },
       ),
     );
   }
@@ -242,6 +240,8 @@ class _CalendarPageState extends State<_CalendarPage> {
             children: [
               const Expanded(child: SizedBox()),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColor.white.color),
                 onPressed: () {
                   showModalBottomSheet<void>(
                     context: context,
@@ -282,75 +282,80 @@ class _CalendarPageState extends State<_CalendarPage> {
               ),
             ],
           ),
-          TableCalendar(
-            firstDay: firstDay,
-            // last day of the current month
-            lastDay: DateTime(now.year, now.month + 1, 0),
-            focusedDay: _focusedDay,
-            availableCalendarFormats: const {
-              CalendarFormat.month: 'Month',
-            },
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) async {
-              if (!isSameDay(_selectedDay, selectedDay)) {
-                di<JournalController>().selectDate(selectedDay);
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return DayViewScreen(date: selectedDay);
-                    },
-                  ),
-                );
-
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              }
-            },
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: _defaultDayBuilder(),
-              outsideBuilder: (context, day, focusedDay) => const SizedBox(),
-              disabledBuilder: (context, day, focusedDay) {
-                if (focusedDay.month != day.month) {
-                  return const SizedBox();
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 24),
-                      Text(
-                        day.day.toString(),
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                );
+          Container(
+            color: Colors.white.withValues(alpha: 0.3),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+            margin: const EdgeInsets.all(8),
+            child: TableCalendar(
+              firstDay: firstDay,
+              // last day of the current month
+              lastDay: DateTime(now.year, now.month + 1, 0),
+              focusedDay: _focusedDay,
+              availableCalendarFormats: const {
+                CalendarFormat.month: 'Month',
               },
-              todayBuilder: (context, day, focusedDay) {
-                return Center(
-                  child: Container(
-                    width: 40.0,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: (selectedDay, focusedDay) async {
+                if (!isSameDay(_selectedDay, selectedDay)) {
+                  di<JournalController>().selectDate(selectedDay);
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return DayViewScreen(date: selectedDay);
+                      },
                     ),
+                  );
+
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                }
+              },
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder: _defaultDayBuilder(),
+                outsideBuilder: (context, day, focusedDay) => const SizedBox(),
+                disabledBuilder: (context, day, focusedDay) {
+                  if (focusedDay.month != day.month) {
+                    return const SizedBox();
+                  }
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        hasJournalEntry(day),
-                        Text(day.day.toString()),
+                        const SizedBox(height: 24),
+                        Text(
+                          day.day.toString(),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ],
                     ),
-                  ),
-                );
-              },
-              selectedBuilder: _defaultDayBuilder(),
+                  );
+                },
+                todayBuilder: (context, day, focusedDay) {
+                  return Center(
+                    child: Container(
+                      width: 40.0,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          hasJournalEntry(day),
+                          Text(day.day.toString()),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                selectedBuilder: _defaultDayBuilder(),
+              ),
             ),
           ),
         ],

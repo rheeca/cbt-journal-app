@@ -15,7 +15,7 @@ class GoalsScreen extends StatelessWidget {
       children: [
         Positioned.fill(
           child: Container(
-            color: AppColor.white.color,
+            color: AppColor.lightYellow.color,
           ),
         ),
         Scaffold(
@@ -104,6 +104,7 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
         children: goals
             .map(
               (e) => Card(
+                color: AppColor.white.color,
                 child: InkWell(
                   onTap: () async {
                     await context.push('/goal/view/${e.id}');
