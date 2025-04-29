@@ -14,30 +14,36 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: AppColor.white.color,
-      child: ListView(
-        children: [
-          ListTile(
-            title: const Text('Settings'),
-            onTap: () {
-              context.go('/settings');
-            },
-          ),
-          ListTile(
-            title: const Text('Sync Data'),
-            onTap: () async {
-              await di<JournalService>().onSync();
-            },
-          ),
-          ListTile(
-            title: const Text('Logout'),
-            onTap: () async {
-              await di<JournalService>().onSync();
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            ListTile(
+              title: const Text('Settings'),
+              leading: const Icon(Icons.settings),
+              onTap: () {
+                context.push('/settings');
+              },
+            ),
+            ListTile(
+              title: const Text('Sync Data'),
+              leading: const Icon(Icons.sync),
+              onTap: () async {
+                await di<JournalService>().onSync();
+              },
+            ),
+            ListTile(
+              title: const Text('Logout'),
+              leading: const Icon(Icons.logout),
+              onTap: () async {
+                await di<JournalService>().onSync();
 
-              await _clearLocalData();
-              FirebaseAuth.instance.signOut();
-            },
-          ),
-        ],
+                await _clearLocalData();
+                FirebaseAuth.instance.signOut();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

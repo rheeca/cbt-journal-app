@@ -10,6 +10,10 @@ final theme = ThemeData(
     elevation: 8.0,
     labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
   ),
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    backgroundColor: Color(0xFF588C7E),
+    foregroundColor: Colors.white,
+  ),
   textTheme: const TextTheme(
     titleLarge: TextStyle(
       fontSize: 24,

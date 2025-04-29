@@ -134,17 +134,24 @@ GoRouter getRouter(User? user) {
   );
 }
 
-class ScaffoldWithNavBar extends StatelessWidget {
+class ScaffoldWithNavBar extends StatefulWidget {
   const ScaffoldWithNavBar({required this.child, super.key});
 
   final Widget child;
 
   @override
+  State<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
+  int selectedIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
+      body: widget.child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _calculateSelectedIndex(context),
+        selectedIndex: selectedIndex,
         onDestinationSelected: (int index) {
           _onItemTapped(index, context);
         },
@@ -170,29 +177,19 @@ class ScaffoldWithNavBar extends StatelessWidget {
     );
   }
 
-  static int _calculateSelectedIndex(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/discover')) {
-      return 1;
-    }
-    if (location.startsWith('/goals')) {
-      return 2;
-    }
-    if (location.startsWith('/myjournal')) {
-      return 3;
-    }
-    return 0;
-  }
-
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
+        selectedIndex = 0;
         context.go('/');
       case 1:
+        selectedIndex = 1;
         context.go('/discover');
       case 2:
+        selectedIndex = 2;
         context.go('/goals');
       case 3:
+        selectedIndex = 3;
         context.go('/myjournal');
     }
   }

@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/settings/settings_controller.dart';
+import 'package:cbt_journal/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -61,58 +62,71 @@ class _SettingsState extends State<SettingsScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final updated = await context.push('/settings/edit');
-              if (updated == true) {
-                di<SettingsController>().load();
-              }
-            },
-            child: const Text('Edit'),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Settings', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Name'),
-                  Text(user.displayName),
-                ],
-              ),
-              const SizedBox(height: 12.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Email'),
-                  Text(user.email),
-                ],
-              ),
-              const SizedBox(height: 50.0),
-              TextButton(
-                onPressed: () => _showChangePasswordDialog(context),
-                style: TextButton.styleFrom(padding: null),
-                child: const Text('Change Password'),
-              ),
-              const SizedBox(height: 12.0),
-              TextButton(
-                onPressed: () => _showDeleteAccountDialog(context),
-                child: const Text('Delete Account'),
-              ),
-            ],
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            color: AppColor.white.color,
           ),
         ),
-      ),
+        Scaffold(
+          appBar: AppBar(
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  final updated = await context.push('/settings/edit');
+                  if (updated == true) {
+                    di<SettingsController>().load();
+                  }
+                },
+                child: const Text('Edit'),
+              ),
+            ],
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Settings',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 20.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Name'),
+                      Text(user.displayName),
+                    ],
+                  ),
+                  const SizedBox(height: 12.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Email'),
+                      Text(user.email),
+                    ],
+                  ),
+                  const SizedBox(height: 50.0),
+                  TextButton(
+                    onPressed: () => _showChangePasswordDialog(context),
+                    style: TextButton.styleFrom(padding: null),
+                    child: const Text('Change Password'),
+                  ),
+                  const SizedBox(height: 12.0),
+                  TextButton(
+                    onPressed: () => _showDeleteAccountDialog(context),
+                    child: const Text('Delete Account'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+        ),
+      ],
     );
   }
 

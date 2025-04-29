@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/settings/settings_controller.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:watch_it/watch_it.dart';
@@ -59,11 +56,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: _nameController,
             ),
             const SizedBox(height: 20.0),
-            const Text('Update Email'),
-            TextFormField(
-              controller: _emailController,
-            ),
-            const SizedBox(height: 20.0),
+            // const Text('Update Email'),
+            // TextFormField(
+            //   controller: _emailController,
+            // ),
+            // const SizedBox(height: 20.0),
             FilledButton(
               onPressed: () async {
                 // TODO: validate email format
@@ -71,18 +68,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   user.displayName = _nameController.text;
                 }
 
-                if (user.email != _emailController.text) {
-                  user.email = _emailController.text;
-                  final firebaseUser = FirebaseAuth.instance.currentUser;
-                  try {
-                    await firebaseUser
-                        ?.verifyBeforeUpdateEmail(_emailController.text);
-                  } on FirebaseAuthException catch (e) {
-                    // TODO: reauthenticate
-                    log('User needs to reauthenticate to change email',
-                        stackTrace: e.stackTrace);
-                  }
-                }
+                // if (user.email != _emailController.text) {
+                //   user.email = _emailController.text;
+                //   final firebaseUser = FirebaseAuth.instance.currentUser;
+                //   try {
+                //     await firebaseUser
+                //         ?.verifyBeforeUpdateEmail(_emailController.text);
+                //   } on FirebaseAuthException catch (e) {
+                //     // TODO: reauthenticate
+                //     log('User needs to reauthenticate to change email',
+                //         stackTrace: e.stackTrace);
+                //   }
+                // }
 
                 di<SettingsController>().insertUserIntoDb(user);
                 if (context.mounted) {
