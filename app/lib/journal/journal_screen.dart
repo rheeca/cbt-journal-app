@@ -139,11 +139,7 @@ class JournalEntryCard extends StatelessWidget {
       text = entry.content[1].answer;
     } else {
       icon = Icon(journalType.icon);
-      if (journalType == GuidedJournalType.challengeThought) {
-        text = entry.content[2].answer;
-      } else {
-        text = entry.content[0].answer;
-      }
+      text = entry.content[0].answer;
     }
 
     return Card(

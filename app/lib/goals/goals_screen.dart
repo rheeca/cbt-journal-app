@@ -1,5 +1,6 @@
 import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
+import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -105,6 +106,7 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
             .map(
               (e) => Card(
                 color: AppColor.white.color,
+                elevation: 0.5,
                 child: InkWell(
                   onTap: () async {
                     await context.push('/goal/view/${e.id}');
@@ -113,12 +115,20 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(e.type.icon),
                         const SizedBox(width: 8),
-                        Text(
-                          e.type.label,
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              e.type.label,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            _ScheduleWeekRound(e.notificationSchedule),
+                          ],
                         ),
                       ],
                     ),
@@ -128,6 +138,35 @@ class _GoalsListView extends StatelessWidget with WatchItMixin {
             )
             .toList(),
       ),
+    );
+  }
+}
+
+class _ScheduleWeekRound extends StatelessWidget {
+  const _ScheduleWeekRound(this.schedule);
+  final List<DayOfWeek> schedule;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 1,
+      children: DayOfWeek.values
+          .map((e) => Container(
+                width: 16,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 0.3),
+                  color: schedule.contains(e)
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
+                      : null,
+                ),
+                child: Text(
+                  e.singleLetter,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 10),
+                ),
+              ))
+          .toList(),
     );
   }
 }

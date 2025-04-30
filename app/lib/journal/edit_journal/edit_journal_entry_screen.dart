@@ -298,6 +298,14 @@ class _MoodJournalState extends State<_MoodJournal> {
   String? selectedMood;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.contentController.text.isNotEmpty) {
+      selectedMood = widget.contentController.text;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
