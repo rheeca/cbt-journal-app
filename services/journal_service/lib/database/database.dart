@@ -5,6 +5,7 @@ import 'package:journal_service/generated/goal.pb.dart';
 import 'package:journal_service/generated/goal_checkin.pb.dart';
 import 'package:journal_service/generated/journal_entry.pb.dart';
 import 'package:journal_service/generated/user.pbgrpc.dart';
+import 'package:journal_service/models/device.dart';
 import 'package:journal_service/utils/goal.dart';
 import 'package:journal_service/utils/util.dart';
 import 'package:postgres/postgres.dart';
@@ -14,7 +15,7 @@ part 'database.g.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load();
 
-@DriftDatabase(tables: [GoalCheckIns, Goals, JournalEntries, Users])
+@DriftDatabase(tables: [Devices, GoalCheckIns, Goals, JournalEntries, Users])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -41,11 +42,14 @@ class AppDatabase extends _$AppDatabase {
 
 extension GoalQuery on AppDatabase {
   Future<List<Goal>> getGoalsByUser(String userId,
-      {DateTime? lastSynced}) async {
+      {DateTime? lastSynced, bool? isDeleted}) async {
     SimpleSelectStatement<Goals, GoalEntity> stmt = select(goals)
       ..where((t) => t.userId.equals(userId));
     if (lastSynced != null) {
       stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
+    }
+    if (isDeleted != null) {
+      stmt.where((t) => t.isDeleted.isValue(isDeleted));
     }
 
     final items = await stmt.get();
@@ -152,11 +156,14 @@ extension GoalQuery on AppDatabase {
 
 extension JournalEntryQuery on AppDatabase {
   Future<List<JournalEntry>> getJournalEntriesByUser(String userId,
-      {DateTime? lastSynced}) async {
+      {DateTime? lastSynced, bool? isDeleted}) async {
     SimpleSelectStatement<JournalEntries, JournalEntryEntity> stmt =
         select(journalEntries)..where((t) => t.userId.equals(userId));
     if (lastSynced != null) {
       stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
+    }
+    if (isDeleted != null) {
+      stmt.where((t) => t.isDeleted.isValue(isDeleted));
     }
 
     final items = await stmt.get();
@@ -260,5 +267,41 @@ extension UserQuery on AppDatabase {
 
   Future<void> deleteUsers(List<String> ids) {
     return (delete(users)..where((t) => t.id.isIn(ids))).go();
+  }
+}
+
+extension DeviceQuery on AppDatabase {
+  Future<List<Device>> getDevices(String userId) async {
+    SimpleSelectStatement<Devices, DeviceEntity> stmt = select(devices)
+      ..where((t) => t.userId.isValue(userId));
+
+    final items = await stmt.get();
+    return items
+        .map((e) => Device(
+              id: e.id,
+              userId: e.userId,
+              lastSynced: e.lastSynced.toDateTime(),
+            ))
+        .toList();
+  }
+
+  Future<void> insertDevices(List<Device> items) async {
+    await batch((batch) {
+      batch.insertAll(
+        devices,
+        items.map(
+          (e) => DevicesCompanion(
+            id: Value(e.id),
+            userId: Value(e.userId),
+            lastSynced: Value(PgDateTime(e.lastSynced)),
+          ),
+        ),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
+  Future<void> deleteDevices(List<String> ids) {
+    return (delete(devices)..where((t) => t.id.isIn(ids))).go();
   }
 }

@@ -362,6 +362,243 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   }
 }
 
+class $DevicesTable extends Devices
+    with TableInfo<$DevicesTable, DeviceEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DevicesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES users (id) ON DELETE CASCADE'));
+  static const VerificationMeta _lastSyncedMeta =
+      const VerificationMeta('lastSynced');
+  @override
+  late final GeneratedColumn<PgDateTime> lastSynced =
+      GeneratedColumn<PgDateTime>('last_synced', aliasedName, false,
+          type: PgTypes.timestampWithTimezone, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, userId, lastSynced];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'devices';
+  @override
+  VerificationContext validateIntegrity(Insertable<DeviceEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('last_synced')) {
+      context.handle(
+          _lastSyncedMeta,
+          lastSynced.isAcceptableOrUnknown(
+              data['last_synced']!, _lastSyncedMeta));
+    } else if (isInserting) {
+      context.missing(_lastSyncedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DeviceEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DeviceEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      lastSynced: attachedDatabase.typeMapping.read(
+          PgTypes.timestampWithTimezone,
+          data['${effectivePrefix}last_synced'])!,
+    );
+  }
+
+  @override
+  $DevicesTable createAlias(String alias) {
+    return $DevicesTable(attachedDatabase, alias);
+  }
+}
+
+class DeviceEntity extends DataClass implements Insertable<DeviceEntity> {
+  final String id;
+  final String userId;
+  final PgDateTime lastSynced;
+  const DeviceEntity(
+      {required this.id, required this.userId, required this.lastSynced});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['last_synced'] =
+        Variable<PgDateTime>(lastSynced, PgTypes.timestampWithTimezone);
+    return map;
+  }
+
+  DevicesCompanion toCompanion(bool nullToAbsent) {
+    return DevicesCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      lastSynced: Value(lastSynced),
+    );
+  }
+
+  factory DeviceEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DeviceEntity(
+      id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      lastSynced: serializer.fromJson<PgDateTime>(json['lastSynced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
+      'lastSynced': serializer.toJson<PgDateTime>(lastSynced),
+    };
+  }
+
+  DeviceEntity copyWith({String? id, String? userId, PgDateTime? lastSynced}) =>
+      DeviceEntity(
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        lastSynced: lastSynced ?? this.lastSynced,
+      );
+  DeviceEntity copyWithCompanion(DevicesCompanion data) {
+    return DeviceEntity(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      lastSynced:
+          data.lastSynced.present ? data.lastSynced.value : this.lastSynced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeviceEntity(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('lastSynced: $lastSynced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, userId, lastSynced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DeviceEntity &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.lastSynced == this.lastSynced);
+}
+
+class DevicesCompanion extends UpdateCompanion<DeviceEntity> {
+  final Value<String> id;
+  final Value<String> userId;
+  final Value<PgDateTime> lastSynced;
+  final Value<int> rowid;
+  const DevicesCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.lastSynced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevicesCompanion.insert({
+    required String id,
+    required String userId,
+    required PgDateTime lastSynced,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        userId = Value(userId),
+        lastSynced = Value(lastSynced);
+  static Insertable<DeviceEntity> custom({
+    Expression<String>? id,
+    Expression<String>? userId,
+    Expression<PgDateTime>? lastSynced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (lastSynced != null) 'last_synced': lastSynced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevicesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? userId,
+      Value<PgDateTime>? lastSynced,
+      Value<int>? rowid}) {
+    return DevicesCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      lastSynced: lastSynced ?? this.lastSynced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (lastSynced.present) {
+      map['last_synced'] =
+          Variable<PgDateTime>(lastSynced.value, PgTypes.timestampWithTimezone);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevicesCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('lastSynced: $lastSynced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $GoalCheckInsTable extends GoalCheckIns
     with TableInfo<$GoalCheckInsTable, GoalCheckInEntity> {
   @override
@@ -1669,6 +1906,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UsersTable users = $UsersTable(this);
+  late final $DevicesTable devices = $DevicesTable(this);
   late final $GoalCheckInsTable goalCheckIns = $GoalCheckInsTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
@@ -1677,10 +1915,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, goalCheckIns, goals, journalEntries];
+      [users, devices, goalCheckIns, goals, journalEntries];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('users',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('devices', kind: UpdateKind.delete),
+            ],
+          ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('users',
                 limitUpdateKind: UpdateKind.delete),
@@ -1731,6 +1976,20 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
 final class $$UsersTableReferences
     extends BaseReferences<_$AppDatabase, $UsersTable, UserEntity> {
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$DevicesTable, List<DeviceEntity>>
+      _devicesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.devices,
+              aliasName: $_aliasNameGenerator(db.users.id, db.devices.userId));
+
+  $$DevicesTableProcessedTableManager get devicesRefs {
+    final manager = $$DevicesTableTableManager($_db, $_db.devices)
+        .filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_devicesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 
   static MultiTypedResultKey<$GoalCheckInsTable, List<GoalCheckInEntity>>
       _goalCheckInsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -1801,6 +2060,27 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
       column: $table.isDeleted, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> devicesRefs(
+      Expression<bool> Function($$DevicesTableFilterComposer f) f) {
+    final $$DevicesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.devices,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DevicesTableFilterComposer(
+              $db: $db,
+              $table: $db.devices,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 
   Expression<bool> goalCheckInsRefs(
       Expression<bool> Function($$GoalCheckInsTableFilterComposer f) f) {
@@ -1921,6 +2201,27 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
+  Expression<T> devicesRefs<T extends Object>(
+      Expression<T> Function($$DevicesTableAnnotationComposer a) f) {
+    final $$DevicesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.devices,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DevicesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.devices,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> goalCheckInsRefs<T extends Object>(
       Expression<T> Function($$GoalCheckInsTableAnnotationComposer a) f) {
     final $$GoalCheckInsTableAnnotationComposer composer = $composerBuilder(
@@ -1997,7 +2298,10 @@ class $$UsersTableTableManager extends RootTableManager<
     (UserEntity, $$UsersTableReferences),
     UserEntity,
     PrefetchHooks Function(
-        {bool goalCheckInsRefs, bool goalsRefs, bool journalEntriesRefs})> {
+        {bool devicesRefs,
+        bool goalCheckInsRefs,
+        bool goalsRefs,
+        bool journalEntriesRefs})> {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
       : super(TableManagerState(
           db: db,
@@ -2049,12 +2353,14 @@ class $$UsersTableTableManager extends RootTableManager<
                   (e.readTable(table), $$UsersTableReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: (
-              {goalCheckInsRefs = false,
+              {devicesRefs = false,
+              goalCheckInsRefs = false,
               goalsRefs = false,
               journalEntriesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
+                if (devicesRefs) db.devices,
                 if (goalCheckInsRefs) db.goalCheckIns,
                 if (goalsRefs) db.goals,
                 if (journalEntriesRefs) db.journalEntries
@@ -2062,6 +2368,18 @@ class $$UsersTableTableManager extends RootTableManager<
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (devicesRefs)
+                    await $_getPrefetchedData<UserEntity, $UsersTable,
+                            DeviceEntity>(
+                        currentTable: table,
+                        referencedTable:
+                            $$UsersTableReferences._devicesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$UsersTableReferences(db, table, p0).devicesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.userId == item.id),
+                        typedResults: items),
                   if (goalCheckInsRefs)
                     await $_getPrefetchedData<UserEntity, $UsersTable,
                             GoalCheckInEntity>(
@@ -2119,7 +2437,249 @@ typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
     (UserEntity, $$UsersTableReferences),
     UserEntity,
     PrefetchHooks Function(
-        {bool goalCheckInsRefs, bool goalsRefs, bool journalEntriesRefs})>;
+        {bool devicesRefs,
+        bool goalCheckInsRefs,
+        bool goalsRefs,
+        bool journalEntriesRefs})>;
+typedef $$DevicesTableCreateCompanionBuilder = DevicesCompanion Function({
+  required String id,
+  required String userId,
+  required PgDateTime lastSynced,
+  Value<int> rowid,
+});
+typedef $$DevicesTableUpdateCompanionBuilder = DevicesCompanion Function({
+  Value<String> id,
+  Value<String> userId,
+  Value<PgDateTime> lastSynced,
+  Value<int> rowid,
+});
+
+final class $$DevicesTableReferences
+    extends BaseReferences<_$AppDatabase, $DevicesTable, DeviceEntity> {
+  $$DevicesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) => db.users
+      .createAlias($_aliasNameGenerator(db.devices.userId, db.users.id));
+
+  $$UsersTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<String>('user_id')!;
+
+    final manager = $$UsersTableTableManager($_db, $_db.users)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$DevicesTableFilterComposer
+    extends Composer<_$AppDatabase, $DevicesTable> {
+  $$DevicesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<PgDateTime> get lastSynced => $composableBuilder(
+      column: $table.lastSynced, builder: (column) => ColumnFilters(column));
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableFilterComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DevicesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DevicesTable> {
+  $$DevicesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<PgDateTime> get lastSynced => $composableBuilder(
+      column: $table.lastSynced, builder: (column) => ColumnOrderings(column));
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableOrderingComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DevicesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DevicesTable> {
+  $$DevicesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<PgDateTime> get lastSynced => $composableBuilder(
+      column: $table.lastSynced, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DevicesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DevicesTable,
+    DeviceEntity,
+    $$DevicesTableFilterComposer,
+    $$DevicesTableOrderingComposer,
+    $$DevicesTableAnnotationComposer,
+    $$DevicesTableCreateCompanionBuilder,
+    $$DevicesTableUpdateCompanionBuilder,
+    (DeviceEntity, $$DevicesTableReferences),
+    DeviceEntity,
+    PrefetchHooks Function({bool userId})> {
+  $$DevicesTableTableManager(_$AppDatabase db, $DevicesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DevicesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DevicesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DevicesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<PgDateTime> lastSynced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DevicesCompanion(
+            id: id,
+            userId: userId,
+            lastSynced: lastSynced,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String userId,
+            required PgDateTime lastSynced,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DevicesCompanion.insert(
+            id: id,
+            userId: userId,
+            lastSynced: lastSynced,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$DevicesTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (userId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.userId,
+                    referencedTable: $$DevicesTableReferences._userIdTable(db),
+                    referencedColumn:
+                        $$DevicesTableReferences._userIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DevicesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DevicesTable,
+    DeviceEntity,
+    $$DevicesTableFilterComposer,
+    $$DevicesTableOrderingComposer,
+    $$DevicesTableAnnotationComposer,
+    $$DevicesTableCreateCompanionBuilder,
+    $$DevicesTableUpdateCompanionBuilder,
+    (DeviceEntity, $$DevicesTableReferences),
+    DeviceEntity,
+    PrefetchHooks Function({bool userId})>;
 typedef $$GoalCheckInsTableCreateCompanionBuilder = GoalCheckInsCompanion
     Function({
   required String userId,
@@ -3081,6 +3641,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
+  $$DevicesTableTableManager get devices =>
+      $$DevicesTableTableManager(_db, _db.devices);
   $$GoalCheckInsTableTableManager get goalCheckIns =>
       $$GoalCheckInsTableTableManager(_db, _db.goalCheckIns);
   $$GoalsTableTableManager get goals =>

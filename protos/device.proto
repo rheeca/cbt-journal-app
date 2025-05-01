@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package journal;
+
+service DeviceService {
+  rpc Sync (SyncRequest) returns (SyncResponse) {}
+  rpc Logout (LogoutRequest) returns (LogoutResponse) {}
+}
+
+message SyncRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message SyncResponse {
+  int32 status = 1;
+  string error_message = 2;
+  repeated string deleted_goals = 3;
+  repeated string deleted_journal_entries = 4;
+}
+
+message LogoutRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message LogoutResponse {
+  int32 status = 1;
+  string error_message = 2;
+}

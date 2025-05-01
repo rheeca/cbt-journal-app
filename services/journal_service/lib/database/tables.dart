@@ -79,6 +79,21 @@ class Users extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName("DeviceEntity")
+class Devices extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text().references(
+        Users,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  Column<PgDateTime> get lastSynced =>
+      customType(PgTypes.timestampWithTimezone)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 

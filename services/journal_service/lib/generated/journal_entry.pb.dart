@@ -13,15 +13,15 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'goal.pb.dart' as $0;
-import 'google/protobuf/timestamp.pb.dart' as $4;
+import 'goal.pb.dart' as $1;
+import 'google/protobuf/timestamp.pb.dart' as $5;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
   factory ReadJournalEntriesRequest({
     $core.String? userId,
-    $4.Timestamp? lastSynced,
+    $5.Timestamp? lastSynced,
   }) {
     final $result = create();
     if (userId != null) {
@@ -38,7 +38,7 @@ class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReadJournalEntriesRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
-    ..aOM<$4.Timestamp>(2, _omitFieldNames ? '' : 'lastSynced', subBuilder: $4.Timestamp.create)
+    ..aOM<$5.Timestamp>(2, _omitFieldNames ? '' : 'lastSynced', subBuilder: $5.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -73,15 +73,15 @@ class ReadJournalEntriesRequest extends $pb.GeneratedMessage {
   void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $4.Timestamp get lastSynced => $_getN(1);
+  $5.Timestamp get lastSynced => $_getN(1);
   @$pb.TagNumber(2)
-  set lastSynced($4.Timestamp v) { $_setField(2, v); }
+  set lastSynced($5.Timestamp v) { $_setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasLastSynced() => $_has(1);
   @$pb.TagNumber(2)
   void clearLastSynced() => $_clearField(2);
   @$pb.TagNumber(2)
-  $4.Timestamp ensureLastSynced() => $_ensure(1);
+  $5.Timestamp ensureLastSynced() => $_ensure(1);
 }
 
 class ReadJournalEntriesResponse extends $pb.GeneratedMessage {
@@ -348,11 +348,11 @@ class JournalEntry extends $pb.GeneratedMessage {
   factory JournalEntry({
     $core.String? id,
     $core.String? userId,
-    $4.Timestamp? createdAt,
+    $5.Timestamp? createdAt,
     $core.String? guidedJournal,
     $core.String? title,
-    $core.Iterable<$0.GuideQuestion>? content,
-    $4.Timestamp? updatedAt,
+    $core.Iterable<$1.GuideQuestion>? content,
+    $5.Timestamp? updatedAt,
     $core.bool? isDeleted,
   }) {
     final $result = create();
@@ -389,11 +389,11 @@ class JournalEntry extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'JournalEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'userId')
-    ..aOM<$4.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $4.Timestamp.create)
+    ..aOM<$5.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $5.Timestamp.create)
     ..aOS(4, _omitFieldNames ? '' : 'guidedJournal')
     ..aOS(5, _omitFieldNames ? '' : 'title')
-    ..pc<$0.GuideQuestion>(6, _omitFieldNames ? '' : 'content', $pb.PbFieldType.PM, subBuilder: $0.GuideQuestion.create)
-    ..aOM<$4.Timestamp>(7, _omitFieldNames ? '' : 'updatedAt', subBuilder: $4.Timestamp.create)
+    ..pc<$1.GuideQuestion>(6, _omitFieldNames ? '' : 'content', $pb.PbFieldType.PM, subBuilder: $1.GuideQuestion.create)
+    ..aOM<$5.Timestamp>(7, _omitFieldNames ? '' : 'updatedAt', subBuilder: $5.Timestamp.create)
     ..aOB(8, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
@@ -438,15 +438,15 @@ class JournalEntry extends $pb.GeneratedMessage {
   void clearUserId() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $4.Timestamp get createdAt => $_getN(2);
+  $5.Timestamp get createdAt => $_getN(2);
   @$pb.TagNumber(3)
-  set createdAt($4.Timestamp v) { $_setField(3, v); }
+  set createdAt($5.Timestamp v) { $_setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasCreatedAt() => $_has(2);
   @$pb.TagNumber(3)
   void clearCreatedAt() => $_clearField(3);
   @$pb.TagNumber(3)
-  $4.Timestamp ensureCreatedAt() => $_ensure(2);
+  $5.Timestamp ensureCreatedAt() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.String get guidedJournal => $_getSZ(3);
@@ -467,18 +467,18 @@ class JournalEntry extends $pb.GeneratedMessage {
   void clearTitle() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $pb.PbList<$0.GuideQuestion> get content => $_getList(5);
+  $pb.PbList<$1.GuideQuestion> get content => $_getList(5);
 
   @$pb.TagNumber(7)
-  $4.Timestamp get updatedAt => $_getN(6);
+  $5.Timestamp get updatedAt => $_getN(6);
   @$pb.TagNumber(7)
-  set updatedAt($4.Timestamp v) { $_setField(7, v); }
+  set updatedAt($5.Timestamp v) { $_setField(7, v); }
   @$pb.TagNumber(7)
   $core.bool hasUpdatedAt() => $_has(6);
   @$pb.TagNumber(7)
   void clearUpdatedAt() => $_clearField(7);
   @$pb.TagNumber(7)
-  $4.Timestamp ensureUpdatedAt() => $_ensure(6);
+  $5.Timestamp ensureUpdatedAt() => $_ensure(6);
 
   @$pb.TagNumber(8)
   $core.bool get isDeleted => $_getBF(7);

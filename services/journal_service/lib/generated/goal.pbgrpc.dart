@@ -15,24 +15,24 @@ import 'dart:core' as $core;
 import 'package:grpc/service_api.dart' as $grpc;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'goal.pb.dart' as $0;
+import 'goal.pb.dart' as $1;
 
 export 'goal.pb.dart';
 
 @$pb.GrpcServiceName('journal.GoalService')
 class GoalServiceClient extends $grpc.Client {
-  static final _$readGoals = $grpc.ClientMethod<$0.ReadGoalsRequest, $0.ReadGoalsResponse>(
+  static final _$readGoals = $grpc.ClientMethod<$1.ReadGoalsRequest, $1.ReadGoalsResponse>(
       '/journal.GoalService/ReadGoals',
-      ($0.ReadGoalsRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $0.ReadGoalsResponse.fromBuffer(value));
-  static final _$writeGoals = $grpc.ClientMethod<$0.WriteGoalsRequest, $0.WriteGoalsResponse>(
+      ($1.ReadGoalsRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $1.ReadGoalsResponse.fromBuffer(value));
+  static final _$writeGoals = $grpc.ClientMethod<$1.WriteGoalsRequest, $1.WriteGoalsResponse>(
       '/journal.GoalService/WriteGoals',
-      ($0.WriteGoalsRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $0.WriteGoalsResponse.fromBuffer(value));
-  static final _$deleteGoals = $grpc.ClientMethod<$0.DeleteGoalsRequest, $0.DeleteGoalsResponse>(
+      ($1.WriteGoalsRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $1.WriteGoalsResponse.fromBuffer(value));
+  static final _$deleteGoals = $grpc.ClientMethod<$1.DeleteGoalsRequest, $1.DeleteGoalsResponse>(
       '/journal.GoalService/DeleteGoals',
-      ($0.DeleteGoalsRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $0.DeleteGoalsResponse.fromBuffer(value));
+      ($1.DeleteGoalsRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $1.DeleteGoalsResponse.fromBuffer(value));
 
   GoalServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -40,15 +40,15 @@ class GoalServiceClient extends $grpc.Client {
       : super(channel, options: options,
         interceptors: interceptors);
 
-  $grpc.ResponseFuture<$0.ReadGoalsResponse> readGoals($0.ReadGoalsRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$1.ReadGoalsResponse> readGoals($1.ReadGoalsRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$readGoals, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.WriteGoalsResponse> writeGoals($0.WriteGoalsRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$1.WriteGoalsResponse> writeGoals($1.WriteGoalsRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$writeGoals, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.DeleteGoalsResponse> deleteGoals($0.DeleteGoalsRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$1.DeleteGoalsResponse> deleteGoals($1.DeleteGoalsRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$deleteGoals, request, options: options);
   }
 }
@@ -58,42 +58,42 @@ abstract class GoalServiceBase extends $grpc.Service {
   $core.String get $name => 'journal.GoalService';
 
   GoalServiceBase() {
-    $addMethod($grpc.ServiceMethod<$0.ReadGoalsRequest, $0.ReadGoalsResponse>(
+    $addMethod($grpc.ServiceMethod<$1.ReadGoalsRequest, $1.ReadGoalsResponse>(
         'ReadGoals',
         readGoals_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.ReadGoalsRequest.fromBuffer(value),
-        ($0.ReadGoalsResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.WriteGoalsRequest, $0.WriteGoalsResponse>(
+        ($core.List<$core.int> value) => $1.ReadGoalsRequest.fromBuffer(value),
+        ($1.ReadGoalsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.WriteGoalsRequest, $1.WriteGoalsResponse>(
         'WriteGoals',
         writeGoals_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.WriteGoalsRequest.fromBuffer(value),
-        ($0.WriteGoalsResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.DeleteGoalsRequest, $0.DeleteGoalsResponse>(
+        ($core.List<$core.int> value) => $1.WriteGoalsRequest.fromBuffer(value),
+        ($1.WriteGoalsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.DeleteGoalsRequest, $1.DeleteGoalsResponse>(
         'DeleteGoals',
         deleteGoals_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.DeleteGoalsRequest.fromBuffer(value),
-        ($0.DeleteGoalsResponse value) => value.writeToBuffer()));
+        ($core.List<$core.int> value) => $1.DeleteGoalsRequest.fromBuffer(value),
+        ($1.DeleteGoalsResponse value) => value.writeToBuffer()));
   }
 
-  $async.Future<$0.ReadGoalsResponse> readGoals_Pre($grpc.ServiceCall $call, $async.Future<$0.ReadGoalsRequest> $request) async {
+  $async.Future<$1.ReadGoalsResponse> readGoals_Pre($grpc.ServiceCall $call, $async.Future<$1.ReadGoalsRequest> $request) async {
     return readGoals($call, await $request);
   }
 
-  $async.Future<$0.WriteGoalsResponse> writeGoals_Pre($grpc.ServiceCall $call, $async.Future<$0.WriteGoalsRequest> $request) async {
+  $async.Future<$1.WriteGoalsResponse> writeGoals_Pre($grpc.ServiceCall $call, $async.Future<$1.WriteGoalsRequest> $request) async {
     return writeGoals($call, await $request);
   }
 
-  $async.Future<$0.DeleteGoalsResponse> deleteGoals_Pre($grpc.ServiceCall $call, $async.Future<$0.DeleteGoalsRequest> $request) async {
+  $async.Future<$1.DeleteGoalsResponse> deleteGoals_Pre($grpc.ServiceCall $call, $async.Future<$1.DeleteGoalsRequest> $request) async {
     return deleteGoals($call, await $request);
   }
 
-  $async.Future<$0.ReadGoalsResponse> readGoals($grpc.ServiceCall call, $0.ReadGoalsRequest request);
-  $async.Future<$0.WriteGoalsResponse> writeGoals($grpc.ServiceCall call, $0.WriteGoalsRequest request);
-  $async.Future<$0.DeleteGoalsResponse> deleteGoals($grpc.ServiceCall call, $0.DeleteGoalsRequest request);
+  $async.Future<$1.ReadGoalsResponse> readGoals($grpc.ServiceCall call, $1.ReadGoalsRequest request);
+  $async.Future<$1.WriteGoalsResponse> writeGoals($grpc.ServiceCall call, $1.WriteGoalsRequest request);
+  $async.Future<$1.DeleteGoalsResponse> deleteGoals($grpc.ServiceCall call, $1.DeleteGoalsRequest request);
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:grpc/grpc.dart';
 import 'package:journal_service/database/database.dart';
+import 'package:journal_service/grpc/device.dart';
 import 'package:journal_service/grpc/goal.dart';
 import 'package:journal_service/grpc/goal_checkin.dart';
 import 'package:journal_service/grpc/journal_entry.dart';
@@ -16,6 +17,7 @@ void main() async {
 
   final grpcServer = Server.create(
     services: [
+      DeviceService(database),
       GoalCheckInService(database),
       GoalService(database),
       JournalEntryService(database),
