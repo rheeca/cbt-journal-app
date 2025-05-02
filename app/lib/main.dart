@@ -40,6 +40,7 @@ void main() async {
     ..registerLazySingleton<UserController>(() => UserController());
 
   await di<JournalService>().load();
+  await initializeAppData();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -64,4 +65,8 @@ class CBTApp extends StatelessWidget {
           );
         });
   }
+}
+
+Future<void> initializeAppData() async {
+  await di<JournalService>().downloadDiscover();
 }

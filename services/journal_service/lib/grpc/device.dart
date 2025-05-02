@@ -3,9 +3,6 @@ import 'package:journal_service/database/database.dart';
 import 'package:journal_service/generated/device.pbgrpc.dart';
 import 'package:journal_service/models/device.dart';
 import 'package:journal_service/utils/logger.dart';
-import 'package:logger/logger.dart';
-
-var logger = Logger(filter: NoFilter());
 
 class DeviceService extends DeviceServiceBase {
   DeviceService(this.database);

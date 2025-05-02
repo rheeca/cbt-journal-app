@@ -1,4 +1,5 @@
 import 'package:cbt_journal/generated/user.pb.dart';
+import 'package:cbt_journal/generated/discover.pb.dart' as pb_di;
 import 'package:cbt_journal/goals/edit_goal/edit_goal.dart';
 import 'package:cbt_journal/models/common.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
@@ -267,14 +268,21 @@ extension GuidedJournalQuery on AppDatabase {
         .toList();
   }
 
-  Future<int> insertGuidedJournal(md.GuidedJournal gj) {
-    return into(guidedJournals).insertOnConflictUpdate(GuidedJournalsCompanion(
-      id: Value(gj.id),
-      title: Value(gj.title),
-      guideQuestions: Value(gj.guideQuestions),
-      description: Value(gj.description),
-      journalType: Value(gj.journalType.map((e) => e.name).toList()),
-    ));
+  Future<void> insertGuidedJournals(List<pb_di.GuidedJournal> items) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(
+        guidedJournals,
+        items.map(
+          (e) => GuidedJournalsCompanion(
+            id: Value(e.id),
+            title: Value(e.title),
+            guideQuestions: Value(e.guideQuestions),
+            description: Value(e.description),
+            journalType: Value(e.journalType),
+          ),
+        ),
+      );
+    });
   }
 }
 

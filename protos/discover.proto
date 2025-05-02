@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package journal;
+
+service DiscoverService {
+  rpc ReadGuidedJournals (ReadGuidedJournalsRequest) returns (ReadGuidedJournalsResponse) {}
+}
+
+message ReadGuidedJournalsRequest {}
+
+message ReadGuidedJournalsResponse {
+  int32 status = 1;
+  string error_message = 2;
+  repeated GuidedJournal guided_journals = 3;
+}
+
+message GuidedJournal {
+  string id = 1;
+  string title = 2;
+  repeated string guide_questions = 3;
+  string description = 4;
+  repeated string journal_type = 5;
+}

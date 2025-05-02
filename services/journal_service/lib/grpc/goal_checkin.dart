@@ -2,9 +2,6 @@ import 'package:grpc/grpc.dart';
 import 'package:journal_service/database/database.dart';
 import 'package:journal_service/generated/goal_checkin.pbgrpc.dart';
 import 'package:journal_service/utils/logger.dart';
-import 'package:logger/logger.dart';
-
-var logger = Logger(filter: NoFilter());
 
 class GoalCheckInService extends GoalCheckInServiceBase {
   GoalCheckInService(this.database);

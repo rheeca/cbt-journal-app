@@ -15,24 +15,24 @@ import 'dart:core' as $core;
 import 'package:grpc/service_api.dart' as $grpc;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'user.pb.dart' as $4;
+import 'user.pb.dart' as $5;
 
 export 'user.pb.dart';
 
 @$pb.GrpcServiceName('journal.UserService')
 class UserServiceClient extends $grpc.Client {
-  static final _$readUsers = $grpc.ClientMethod<$4.ReadUsersRequest, $4.ReadUsersResponse>(
+  static final _$readUsers = $grpc.ClientMethod<$5.ReadUsersRequest, $5.ReadUsersResponse>(
       '/journal.UserService/ReadUsers',
-      ($4.ReadUsersRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $4.ReadUsersResponse.fromBuffer(value));
-  static final _$writeUsers = $grpc.ClientMethod<$4.WriteUsersRequest, $4.WriteUsersResponse>(
+      ($5.ReadUsersRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $5.ReadUsersResponse.fromBuffer(value));
+  static final _$writeUsers = $grpc.ClientMethod<$5.WriteUsersRequest, $5.WriteUsersResponse>(
       '/journal.UserService/WriteUsers',
-      ($4.WriteUsersRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $4.WriteUsersResponse.fromBuffer(value));
-  static final _$deleteUsers = $grpc.ClientMethod<$4.DeleteUsersRequest, $4.DeleteUsersResponse>(
+      ($5.WriteUsersRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $5.WriteUsersResponse.fromBuffer(value));
+  static final _$deleteUsers = $grpc.ClientMethod<$5.DeleteUsersRequest, $5.DeleteUsersResponse>(
       '/journal.UserService/DeleteUsers',
-      ($4.DeleteUsersRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $4.DeleteUsersResponse.fromBuffer(value));
+      ($5.DeleteUsersRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $5.DeleteUsersResponse.fromBuffer(value));
 
   UserServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -40,15 +40,15 @@ class UserServiceClient extends $grpc.Client {
       : super(channel, options: options,
         interceptors: interceptors);
 
-  $grpc.ResponseFuture<$4.ReadUsersResponse> readUsers($4.ReadUsersRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$5.ReadUsersResponse> readUsers($5.ReadUsersRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$readUsers, request, options: options);
   }
 
-  $grpc.ResponseFuture<$4.WriteUsersResponse> writeUsers($4.WriteUsersRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$5.WriteUsersResponse> writeUsers($5.WriteUsersRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$writeUsers, request, options: options);
   }
 
-  $grpc.ResponseFuture<$4.DeleteUsersResponse> deleteUsers($4.DeleteUsersRequest request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$5.DeleteUsersResponse> deleteUsers($5.DeleteUsersRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$deleteUsers, request, options: options);
   }
 }
@@ -58,42 +58,42 @@ abstract class UserServiceBase extends $grpc.Service {
   $core.String get $name => 'journal.UserService';
 
   UserServiceBase() {
-    $addMethod($grpc.ServiceMethod<$4.ReadUsersRequest, $4.ReadUsersResponse>(
+    $addMethod($grpc.ServiceMethod<$5.ReadUsersRequest, $5.ReadUsersResponse>(
         'ReadUsers',
         readUsers_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $4.ReadUsersRequest.fromBuffer(value),
-        ($4.ReadUsersResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$4.WriteUsersRequest, $4.WriteUsersResponse>(
+        ($core.List<$core.int> value) => $5.ReadUsersRequest.fromBuffer(value),
+        ($5.ReadUsersResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$5.WriteUsersRequest, $5.WriteUsersResponse>(
         'WriteUsers',
         writeUsers_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $4.WriteUsersRequest.fromBuffer(value),
-        ($4.WriteUsersResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$4.DeleteUsersRequest, $4.DeleteUsersResponse>(
+        ($core.List<$core.int> value) => $5.WriteUsersRequest.fromBuffer(value),
+        ($5.WriteUsersResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$5.DeleteUsersRequest, $5.DeleteUsersResponse>(
         'DeleteUsers',
         deleteUsers_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $4.DeleteUsersRequest.fromBuffer(value),
-        ($4.DeleteUsersResponse value) => value.writeToBuffer()));
+        ($core.List<$core.int> value) => $5.DeleteUsersRequest.fromBuffer(value),
+        ($5.DeleteUsersResponse value) => value.writeToBuffer()));
   }
 
-  $async.Future<$4.ReadUsersResponse> readUsers_Pre($grpc.ServiceCall $call, $async.Future<$4.ReadUsersRequest> $request) async {
+  $async.Future<$5.ReadUsersResponse> readUsers_Pre($grpc.ServiceCall $call, $async.Future<$5.ReadUsersRequest> $request) async {
     return readUsers($call, await $request);
   }
 
-  $async.Future<$4.WriteUsersResponse> writeUsers_Pre($grpc.ServiceCall $call, $async.Future<$4.WriteUsersRequest> $request) async {
+  $async.Future<$5.WriteUsersResponse> writeUsers_Pre($grpc.ServiceCall $call, $async.Future<$5.WriteUsersRequest> $request) async {
     return writeUsers($call, await $request);
   }
 
-  $async.Future<$4.DeleteUsersResponse> deleteUsers_Pre($grpc.ServiceCall $call, $async.Future<$4.DeleteUsersRequest> $request) async {
+  $async.Future<$5.DeleteUsersResponse> deleteUsers_Pre($grpc.ServiceCall $call, $async.Future<$5.DeleteUsersRequest> $request) async {
     return deleteUsers($call, await $request);
   }
 
-  $async.Future<$4.ReadUsersResponse> readUsers($grpc.ServiceCall call, $4.ReadUsersRequest request);
-  $async.Future<$4.WriteUsersResponse> writeUsers($grpc.ServiceCall call, $4.WriteUsersRequest request);
-  $async.Future<$4.DeleteUsersResponse> deleteUsers($grpc.ServiceCall call, $4.DeleteUsersRequest request);
+  $async.Future<$5.ReadUsersResponse> readUsers($grpc.ServiceCall call, $5.ReadUsersRequest request);
+  $async.Future<$5.WriteUsersResponse> writeUsers($grpc.ServiceCall call, $5.WriteUsersRequest request);
+  $async.Future<$5.DeleteUsersResponse> deleteUsers($grpc.ServiceCall call, $5.DeleteUsersRequest request);
 }

@@ -1,6 +1,7 @@
 import 'package:dotenv/dotenv.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_postgres/drift_postgres.dart';
+import 'package:journal_service/generated/discover.pb.dart';
 import 'package:journal_service/generated/goal.pb.dart';
 import 'package:journal_service/generated/goal_checkin.pb.dart';
 import 'package:journal_service/generated/journal_entry.pb.dart';
@@ -15,12 +16,24 @@ part 'database.g.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load();
 
-@DriftDatabase(tables: [Devices, GoalCheckIns, Goals, JournalEntries, Users])
+@DriftDatabase(tables: [
+  Devices,
+  GoalCheckIns,
+  Goals,
+  GuidedJournals,
+  JournalEntries,
+  Users,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;
+
+  Future<void> initialize() async {
+    // initialize database by querying a table
+    await select(users).get();
+  }
 
   static QueryExecutor _openConnection() {
     return PgDatabase(
@@ -151,6 +164,23 @@ extension GoalQuery on AppDatabase {
               where: (old, excluded) =>
                   old.updatedAt.isSmallerThan(excluded.updatedAt)));
     });
+  }
+}
+
+extension GuidedJournalQuery on AppDatabase {
+  Future<List<GuidedJournal>> getGuidedJournals() async {
+    final items = await (select(guidedJournals)).get();
+    return items
+        .map(
+          (e) => GuidedJournal(
+            id: e.id,
+            title: e.title,
+            guideQuestions: e.guideQuestions,
+            description: e.description,
+            journalType: e.journalType,
+          ),
+        )
+        .toList();
   }
 }
 

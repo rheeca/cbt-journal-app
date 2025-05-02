@@ -1,5 +1,6 @@
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/generated/device.pbgrpc.dart';
+import 'package:cbt_journal/generated/discover.pbgrpc.dart';
 import 'package:cbt_journal/generated/goal.pbgrpc.dart';
 import 'package:cbt_journal/generated/goal_checkin.pbgrpc.dart';
 import 'package:cbt_journal/generated/journal_entry.pbgrpc.dart';
@@ -20,6 +21,7 @@ class JournalService extends ChangeNotifier {
   final AppDatabase _database;
   ClientChannel? _channel;
   DeviceServiceClient? deviceClient;
+  DiscoverServiceClient? discoverClient;
   GoalCheckInServiceClient? goalCheckInClient;
   GoalServiceClient? goalClient;
   JournalEntryServiceClient? journalEntryClient;
@@ -56,6 +58,7 @@ class JournalService extends ChangeNotifier {
       options: const ChannelOptions(credentials: ChannelCredentials.secure()),
     );
     deviceClient = DeviceServiceClient(_channel!);
+    discoverClient = DiscoverServiceClient(_channel!);
     goalCheckInClient = GoalCheckInServiceClient(_channel!);
     goalClient = GoalServiceClient(_channel!);
     journalEntryClient = JournalEntryServiceClient(_channel!);
@@ -233,5 +236,13 @@ class JournalService extends ChangeNotifier {
       id: deviceId,
       userId: userId,
     ));
+  }
+
+  Future<void> downloadDiscover() async {
+    final resp =
+        await discoverClient?.readGuidedJournals(ReadGuidedJournalsRequest());
+    if (resp != null && resp.guidedJournals.isNotEmpty) {
+      await _database.insertGuidedJournals(resp.guidedJournals);
+    }
   }
 }

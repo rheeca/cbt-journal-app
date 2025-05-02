@@ -43,6 +43,18 @@ class Goals extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName("GuidedJournalEntity")
+class GuidedJournals extends Table {
+  TextColumn get id => text()();
+  TextColumn get title => text().unique()();
+  TextColumn get guideQuestions => text().map(const StringListConverter())();
+  TextColumn get description => text()();
+  TextColumn get journalType => text().map(const StringListConverter())();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DataClassName("JournalEntryEntity")
 class JournalEntries extends Table {
   TextColumn get id => text()();

@@ -13,14 +13,14 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'google/protobuf/timestamp.pb.dart' as $5;
+import 'google/protobuf/timestamp.pb.dart' as $6;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class ReadUsersRequest extends $pb.GeneratedMessage {
   factory ReadUsersRequest({
     $core.Iterable<$core.String>? ids,
-    $5.Timestamp? lastSynced,
+    $6.Timestamp? lastSynced,
   }) {
     final $result = create();
     if (ids != null) {
@@ -37,7 +37,7 @@ class ReadUsersRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReadUsersRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'ids')
-    ..aOM<$5.Timestamp>(2, _omitFieldNames ? '' : 'lastSynced', subBuilder: $5.Timestamp.create)
+    ..aOM<$6.Timestamp>(2, _omitFieldNames ? '' : 'lastSynced', subBuilder: $6.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -66,15 +66,15 @@ class ReadUsersRequest extends $pb.GeneratedMessage {
   $pb.PbList<$core.String> get ids => $_getList(0);
 
   @$pb.TagNumber(2)
-  $5.Timestamp get lastSynced => $_getN(1);
+  $6.Timestamp get lastSynced => $_getN(1);
   @$pb.TagNumber(2)
-  set lastSynced($5.Timestamp v) { $_setField(2, v); }
+  set lastSynced($6.Timestamp v) { $_setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasLastSynced() => $_has(1);
   @$pb.TagNumber(2)
   void clearLastSynced() => $_clearField(2);
   @$pb.TagNumber(2)
-  $5.Timestamp ensureLastSynced() => $_ensure(1);
+  $6.Timestamp ensureLastSynced() => $_ensure(1);
 }
 
 class ReadUsersResponse extends $pb.GeneratedMessage {
@@ -341,9 +341,9 @@ class User extends $pb.GeneratedMessage {
   factory User({
     $core.String? id,
     $core.String? email,
-    $5.Timestamp? createdAt,
+    $6.Timestamp? createdAt,
     $core.String? displayName,
-    $5.Timestamp? updatedAt,
+    $6.Timestamp? updatedAt,
     $core.bool? isDeleted,
   }) {
     final $result = create();
@@ -374,9 +374,9 @@ class User extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'User', package: const $pb.PackageName(_omitMessageNames ? '' : 'journal'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'email')
-    ..aOM<$5.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $5.Timestamp.create)
+    ..aOM<$6.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $6.Timestamp.create)
     ..aOS(4, _omitFieldNames ? '' : 'displayName')
-    ..aOM<$5.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $5.Timestamp.create)
+    ..aOM<$6.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $6.Timestamp.create)
     ..aOB(6, _omitFieldNames ? '' : 'isDeleted')
     ..hasRequiredFields = false
   ;
@@ -421,15 +421,15 @@ class User extends $pb.GeneratedMessage {
   void clearEmail() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $5.Timestamp get createdAt => $_getN(2);
+  $6.Timestamp get createdAt => $_getN(2);
   @$pb.TagNumber(3)
-  set createdAt($5.Timestamp v) { $_setField(3, v); }
+  set createdAt($6.Timestamp v) { $_setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasCreatedAt() => $_has(2);
   @$pb.TagNumber(3)
   void clearCreatedAt() => $_clearField(3);
   @$pb.TagNumber(3)
-  $5.Timestamp ensureCreatedAt() => $_ensure(2);
+  $6.Timestamp ensureCreatedAt() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.String get displayName => $_getSZ(3);
@@ -441,15 +441,15 @@ class User extends $pb.GeneratedMessage {
   void clearDisplayName() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $5.Timestamp get updatedAt => $_getN(4);
+  $6.Timestamp get updatedAt => $_getN(4);
   @$pb.TagNumber(5)
-  set updatedAt($5.Timestamp v) { $_setField(5, v); }
+  set updatedAt($6.Timestamp v) { $_setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasUpdatedAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearUpdatedAt() => $_clearField(5);
   @$pb.TagNumber(5)
-  $5.Timestamp ensureUpdatedAt() => $_ensure(4);
+  $6.Timestamp ensureUpdatedAt() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.bool get isDeleted => $_getBF(5);

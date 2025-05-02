@@ -1456,6 +1456,330 @@ class GoalsCompanion extends UpdateCompanion<GoalEntity> {
   }
 }
 
+class $GuidedJournalsTable extends GuidedJournals
+    with TableInfo<$GuidedJournalsTable, GuidedJournalEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GuidedJournalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      guideQuestions = GeneratedColumn<String>(
+              'guide_questions', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $GuidedJournalsTable.$converterguideQuestions);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      journalType = GeneratedColumn<String>('journal_type', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $GuidedJournalsTable.$converterjournalType);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, title, guideQuestions, description, journalType];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'guided_journals';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<GuidedJournalEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GuidedJournalEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GuidedJournalEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      guideQuestions: $GuidedJournalsTable.$converterguideQuestions.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}guide_questions'])!),
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      journalType: $GuidedJournalsTable.$converterjournalType.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}journal_type'])!),
+    );
+  }
+
+  @override
+  $GuidedJournalsTable createAlias(String alias) {
+    return $GuidedJournalsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converterguideQuestions =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterjournalType =
+      const StringListConverter();
+}
+
+class GuidedJournalEntity extends DataClass
+    implements Insertable<GuidedJournalEntity> {
+  final String id;
+  final String title;
+  final List<String> guideQuestions;
+  final String description;
+  final List<String> journalType;
+  const GuidedJournalEntity(
+      {required this.id,
+      required this.title,
+      required this.guideQuestions,
+      required this.description,
+      required this.journalType});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    {
+      map['guide_questions'] = Variable<String>(
+          $GuidedJournalsTable.$converterguideQuestions.toSql(guideQuestions));
+    }
+    map['description'] = Variable<String>(description);
+    {
+      map['journal_type'] = Variable<String>(
+          $GuidedJournalsTable.$converterjournalType.toSql(journalType));
+    }
+    return map;
+  }
+
+  GuidedJournalsCompanion toCompanion(bool nullToAbsent) {
+    return GuidedJournalsCompanion(
+      id: Value(id),
+      title: Value(title),
+      guideQuestions: Value(guideQuestions),
+      description: Value(description),
+      journalType: Value(journalType),
+    );
+  }
+
+  factory GuidedJournalEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GuidedJournalEntity(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      guideQuestions: serializer.fromJson<List<String>>(json['guideQuestions']),
+      description: serializer.fromJson<String>(json['description']),
+      journalType: serializer.fromJson<List<String>>(json['journalType']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'guideQuestions': serializer.toJson<List<String>>(guideQuestions),
+      'description': serializer.toJson<String>(description),
+      'journalType': serializer.toJson<List<String>>(journalType),
+    };
+  }
+
+  GuidedJournalEntity copyWith(
+          {String? id,
+          String? title,
+          List<String>? guideQuestions,
+          String? description,
+          List<String>? journalType}) =>
+      GuidedJournalEntity(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        guideQuestions: guideQuestions ?? this.guideQuestions,
+        description: description ?? this.description,
+        journalType: journalType ?? this.journalType,
+      );
+  GuidedJournalEntity copyWithCompanion(GuidedJournalsCompanion data) {
+    return GuidedJournalEntity(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      guideQuestions: data.guideQuestions.present
+          ? data.guideQuestions.value
+          : this.guideQuestions,
+      description:
+          data.description.present ? data.description.value : this.description,
+      journalType:
+          data.journalType.present ? data.journalType.value : this.journalType,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GuidedJournalEntity(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('guideQuestions: $guideQuestions, ')
+          ..write('description: $description, ')
+          ..write('journalType: $journalType')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, title, guideQuestions, description, journalType);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GuidedJournalEntity &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.guideQuestions == this.guideQuestions &&
+          other.description == this.description &&
+          other.journalType == this.journalType);
+}
+
+class GuidedJournalsCompanion extends UpdateCompanion<GuidedJournalEntity> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<List<String>> guideQuestions;
+  final Value<String> description;
+  final Value<List<String>> journalType;
+  final Value<int> rowid;
+  const GuidedJournalsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.guideQuestions = const Value.absent(),
+    this.description = const Value.absent(),
+    this.journalType = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GuidedJournalsCompanion.insert({
+    required String id,
+    required String title,
+    required List<String> guideQuestions,
+    required String description,
+    required List<String> journalType,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        title = Value(title),
+        guideQuestions = Value(guideQuestions),
+        description = Value(description),
+        journalType = Value(journalType);
+  static Insertable<GuidedJournalEntity> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? guideQuestions,
+    Expression<String>? description,
+    Expression<String>? journalType,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (guideQuestions != null) 'guide_questions': guideQuestions,
+      if (description != null) 'description': description,
+      if (journalType != null) 'journal_type': journalType,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GuidedJournalsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<List<String>>? guideQuestions,
+      Value<String>? description,
+      Value<List<String>>? journalType,
+      Value<int>? rowid}) {
+    return GuidedJournalsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      guideQuestions: guideQuestions ?? this.guideQuestions,
+      description: description ?? this.description,
+      journalType: journalType ?? this.journalType,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (guideQuestions.present) {
+      map['guide_questions'] = Variable<String>($GuidedJournalsTable
+          .$converterguideQuestions
+          .toSql(guideQuestions.value));
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (journalType.present) {
+      map['journal_type'] = Variable<String>(
+          $GuidedJournalsTable.$converterjournalType.toSql(journalType.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GuidedJournalsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('guideQuestions: $guideQuestions, ')
+          ..write('description: $description, ')
+          ..write('journalType: $journalType, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $JournalEntriesTable extends JournalEntries
     with TableInfo<$JournalEntriesTable, JournalEntryEntity> {
   @override
@@ -1909,13 +2233,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DevicesTable devices = $DevicesTable(this);
   late final $GoalCheckInsTable goalCheckIns = $GoalCheckInsTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
+  late final $GuidedJournalsTable guidedJournals = $GuidedJournalsTable(this);
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, devices, goalCheckIns, goals, journalEntries];
+      [users, devices, goalCheckIns, goals, guidedJournals, journalEntries];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -3309,6 +3634,187 @@ typedef $$GoalsTableProcessedTableManager = ProcessedTableManager<
     (GoalEntity, $$GoalsTableReferences),
     GoalEntity,
     PrefetchHooks Function({bool userId})>;
+typedef $$GuidedJournalsTableCreateCompanionBuilder = GuidedJournalsCompanion
+    Function({
+  required String id,
+  required String title,
+  required List<String> guideQuestions,
+  required String description,
+  required List<String> journalType,
+  Value<int> rowid,
+});
+typedef $$GuidedJournalsTableUpdateCompanionBuilder = GuidedJournalsCompanion
+    Function({
+  Value<String> id,
+  Value<String> title,
+  Value<List<String>> guideQuestions,
+  Value<String> description,
+  Value<List<String>> journalType,
+  Value<int> rowid,
+});
+
+class $$GuidedJournalsTableFilterComposer
+    extends Composer<_$AppDatabase, $GuidedJournalsTable> {
+  $$GuidedJournalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get guideQuestions => $composableBuilder(
+          column: $table.guideQuestions,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get journalType => $composableBuilder(
+          column: $table.journalType,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $$GuidedJournalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $GuidedJournalsTable> {
+  $$GuidedJournalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get guideQuestions => $composableBuilder(
+      column: $table.guideQuestions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get journalType => $composableBuilder(
+      column: $table.journalType, builder: (column) => ColumnOrderings(column));
+}
+
+class $$GuidedJournalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GuidedJournalsTable> {
+  $$GuidedJournalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get guideQuestions =>
+      $composableBuilder(
+          column: $table.guideQuestions, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get journalType =>
+      $composableBuilder(
+          column: $table.journalType, builder: (column) => column);
+}
+
+class $$GuidedJournalsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GuidedJournalsTable,
+    GuidedJournalEntity,
+    $$GuidedJournalsTableFilterComposer,
+    $$GuidedJournalsTableOrderingComposer,
+    $$GuidedJournalsTableAnnotationComposer,
+    $$GuidedJournalsTableCreateCompanionBuilder,
+    $$GuidedJournalsTableUpdateCompanionBuilder,
+    (
+      GuidedJournalEntity,
+      BaseReferences<_$AppDatabase, $GuidedJournalsTable, GuidedJournalEntity>
+    ),
+    GuidedJournalEntity,
+    PrefetchHooks Function()> {
+  $$GuidedJournalsTableTableManager(
+      _$AppDatabase db, $GuidedJournalsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GuidedJournalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GuidedJournalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GuidedJournalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<List<String>> guideQuestions = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<List<String>> journalType = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GuidedJournalsCompanion(
+            id: id,
+            title: title,
+            guideQuestions: guideQuestions,
+            description: description,
+            journalType: journalType,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String title,
+            required List<String> guideQuestions,
+            required String description,
+            required List<String> journalType,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GuidedJournalsCompanion.insert(
+            id: id,
+            title: title,
+            guideQuestions: guideQuestions,
+            description: description,
+            journalType: journalType,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$GuidedJournalsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GuidedJournalsTable,
+    GuidedJournalEntity,
+    $$GuidedJournalsTableFilterComposer,
+    $$GuidedJournalsTableOrderingComposer,
+    $$GuidedJournalsTableAnnotationComposer,
+    $$GuidedJournalsTableCreateCompanionBuilder,
+    $$GuidedJournalsTableUpdateCompanionBuilder,
+    (
+      GuidedJournalEntity,
+      BaseReferences<_$AppDatabase, $GuidedJournalsTable, GuidedJournalEntity>
+    ),
+    GuidedJournalEntity,
+    PrefetchHooks Function()>;
 typedef $$JournalEntriesTableCreateCompanionBuilder = JournalEntriesCompanion
     Function({
   required String id,
@@ -3647,6 +4153,8 @@ class $AppDatabaseManager {
       $$GoalCheckInsTableTableManager(_db, _db.goalCheckIns);
   $$GoalsTableTableManager get goals =>
       $$GoalsTableTableManager(_db, _db.goals);
+  $$GuidedJournalsTableTableManager get guidedJournals =>
+      $$GuidedJournalsTableTableManager(_db, _db.guidedJournals);
   $$JournalEntriesTableTableManager get journalEntries =>
       $$JournalEntriesTableTableManager(_db, _db.journalEntries);
 }
