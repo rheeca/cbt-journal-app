@@ -49,7 +49,7 @@ extension GoalQuery on AppDatabase {
       stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
     if (isDeleted != null) {
-      stmt.where((t) => t.isDeleted.isValue(isDeleted));
+      stmt.where((t) => t.isDeleted.equals(isDeleted));
     }
 
     final items = await stmt.get();
@@ -163,7 +163,7 @@ extension JournalEntryQuery on AppDatabase {
       stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
     }
     if (isDeleted != null) {
-      stmt.where((t) => t.isDeleted.isValue(isDeleted));
+      stmt.where((t) => t.isDeleted.equals(isDeleted));
     }
 
     final items = await stmt.get();
@@ -273,7 +273,7 @@ extension UserQuery on AppDatabase {
 extension DeviceQuery on AppDatabase {
   Future<List<Device>> getDevices(String userId) async {
     SimpleSelectStatement<Devices, DeviceEntity> stmt = select(devices)
-      ..where((t) => t.userId.isValue(userId));
+      ..where((t) => t.userId.equals(userId));
 
     final items = await stmt.get();
     return items
@@ -287,7 +287,7 @@ extension DeviceQuery on AppDatabase {
 
   Future<void> insertDevices(List<Device> items) async {
     await batch((batch) {
-      batch.insertAll(
+      batch.insertAllOnConflictUpdate(
         devices,
         items.map(
           (e) => DevicesCompanion(
@@ -296,7 +296,6 @@ extension DeviceQuery on AppDatabase {
             lastSynced: Value(PgDateTime(e.lastSynced)),
           ),
         ),
-        mode: InsertMode.insertOrReplace,
       );
     });
   }

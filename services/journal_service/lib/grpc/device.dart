@@ -37,7 +37,9 @@ class DeviceService extends DeviceServiceBase {
             .where((e) => e.updatedAt.toDateTime().isBefore(stalestSync))
             .map((e) => e.id)
             .toList());
-        await database.deleteGoals(goalsToDelete);
+        if (goalsToDelete.isNotEmpty) {
+          await database.deleteGoals(goalsToDelete);
+        }
 
         final journalEntries = await database
             .getJournalEntriesByUser(request.userId, isDeleted: true);
@@ -45,7 +47,9 @@ class DeviceService extends DeviceServiceBase {
             .where((e) => e.updatedAt.toDateTime().isBefore(stalestSync))
             .map((e) => e.id)
             .toList());
-        await database.deleteJournalEntries(entriesToDelete);
+        if (entriesToDelete.isNotEmpty) {
+          await database.deleteJournalEntries(entriesToDelete);
+        }
       }
     } catch (e) {
       logger.e('failed to sync device', error: e);
