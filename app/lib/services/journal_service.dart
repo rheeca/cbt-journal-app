@@ -8,7 +8,7 @@ import 'package:cbt_journal/generated/user.pbgrpc.dart';
 import 'package:cbt_journal/models/model.dart' as md;
 import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:grpc/grpc.dart';
@@ -41,7 +41,17 @@ class JournalService extends ChangeNotifier {
     notifyListeners();
 
     await _syncDown();
-    await _syncUp();
+
+    // TODO: refactor and make more efficient
+    String? deviceId = prefs!.getString('deviceId');
+    if (deviceId == null) {
+      deviceId = const Uuid().v4();
+      await prefs!.setString('deviceId', deviceId);
+      await _syncUp();
+    } else {
+      await _syncUp(updatesOnly: true);
+    }
+
     await _syncDevice();
 
     _syncing = false;
@@ -131,63 +141,77 @@ class JournalService extends ChangeNotifier {
         .setString('lastSynced', DateTime.now().toUtc().toIso8601String());
   }
 
-  Future<void> _syncUp() async {
-    final logs = await _database.getSyncLogs();
-    final groupedLogs = groupBy(logs, (e) => e.type);
-
-    final checkInLogs = groupedLogs[md.DatabaseType.goalCheckIn];
-    if (checkInLogs != null) {
-      final splitStr = checkInLogs[0].id.split('+');
-      final userId = splitStr[0];
-
-      final dates =
-          checkInLogs.map((e) => DateTime.parse(e.id.split('+')[1])).toList();
-      final checkIns = await _database.getGoalCheckIns(
-          userId: userId, dates: dates, includeDeleted: true);
-
-      if (checkIns.isNotEmpty) {
-        await goalCheckInClient?.writeGoalCheckIns(WriteGoalCheckInsRequest(
-          goalCheckIns: checkIns.map((e) => e.toPb()),
-        ));
-      }
+  Future<void> _syncUp({bool updatesOnly = false}) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      logger.d('failed to sync up to cloud: no logged in user');
+      return;
     }
 
-    final goalLogs = groupedLogs[md.DatabaseType.goal];
-    if (goalLogs != null) {
-      final ids = goalLogs.map((e) => e.id).toList();
-      final goals = await _database.getGoals(ids: ids, includeDeleted: true);
+    final checkIns = <md.GoalCheckIn>[];
+    final goals = <md.Goal>[];
+    final entries = <md.JournalEntry>[];
+    final users = <User>[];
 
-      if (goals.isNotEmpty) {
-        await goalClient?.writeGoals(WriteGoalsRequest(
-          goals: goals.map((e) => e.toPb()),
-        ));
+    if (updatesOnly) {
+      final logs = await _database.getSyncLogs();
+      final groupedLogs = groupBy(logs, (e) => e.type);
+
+      final checkInLogs = groupedLogs[md.DatabaseType.goalCheckIn];
+      if (checkInLogs != null) {
+        final dates =
+            checkInLogs.map((e) => DateTime.parse(e.id.split('+')[1])).toList();
+        checkIns.addAll(await _database.getGoalCheckIns(
+            userId: userId, dates: dates, includeDeleted: true));
       }
+
+      final goalLogs = groupedLogs[md.DatabaseType.goal];
+      if (goalLogs != null) {
+        final ids = goalLogs.map((e) => e.id).toList();
+        goals.addAll(await _database.getGoals(ids: ids, includeDeleted: true));
+      }
+
+      final journalLogs = groupedLogs[md.DatabaseType.journalEntry];
+      if (journalLogs != null) {
+        final ids = journalLogs.map((e) => e.id).toList();
+        entries.addAll(
+            await _database.getJournalEntries(ids: ids, includeDeleted: true));
+      }
+
+      final userLogs = groupedLogs[md.DatabaseType.user];
+      if (userLogs != null) {
+        final userIds = userLogs.map((e) => e.id).toList();
+        users.addAll(await _database.getUsers(userIds, includeDeleted: true));
+      }
+    } else {
+      checkIns.addAll(await _database.getGoalCheckIns(
+          userId: userId, includeDeleted: true));
+      goals.addAll(
+          await _database.getGoals(userId: userId, includeDeleted: true));
+      entries.addAll(await _database.getJournalEntries(
+          userId: userId, includeDeleted: true));
+      users.addAll(await _database.getUsers([userId], includeDeleted: true));
     }
 
-    final journalLogs = groupedLogs[md.DatabaseType.journalEntry];
-    if (journalLogs != null) {
-      final ids = journalLogs.map((e) => e.id).toList();
-      final entries =
-          await _database.getJournalEntries(ids: ids, includeDeleted: true);
-
-      if (entries.isNotEmpty) {
-        await journalEntryClient
-            ?.writeJournalEntries(WriteJournalEntriesRequest(
-          journalEntries: entries.map((e) => e.toPb()),
-        ));
-      }
+    if (checkIns.isNotEmpty) {
+      await goalCheckInClient?.writeGoalCheckIns(WriteGoalCheckInsRequest(
+        goalCheckIns: checkIns.map((e) => e.toPb()),
+      ));
     }
-
-    final userLogs = groupedLogs[md.DatabaseType.user];
-    if (userLogs != null) {
-      final userIds = userLogs.map((e) => e.id).toList();
-      final users = await _database.getUsers(userIds, includeDeleted: true);
-
-      if (users.isNotEmpty) {
-        await userClient?.writeUsers(WriteUsersRequest(
-          users: users,
-        ));
-      }
+    if (goals.isNotEmpty) {
+      await goalClient?.writeGoals(WriteGoalsRequest(
+        goals: goals.map((e) => e.toPb()),
+      ));
+    }
+    if (entries.isNotEmpty) {
+      await journalEntryClient?.writeJournalEntries(WriteJournalEntriesRequest(
+        journalEntries: entries.map((e) => e.toPb()),
+      ));
+    }
+    if (users.isNotEmpty) {
+      await userClient?.writeUsers(WriteUsersRequest(
+        users: users,
+      ));
     }
 
     await _database.clearSyncLogs();
@@ -201,8 +225,8 @@ class JournalService extends ChangeNotifier {
     }
     String? deviceId = prefs!.getString('deviceId');
     if (deviceId == null) {
-      deviceId = const Uuid().v4();
-      await prefs!.setString('deviceId', deviceId);
+      logger.d('failed to sync device: no device id');
+      return;
     }
     final resp = await deviceClient?.sync(SyncRequest(
       id: deviceId,

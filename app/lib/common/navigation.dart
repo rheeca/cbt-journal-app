@@ -63,6 +63,7 @@ class AppDrawer extends StatelessWidget {
   Future<void> _clearLocalData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('lastSynced');
+    await prefs.remove('deviceId');
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
       await di<AppDatabase>().removeUser(userId);
