@@ -134,6 +134,10 @@ extension GoalQuery on AppDatabase {
     );
   }
 
+  Future<void> deleteGoals(List<String> ids) {
+    return (delete(goals)..where((t) => t.id.isIn(ids))).go();
+  }
+
   Future<List<GoalEntryEntity>> getGoalEntriesByGoal(String goalId) {
     return (select(goalEntries)..where((t) => t.goalId.equals(goalId))).get();
   }
@@ -436,6 +440,10 @@ extension JournalEntryQuery on AppDatabase {
         isDeleted: const Value(true),
       ),
     );
+  }
+
+  Future<void> deleteJournalEntries(List<String> ids) {
+    return (delete(journalEntries)..where((t) => t.id.isIn(ids))).go();
   }
 }
 

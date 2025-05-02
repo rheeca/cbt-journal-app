@@ -2,6 +2,10 @@ import 'package:grpc/grpc.dart';
 import 'package:journal_service/database/database.dart';
 import 'package:journal_service/generated/device.pbgrpc.dart';
 import 'package:journal_service/models/device.dart';
+import 'package:journal_service/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger(filter: NoFilter());
 
 class DeviceService extends DeviceServiceBase {
   DeviceService(this.database);
@@ -44,6 +48,7 @@ class DeviceService extends DeviceServiceBase {
         await database.deleteJournalEntries(entriesToDelete);
       }
     } catch (e) {
+      logger.e('failed to sync device', error: e);
       return SyncResponse(
         status: 400,
       );

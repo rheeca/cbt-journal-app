@@ -1,4 +1,5 @@
 import 'package:cbt_journal/database/database.dart';
+import 'package:cbt_journal/generated/device.pbgrpc.dart';
 import 'package:cbt_journal/generated/goal.pbgrpc.dart';
 import 'package:cbt_journal/generated/goal_checkin.pbgrpc.dart';
 import 'package:cbt_journal/generated/journal_entry.pbgrpc.dart';
@@ -11,12 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:grpc/grpc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class JournalService extends ChangeNotifier {
   JournalService({required AppDatabase database}) : _database = database;
 
   final AppDatabase _database;
   ClientChannel? _channel;
+  DeviceServiceClient? deviceClient;
   GoalCheckInServiceClient? goalCheckInClient;
   GoalServiceClient? goalClient;
   JournalEntryServiceClient? journalEntryClient;
@@ -24,6 +27,8 @@ class JournalService extends ChangeNotifier {
 
   bool _syncing = false;
   bool get syncing => _syncing;
+
+  SharedPreferences? prefs;
 
   Future<void> load() async {
     await _initialize();
@@ -35,6 +40,7 @@ class JournalService extends ChangeNotifier {
 
     await _syncDown();
     await _syncUp();
+    await _syncDevice();
 
     _syncing = false;
     notifyListeners();
@@ -42,12 +48,14 @@ class JournalService extends ChangeNotifier {
 
   Future<void> _initialize() async {
     await dotenv.load(fileName: ".env");
+    prefs = await SharedPreferences.getInstance();
 
     _channel = ClientChannel(
       dotenv.env['SERVICE_ENDPOINT'] ?? '',
       port: int.parse(dotenv.env['SERVICE_PORT'] ?? '443'),
       options: const ChannelOptions(credentials: ChannelCredentials.secure()),
     );
+    deviceClient = DeviceServiceClient(_channel!);
     goalCheckInClient = GoalCheckInServiceClient(_channel!);
     goalClient = GoalServiceClient(_channel!);
     journalEntryClient = JournalEntryServiceClient(_channel!);
@@ -63,9 +71,8 @@ class JournalService extends ChangeNotifier {
   // }
 
   Future<void> _syncDown() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastSynced = prefs.getString('lastSynced') != null
-        ? DateTime.parse(prefs.getString('lastSynced')!).toProtoTimestamp()
+    final lastSynced = prefs!.getString('lastSynced') != null
+        ? DateTime.parse(prefs!.getString('lastSynced')!).toProtoTimestamp()
         : null;
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
@@ -117,8 +124,8 @@ class JournalService extends ChangeNotifier {
           toSync: false);
     }
 
-    await prefs.setString(
-        'lastSynced', DateTime.now().toUtc().toIso8601String());
+    await prefs!
+        .setString('lastSynced', DateTime.now().toUtc().toIso8601String());
   }
 
   Future<void> _syncUp() async {
@@ -181,5 +188,50 @@ class JournalService extends ChangeNotifier {
     }
 
     await _database.clearSyncLogs();
+  }
+
+  Future<void> _syncDevice() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      logger.d('failed to sync device: no logged in user');
+      return;
+    }
+    String? deviceId = prefs!.getString('deviceId');
+    if (deviceId == null) {
+      deviceId = const Uuid().v4();
+      await prefs!.setString('deviceId', deviceId);
+    }
+    final resp = await deviceClient?.sync(SyncRequest(
+      id: deviceId,
+      userId: userId,
+    ));
+
+    final deletedGoals = resp?.deletedGoals;
+    if (deletedGoals != null && deletedGoals.isNotEmpty) {
+      await _database.deleteGoals(deletedGoals);
+    }
+
+    final deletedJournalEntries = resp?.deletedJournalEntries;
+    if (deletedJournalEntries != null && deletedJournalEntries.isNotEmpty) {
+      await _database.deleteJournalEntries(deletedJournalEntries);
+    }
+  }
+
+  Future<void> logoutDevice() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      logger.d('failed to logout device: no logged in user');
+      return;
+    }
+    final deviceId = prefs!.getString('deviceId');
+    if (deviceId == null) {
+      logger.d('failed to logout device: no device id');
+      return;
+    }
+
+    await deviceClient?.logout(LogoutRequest(
+      id: deviceId,
+      userId: userId,
+    ));
   }
 }

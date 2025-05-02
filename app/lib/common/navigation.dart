@@ -37,6 +37,7 @@ class AppDrawer extends StatelessWidget {
               leading: const Icon(Icons.logout),
               onTap: () async {
                 await di<JournalService>().onSync();
+                await di<JournalService>().logoutDevice();
 
                 await _clearLocalData();
                 FirebaseAuth.instance.signOut();
