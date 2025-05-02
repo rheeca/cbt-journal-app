@@ -1,3 +1,4 @@
+import 'package:cbt_journal/common/confirm_dialog.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/edit_journal/edit_journal_entry_screen.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
@@ -66,12 +67,28 @@ class _ViewJournalEntryScreenState extends State<ViewJournalEntryScreen> {
               ),
               MenuItemButton(
                 child: const Text('Delete'),
-                onPressed: () {
+                onPressed: () async {
                   // TODO: Prevent rebuilding while popping to avoid black screen.
                   // Or other solutions.
                   _isPopping = true;
-                  di<JournalController>().deleteJournalEntry(journal.id);
-                  context.pop();
+
+                  await showConfirmDialog(
+                    context,
+                    onConfirm: () async {
+                      await di<JournalController>()
+                          .deleteJournalEntry(journal.id);
+                      if (context.mounted) {
+                        if (context.canPop()) {
+                          context.pop();
+                          context.pop();
+                        } else {
+                          context.go('/myjournal');
+                        }
+                      }
+                    },
+                    title: 'Delete?',
+                    confirmText: 'Delete',
+                  );
                 },
               ),
             ],

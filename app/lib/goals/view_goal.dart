@@ -1,3 +1,4 @@
+import 'package:cbt_journal/common/confirm_dialog.dart';
 import 'package:cbt_journal/goals/goals_controller.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -52,13 +53,23 @@ class _ViewGoalScreenState extends State<ViewGoalScreen> {
               ),
               MenuItemButton(
                 child: const Text('Delete'),
-                onPressed: () {
-                  di<GoalsController>().deleteGoal(selectedGoal.id);
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/goals');
-                  }
+                onPressed: () async {
+                  await showConfirmDialog(
+                    context,
+                    onConfirm: () async {
+                      await di<GoalsController>().deleteGoal(selectedGoal.id);
+                      if (context.mounted) {
+                        if (context.canPop()) {
+                          context.pop();
+                          context.pop();
+                        } else {
+                          context.go('/goals');
+                        }
+                      }
+                    },
+                    title: 'Delete?',
+                    confirmText: 'Delete',
+                  );
                 },
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:cbt_journal/common/confirm_dialog.dart';
 import 'package:cbt_journal/common/confirm_screen.dart';
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/services/journal_service.dart';
@@ -47,11 +48,18 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Logout'),
               leading: const Icon(Icons.logout),
               onTap: () async {
-                await di<JournalService>().onSync();
-                await di<JournalService>().logoutDevice();
+                await showConfirmDialog(
+                  context,
+                  onConfirm: () async {
+                    await di<JournalService>().onSync();
+                    await di<JournalService>().logoutDevice();
 
-                await _clearLocalData();
-                FirebaseAuth.instance.signOut();
+                    await _clearLocalData();
+                    FirebaseAuth.instance.signOut();
+                  },
+                  title: 'Log out?',
+                  confirmText: 'Logout',
+                );
               },
             ),
           ],
