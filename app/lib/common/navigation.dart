@@ -1,3 +1,4 @@
+import 'package:cbt_journal/common/confirm_screen.dart';
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/services/journal_service.dart';
 import 'package:cbt_journal/theme.dart';
@@ -29,7 +30,17 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Sync Data'),
               leading: const Icon(Icons.sync),
               onTap: () async {
-                await di<JournalService>().onSync();
+                final future = di<JournalService>().onSync();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => ConfirmScreen(
+                            future: future,
+                            loadingMessage: 'Syncing...',
+                            completedMessage: 'Sync complete!',
+                            buttonText: 'Done',
+                          )),
+                );
               },
             ),
             ListTile(

@@ -1,3 +1,4 @@
+import 'package:animated_checkmark/animated_checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +12,16 @@ class ConfirmCreateJournalScreen extends StatefulWidget {
 
 class _ConfirmCreateJournalScreenState
     extends State<ConfirmCreateJournalScreen> {
+  bool _checked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      setState(() => _checked = true);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,6 +30,17 @@ class _ConfirmCreateJournalScreenState
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Checkmark(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.linear,
+              checked: _checked,
+              indeterminate: false,
+              size: 60,
+              weight: 10,
+              color: Theme.of(context).primaryColor,
+              drawDash: false,
+            ),
+            const SizedBox(height: 24),
             Text(
               'Journal created!',
               style: Theme.of(context).textTheme.titleLarge,
@@ -26,7 +48,7 @@ class _ConfirmCreateJournalScreenState
             const SizedBox(
               height: 36.0,
             ),
-            ElevatedButton(
+            FilledButton(
               onPressed: () {
                 if (context.mounted) context.pop();
               },
