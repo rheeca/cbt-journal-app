@@ -5,7 +5,6 @@ import 'package:cbt_journal/journal/edit_journal/edit_journal_controller.dart';
 import 'package:cbt_journal/journal/journal_controller.dart';
 import 'package:cbt_journal/models/journal_entry.dart';
 import 'package:cbt_journal/theme.dart';
-import 'package:cbt_journal/util/util.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -82,8 +81,8 @@ class _JournalPageState extends State<_JournalPage> {
 
     final journalEntries =
         watchPropertyValue((JournalController c) => c.journalEntries);
-    final groupedJournals =
-        groupBy(journalEntries, (e) => dateOnlyUtc(e.createdAt).toLocal());
+    final groupedJournals = groupBy(
+        journalEntries, (e) => DateUtils.dateOnly(e.createdAt.toLocal()));
     final sortedByKeyMap = Map.fromEntries(groupedJournals.entries.toList()
       ..sort((a, b) => b.key.compareTo(a.key)));
 
