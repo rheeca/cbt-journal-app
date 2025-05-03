@@ -247,11 +247,18 @@ extension JournalEntryQuery on AppDatabase {
 }
 
 extension UserQuery on AppDatabase {
-  Future<List<User>> getUsers(List<String> ids, {DateTime? lastSynced}) async {
+  Future<List<User>> getUsers(
+    List<String> ids, {
+    DateTime? lastSynced,
+    bool? isDeleted,
+  }) async {
     SimpleSelectStatement<Users, UserEntity> stmt = select(users)
       ..where((t) => t.id.isIn(ids));
     if (lastSynced != null) {
       stmt.where((t) => t.updatedAt.isBiggerThanValue(PgDateTime(lastSynced)));
+    }
+    if (isDeleted != null) {
+      stmt.where((t) => t.isDeleted.equals(isDeleted));
     }
 
     final items = await stmt.get();

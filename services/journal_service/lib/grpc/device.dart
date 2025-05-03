@@ -12,6 +12,7 @@ class DeviceService extends DeviceServiceBase {
   Future<SyncResponse> sync(ServiceCall call, SyncRequest request) async {
     final goalsToDelete = <String>[];
     final entriesToDelete = <String>[];
+    final usersToDelete = <String>[];
 
     try {
       await database.insertDevices([
@@ -46,6 +47,13 @@ class DeviceService extends DeviceServiceBase {
             .toList());
         if (entriesToDelete.isNotEmpty) {
           await database.deleteJournalEntries(entriesToDelete);
+        }
+
+        final users =
+            await database.getUsers([request.userId], isDeleted: true);
+        usersToDelete.addAll(users.map((e) => e.id).toList());
+        if (usersToDelete.isNotEmpty) {
+          await database.deleteUsers(usersToDelete);
         }
       }
     } catch (e) {
