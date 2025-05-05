@@ -214,7 +214,7 @@ class _CalendarPageState extends State<_CalendarPage> {
       return const SizedBox();
     }
 
-    final createdAt = user.createdAt.toDateTime();
+    final createdAt = user.createdAt.toDateTime().toLocal();
     final firstDay = DateTime(
       createdAt.year,
       createdAt.month,
@@ -228,8 +228,7 @@ class _CalendarPageState extends State<_CalendarPage> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: ListView(
         children: [
           Row(
             children: [

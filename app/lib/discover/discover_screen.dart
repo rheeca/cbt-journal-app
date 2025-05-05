@@ -60,11 +60,13 @@ class _DiscoverPageState extends State<_DiscoverPage> {
       );
     }
 
+    final screenWidth = (MediaQuery.of(context).size.width / 2) - 30;
+
     final guidedJournals =
         watchPropertyValue((DiscoverController c) => c.guidedJournals);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
+      child: ListView(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -85,8 +87,8 @@ class _DiscoverPageState extends State<_DiscoverPage> {
                       context.push('/journal/create/${e.id}');
                     },
                     child: SizedBox(
-                      height: 150,
-                      width: 170,
+                      height: screenWidth * 0.9,
+                      width: screenWidth,
                       child: Stack(
                         children: [
                           Positioned(

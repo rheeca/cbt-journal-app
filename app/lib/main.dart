@@ -54,16 +54,18 @@ class CBTApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          final user = snapshot.data;
-          return MaterialApp.router(
-            theme: theme,
-            routerConfig: getRouter(user),
-            debugShowCheckedModeBanner: false,
-          );
-        });
+    return SafeArea(
+      child: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            final user = snapshot.data;
+            return MaterialApp.router(
+              theme: theme,
+              routerConfig: getRouter(user),
+              debugShowCheckedModeBanner: false,
+            );
+          }),
+    );
   }
 }
 
