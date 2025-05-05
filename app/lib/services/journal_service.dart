@@ -193,6 +193,11 @@ class JournalService extends ChangeNotifier {
       users.addAll(await _database.getUsers([userId], includeDeleted: true));
     }
 
+    if (users.isNotEmpty) {
+      await userClient?.writeUsers(WriteUsersRequest(
+        users: users,
+      ));
+    }
     if (checkIns.isNotEmpty) {
       await goalCheckInClient?.writeGoalCheckIns(WriteGoalCheckInsRequest(
         goalCheckIns: checkIns.map((e) => e.toPb()),
@@ -206,11 +211,6 @@ class JournalService extends ChangeNotifier {
     if (entries.isNotEmpty) {
       await journalEntryClient?.writeJournalEntries(WriteJournalEntriesRequest(
         journalEntries: entries.map((e) => e.toPb()),
-      ));
-    }
-    if (users.isNotEmpty) {
-      await userClient?.writeUsers(WriteUsersRequest(
-        users: users,
       ));
     }
 

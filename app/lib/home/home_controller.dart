@@ -2,7 +2,6 @@ import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/generated/user.pb.dart' as pb_user;
 import 'package:cbt_journal/models/model.dart';
 import 'package:cbt_journal/user/user_controller.dart';
-import 'package:cbt_journal/util/util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -47,7 +46,12 @@ class HomeController extends ChangeNotifier {
     _goals.clear();
     _goals.addAll(goals);
 
-    final dateToday = dateOnlyUtc(DateTime.now().toUtc());
+    final now = DateTime.now();
+    final dateToday = DateTime.utc(
+      now.year,
+      now.month,
+      now.day,
+    );
     _goalCheckIns =
         (await _database.getGoalCheckIns(userId: userId, dates: [dateToday]))
             .firstOrNull;

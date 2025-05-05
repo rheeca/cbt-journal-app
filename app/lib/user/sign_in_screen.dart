@@ -19,6 +19,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     return ui.SignInScreen(
       providers: providers,
+      showPasswordVisibilityToggle: true,
       actions: [
         ui.AuthStateChangeAction<ui.UserCreated>((context, state) {
           di<UserController>().registered = false;

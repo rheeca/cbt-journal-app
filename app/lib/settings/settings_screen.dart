@@ -132,6 +132,8 @@ class _SettingsState extends State<SettingsScreen> {
   }
 
   Future<void> _showDeleteAccountDialog(BuildContext context) {
+    _passwordController.text = '';
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -185,11 +187,17 @@ class _SettingsState extends State<SettingsScreen> {
                 } catch (e) {
                   logger.e('Failed to reauthenticate user.', error: e);
                   if (context.mounted) {
+                    await _showDialog(context, 'Wrong password.');
+                  }
+                  if (context.mounted) {
                     context.pop();
                   }
                   return;
                 }
 
+                if (context.mounted) {
+                  await _showDialog(context, 'Account deleted.');
+                }
                 await di<AppDatabase>().deleteUser(user.uid);
                 await di<JournalService>().onSync();
                 await di<JournalService>().logoutDevice();
