@@ -1,3 +1,4 @@
+import 'package:cbt_journal/common/navigation.dart';
 import 'package:cbt_journal/database/database.dart';
 import 'package:cbt_journal/services/journal_service.dart';
 import 'package:cbt_journal/settings/settings_controller.dart';
@@ -201,12 +202,8 @@ class _SettingsState extends State<SettingsScreen> {
                 await di<AppDatabase>().deleteUser(user.uid);
                 await di<JournalService>().onSync();
                 await di<JournalService>().logoutDevice();
-                await di<AppDatabase>().removeUser(user.uid);
+                await clearLocalData();
                 await user.delete();
-
-                if (context.mounted) {
-                  context.go('/signin');
-                }
               },
             ),
           ],

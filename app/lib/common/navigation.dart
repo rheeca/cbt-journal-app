@@ -54,7 +54,7 @@ class AppDrawer extends StatelessWidget {
                     await di<JournalService>().onSync();
                     await di<JournalService>().logoutDevice();
 
-                    await _clearLocalData();
+                    await clearLocalData();
                     FirebaseAuth.instance.signOut();
                   },
                   title: 'Log out?',
@@ -67,14 +67,14 @@ class AppDrawer extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<void> _clearLocalData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('lastSynced');
-    await prefs.remove('deviceId');
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      await di<AppDatabase>().removeUser(userId);
-    }
+Future<void> clearLocalData() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('lastSynced');
+  await prefs.remove('deviceId');
+  final userId = FirebaseAuth.instance.currentUser?.uid;
+  if (userId != null) {
+    await di<AppDatabase>().removeUser(userId);
   }
 }
